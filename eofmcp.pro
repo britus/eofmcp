@@ -346,12 +346,14 @@ SOURCES += \
     mcpmainwindow.cpp \
     mycalculatorHandler.cpp \
     myresourcehandler.cpp \
+    mysourcecodehandler.cpp \
     mysourcescraper.cpp
 
 HEADERS += \
     mcpmainwindow.h \
     mycalculatorHandler.h \
     myresourcehandler.h \
+    mysourcecodehandler.h \
     mysourcescraper.h
 
 FORMS += \
@@ -366,12 +368,20 @@ TRANSLATIONS += \
 #!isEmpty(target.path): INSTALLS += target
 
 DISTFILES += \
-    ../../Library/Preferences/eofmcp/Prompts/code_review.json \
-    ../../Library/Preferences/eofmcp/Prompts/generate_api_doc.json \
-    ../../Library/Preferences/eofmcp/Resources/config_file.json \
-    ../../Library/Preferences/eofmcp/Resources/system_info.json \
-    ../../Library/Preferences/eofmcp/Resources/wrapper_dynamic.json \
-    ../../Library/Preferences/eofmcp/Resources/wrapper_example.json \
-    ../../Library/Preferences/eofmcp/Tools/calculator.json \
-    ../../Library/Preferences/eofmcp/Tools/src-scraper.json \
-    ../../Library/Preferences/eofmcp/eofmcp.config
+    cfg/Prompts/code_review.json \
+    cfg/Prompts/generate_api_doc.json \
+    cfg/Resources/config_file.json \
+    cfg/Resources/system_info.json \
+    cfg/Resources/wrapper_dynamic.json \
+    cfg/Resources/wrapper_example.json \
+    cfg/Tools/calculator.json \
+    cfg/Tools/list-source-file.json \
+    cfg/Tools/read-source-file.json \
+    cfg/Tools/write-source-file.json \
+    cfg/Tools/display-project-files.json \
+    cfg/Tools/src-scraper.json \
+    cfg/eofmcp.config \
+    LICENSE \
+    README.md \
+    privacy.txt \
+    qt.conf

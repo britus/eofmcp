@@ -1,3 +1,8 @@
+// ********************************************************************
+// EoF MCP Server
+// Copyright © 2025 by EoF Software Labs
+// SPDX-License-Identifier: GPLv3
+// ********************************************************************
 #include "mysourcescraper.h"
 #include <MCPLog.h>
 #include <QDateTime>
@@ -11,7 +16,7 @@ MySourceScraper::MySourceScraper(QObject *parent)
 {
     // Set the MCPResourceHandlerName property so that
     // MCPHandlerResolver can locate this object.
-    setProperty("MCPResourceHandlerName", MySourceScraper::metaObject()->className());
+    setProperty("MPCToolHandlerName", MySourceScraper::metaObject()->className());
 
     // Set objectName as a fallback identifier
     setObjectName(MySourceScraper::metaObject()->className());
@@ -27,18 +32,21 @@ QJsonObject MySourceScraper::sourceScraper(const QString &operation, const QStri
     // --
 
     // result
-    QJsonObject result = QJsonObject({
+    QJsonObject info = QJsonObject({
         QPair<QString, QJsonValue>("result", QJsonValue("OK")),
         QPair<QString, QJsonValue>("success", QJsonValue(true)),
         QPair<QString, QJsonValue>("timestamp", QJsonValue(timestamp)),
     });
 
-    QJsonObject response;
-    response["structuredContent"] = result;
-    response["content"] = QJsonArray({QJsonObject({
+    QJsonArray content = QJsonArray({QJsonObject({
         QPair<QString, QString>("type", "text"), //
         QPair<QString, QString>("text", "Hello source from MySourceScraper Content"),
     })});
+
+    QJsonObject response = QJsonObject({
+        QPair<QString, QJsonValue>("structuredContent", info),
+        QPair<QString, QJsonValue>("content", content),
+    });
 
     return response;
 }

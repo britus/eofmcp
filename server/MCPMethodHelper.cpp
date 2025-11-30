@@ -67,9 +67,14 @@ QVariant MCPMethodHelper::call(QObject *pHandler, const QSharedPointer<QMetaMeth
 
     const QList<QByteArray> parameterTypes = pMetaMethod->parameterTypes();
     if (parameterTypes.size() < lstArguments.size()) {
-        MCP_CORE_LOG_WARNING().noquote() << "MCPMethodHelper::call: invalid argument count:" << lstArguments;
+        MCP_CORE_LOG_WARNING().noquote() << "MCPMethodHelper::call: invalid argument count:" //
+                                         << lstArguments << parameterTypes.size()            //
+                                         << "vs" << lstArguments.size();
         return QVariant();
     }
+
+    MCP_CORE_LOG_DEBUG().noquote() << "TOOL-CALL(" << pHandler->objectName() << "):" //
+                                   << pMetaMethod->name() << ":" << parameterTypes;
 
     // Storage for converted arguments - must stay alive until after invoke()
     QVariant storage[10];      // Qt supports up to 10 args for invoke
@@ -85,7 +90,8 @@ QVariant MCPMethodHelper::call(QObject *pHandler, const QSharedPointer<QMetaMeth
     }
     QGenericReturnArgument retArg(pMetaMethod->typeName(), const_cast<void *>(returnValue.constData()));
 
-    const int maxArgs = qMin(10, qMin(parameterTypes.size(), lstArguments.size()));
+    // use C++ declared parameter count
+    const int maxArgs = parameterTypes.size(); // qMin(10, qMin(parameterTypes.size(), lstArguments.size()));
     for (int i = 0; i < maxArgs; ++i) {
         // Get meta info for parameter type (Qt6)
         const QByteArray &typeName = parameterTypes[i];
@@ -93,8 +99,10 @@ QVariant MCPMethodHelper::call(QObject *pHandler, const QSharedPointer<QMetaMeth
         int parameterTypeId = parameterMeta.id();
 
         // copy input into storage so we have stable memory for the pointer QGenericArgument will hold
-        storage[i] = lstArguments[i];
+        // if less parameter given from MCP client, add empty variants.
+        storage[i] = (i < lstArguments.count() ? lstArguments[i] : QVariant());
 
+        // get reference of variant object
         QVariant &inputArg = storage[i];
 
         if (parameterTypeId == QMetaType::QVariant) {
@@ -106,7 +114,7 @@ QVariant MCPMethodHelper::call(QObject *pHandler, const QSharedPointer<QMetaMeth
         } else if (customConvert(inputArg, parameterTypeId)) {
             inputArg.convert(QMetaType(parameterTypeId));
         } else {
-            MCP_CORE_LOG_DEBUG().noquote() << "MCPMethodHelper::createMethodArguments(arguments type error): " << typeName << " = false";
+            MCP_CORE_LOG_DEBUG().noquote() << "MCPMethodHelper::call(arguments type error): " << typeName;
             return QVariant();
         }
 
@@ -121,13 +129,32 @@ QVariant MCPMethodHelper::call(QObject *pHandler, const QSharedPointer<QMetaMeth
             _args += ", ";
         _args += QStringLiteral("%1 @%2").arg(parameterTypes[i].constData()).arg((qulonglong) args[i].data(), 8, 16, QChar('0'));
     }
-    MCP_CORE_LOG_DEBUG().noquote() << "TOOL-CALL:" << pMetaMethod->name() << "args:" << _args;
-    MCP_CORE_LOG_DEBUG().noquote() << "TOOL-CALL: MainThread(" << (QThread::currentThread() == QCoreApplication::instance()->thread()) << ")";
+    MCP_CORE_LOG_DEBUG().noquote() << "TOOL-CALL(" << pHandler->objectName() << "):" //
+                                   << pMetaMethod->name() << "args:" << _args;
+    MCP_CORE_LOG_DEBUG().noquote() << "TOOL-CALL(" << pHandler->objectName() //
+                                   << "): MainThread(" << (QThread::currentThread() == QCoreApplication::instance()->thread()) << ")";
 
     // call invoke with up to 10 args
-    pMetaMethod->invoke(pHandler, Qt::DirectConnection, retArg, args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8], args[9]);
-
-    MCP_CORE_LOG_DEBUG().noquote() << "TOOL-CALL:" << pMetaMethod->name() << "->" << returnValue;
+    pMetaMethod->invoke(pHandler,
+                        Qt::DirectConnection, //
+                        retArg,
+                        args[0],
+                        args[1],
+                        args[2],
+                        args[3],
+                        args[4],
+                        args[5],
+                        args[6],
+                        args[7],
+                        args[8],
+                        args[9]);
+    if (returnValue.isValid()) {
+        QJsonDocument doc = QJsonDocument(returnValue.toJsonObject());
+        MCP_CORE_LOG_DEBUG().noquote() << "TOOL-CALL(" << pHandler->objectName() << "):" //
+                                       << pMetaMethod->name() << "" << doc.toJson();
+    } else {
+        MCP_CORE_LOG_WARNING().noquote() << "TOOL-CALL:" << pMetaMethod->name() << ":" << returnValue;
+    }
     return returnValue;
 }
 
@@ -135,12 +162,20 @@ QVariant MCPMethodHelper::call(QObject *pHandler, const QSharedPointer<QMetaMeth
 {
     auto lstMethodParameterNames = pMetaMethod->parameterNames();
     if (dictArguments.size() > lstMethodParameterNames.size()) {
-        MCP_CORE_LOG_WARNING().noquote() << "MCPMethodHelper::createMethodArguments(arguments size error): " << dictArguments.values() << " = false";
+        MCP_CORE_LOG_WARNING().noquote() << "MCPMethodHelper::createMethodArguments(arguments count error): " << dictArguments.values() << dictArguments;
         return QVariant();
     }
 
+    MCP_CORE_LOG_DEBUG().noquote() << "TOOL-CALL(" << pHandler->objectName() << "):" //
+                                   << pMetaMethod->name() << ": dictArguments:" << dictArguments;
+    MCP_CORE_LOG_DEBUG().noquote() << "TOOL-CALL(" << pHandler->objectName() << "):" //
+                                   << pMetaMethod->name() << ": lstMethodParameterNames:" << lstMethodParameterNames;
+
+    // The MCP client must generate the same parameter name from
+    // the JSON input scheme as is declared in C++.
+    // dictArguments contain names from MCP client.
     QVariantList lstArguments;
-    for (const auto &strMethodParameterName : lstMethodParameterNames) {
+    foreach (const auto &strMethodParameterName, lstMethodParameterNames) {
         auto it = dictArguments.find(strMethodParameterName);
         if (it != dictArguments.end()) {
             lstArguments.append(it.value());
@@ -148,8 +183,8 @@ QVariant MCPMethodHelper::call(QObject *pHandler, const QSharedPointer<QMetaMeth
     }
 
     if (lstArguments.size() != dictArguments.size()) {
-        MCP_CORE_LOG_WARNING() << "MCPMethodHelper::createMethodArguments: lstArguments:" << lstArguments.size() //
-                               << "!= dictArguments:" << dictArguments.size();
+        MCP_CORE_LOG_WARNING() << "MCPMethodHelper::createMethodArguments(arguments mismatch error): lstArguments:" << lstArguments.size() //
+                               << "!= dictArguments:" << dictArguments.size() << dictArguments << "vs" << lstArguments;
         return QVariant();
     }
 

@@ -1,11 +1,10 @@
 /**
  * @file MCPToolNotificationHandler.cpp
- * @brief MCP工具通知处理器实现
+ * @brief MCP tool notification handler implementation
  * @author zhangheng
  * @date 2025-01-09
  * @copyright Copyright (c) 2025 zhangheng. All rights reserved.
  */
-
 #include <MCPLog.h>
 #include <MCPServer.h>
 #include <MCPToolNotificationHandler.h>
@@ -19,17 +18,15 @@ MCPToolNotificationHandler::~MCPToolNotificationHandler() {}
 
 void MCPToolNotificationHandler::onToolsListChanged()
 {
-    //MCP_CORE_LOG_INFO() << "MCPToolNotificationHandler: onToolsListChanged()";
+    MCP_CORE_LOG_INFO() << "MCPToolNotificationHandler: Tools list changed, sending notification to all clients";
 
-    // 获取最新的工具列表
+    // Get the latest tools list
     QJsonArray arrTools = m_pServer->getToolService()->list();
 
-    // 构建通知参数
+    // Build notification parameters
     QJsonObject params;
     params["tools"] = arrTools;
 
-    // 广播通知
+    // Broadcast notification
     broadcastNotification("notifications/tools/list_changed", params);
-
-    //MCP_CORE_LOG_INFO() << "MCPToolNotificationHandler: onToolsListChanged done.";
 }

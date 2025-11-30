@@ -44,13 +44,13 @@ void MCPHttpConnection::sendMessage(QSharedPointer<MCPMessage> pMessage)
     auto data = pMessage->toData();
 
     MCP_TRANSPORT_LOG_INFO() << "HTTP-RESP:" << m_pSocket->peerAddress().toString() << ":" << m_pSocket->peerPort() << "size:" << data.size();
-
+#if 0
     if (data.indexOf("\n{") > -1) {
         QByteArray payload = data.mid(data.indexOf("{"));
         QJsonDocument doc = QJsonDocument::fromJson(payload);
         MCP_TRANSPORT_LOG_DEBUG().noquote() << "HTTP-RESP:" << doc.toJson();
     }
-
+#endif
     m_pSocket->write(data);
 }
 

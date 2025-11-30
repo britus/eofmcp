@@ -74,9 +74,8 @@ bool MCPToolService::addFromConfig(const MCPToolConfig &toolConfig, const QMap<Q
     // 从dictHandlers映射表中查找Handler，如果dictHandlers为空则从qApp搜索
     QObject *pHandler = dictHandlers.value(toolConfig.strExecHandler, nullptr);
     if (pHandler == nullptr) {
-        MCP_TOOLS_LOG_WARNING() << "MCPToolService: addFromConfig error:" //
-                                << toolConfig.strExecHandler              //
-                                << "for name:" << toolConfig.strName;
+        MCP_TOOLS_LOG_WARNING() << "MCPToolService:addFromConfig: error in tool name:" << toolConfig.strName //
+                                << "strExecHandler:" << toolConfig.strExecHandler;
         return false;
     }
 

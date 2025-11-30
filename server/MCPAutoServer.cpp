@@ -70,7 +70,10 @@ void MCPAutoServer::loadTool(const QString &strToolConfigFile)
     }
 
     MCPInvokeHelper::asynInvoke(m_pServer, [this, jsonTool]() { //
-        m_pServer->getToolService()->addFromJson(jsonTool);
+        if (!m_pServer->getToolService()->addFromJson(jsonTool)) {
+            MCP_CORE_LOG_WARNING() << "MCPAutoServer: Failed to add tool: " //
+                                   << jsonTool;
+        }
     });
 }
 

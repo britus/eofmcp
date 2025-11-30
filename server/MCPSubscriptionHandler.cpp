@@ -1,15 +1,13 @@
 /**
  * @file MCPSubscriptionHandler.cpp
- * @brief MCP订阅处理器实现
+ * @brief MCP subscription handler implementation
  * @author zhangheng
  * @date 2025-01-09
  * @copyright Copyright (c) 2025 zhangheng. All rights reserved.
  */
-
 #include "MCPSubscriptionHandler.h"
 #include "MCPClientMessage.h"
 #include "MCPContext.h"
-#include "MCPError.h"
 #include "MCPLog.h"
 #include "MCPResourceService.h"
 #include "MCPServerMessage.h"
@@ -19,7 +17,7 @@ MCPSubscriptionHandler::MCPSubscriptionHandler(MCPResourceService *pResourceServ
     , m_pResourceService(pResourceService)
 {
     if (!m_pResourceService) {
-        MCP_CORE_LOG_WARNING() << "MCPSubscriptionHandler: 资源服务为空";
+        MCP_CORE_LOG_WARNING() << "MCPSubscriptionHandler: Resource service is null";
     }
 }
 
@@ -28,7 +26,7 @@ MCPSubscriptionHandler::~MCPSubscriptionHandler() {}
 QSharedPointer<MCPServerMessage> MCPSubscriptionHandler::handleSubscribe(const QSharedPointer<MCPContext> &pContext)
 {
     if (!m_pResourceService) {
-        // 根据 MCP 协议规范，内部错误应返回 -32603，错误消息使用英文
+        // According to the MCP protocol specification, internal errors should return -32603, and error messages should be in English
         return QSharedPointer<MCPServerErrorResponse>::create(pContext, MCPError::internalError("Resource service not initialized"));
     }
 
@@ -37,17 +35,17 @@ QSharedPointer<MCPServerMessage> MCPSubscriptionHandler::handleSubscribe(const Q
     QString strUri = jsonParams.value("uri").toString();
 
     if (strUri.isEmpty()) {
-        // 根据 JSON-RPC 2.0 和 MCP 协议规范，错误消息应该使用英文
+        // According to the JSON-RPC 2.0 and MCP protocol specifications, error messages should be in English
         return QSharedPointer<MCPServerErrorResponse>::create(pContext, MCPError::invalidParams("Missing required parameter: uri"));
     }
 
-    // 验证资源是否存在（可选，根据MCP协议规范）
-    // 如果资源不存在，仍然允许订阅，以便在资源创建时收到通知
+    // Validate if the resource exists (optional, according to MCP protocol specification)
+    // If the resource does not exist, subscription is still allowed so that notifications can be received when the resource is created
 
-    // 执行订阅（使用sessionId而不是connectionId）
+    // Perform subscription (using sessionId instead of connectionId)
     auto pSession = pContext->getSession();
     if (!pSession) {
-        // 根据 JSON-RPC 2.0 和 MCP 协议规范，错误消息应该使用英文
+        // According to the JSON-RPC 2.0 and MCP protocol specifications, error messages should be in English
         return QSharedPointer<MCPServerErrorResponse>::create(pContext, MCPError::invalidRequest("Session not found"));
     }
 
@@ -55,20 +53,20 @@ QSharedPointer<MCPServerMessage> MCPSubscriptionHandler::handleSubscribe(const Q
     bool bSuccess = m_pResourceService->subscribe(strUri, strSessionId);
 
     if (!bSuccess) {
-        // 根据 MCP 协议规范，内部错误应返回 -32603，错误消息使用英文
+        // According to the MCP protocol specification, internal errors should return -32603, and error messages should be in English
         return QSharedPointer<MCPServerErrorResponse>::create(pContext, MCPError::internalError("Subscription failed"));
     }
 
-    MCP_CORE_LOG_INFO() << "MCPSubscriptionHandler: 会话" << strSessionId << "已订阅URI:" << strUri;
+    MCP_CORE_LOG_INFO() << "MCPSubscriptionHandler: Session" << strSessionId << "subscribed to URI:" << strUri;
 
-    // 返回成功响应（空结果表示成功）
+    // Return success response (empty result indicates success)
     return QSharedPointer<MCPServerMessage>::create(pContext, QJsonObject());
 }
 
 QSharedPointer<MCPServerMessage> MCPSubscriptionHandler::handleUnsubscribe(const QSharedPointer<MCPContext> &pContext)
 {
     if (!m_pResourceService) {
-        // 根据 MCP 协议规范，内部错误应返回 -32603，错误消息使用英文
+        // According to the MCP protocol specification, internal errors should return -32603, and error messages should be in English
         return QSharedPointer<MCPServerErrorResponse>::create(pContext, MCPError::internalError("Resource service not initialized"));
     }
 
@@ -77,14 +75,14 @@ QSharedPointer<MCPServerMessage> MCPSubscriptionHandler::handleUnsubscribe(const
     QString strUri = jsonParams.value("uri").toString();
 
     if (strUri.isEmpty()) {
-        // 根据 JSON-RPC 2.0 和 MCP 协议规范，错误消息应该使用英文
+        // According to the JSON-RPC 2.0 and MCP protocol specifications, error messages should be in English
         return QSharedPointer<MCPServerErrorResponse>::create(pContext, MCPError::invalidParams("Missing required parameter: uri"));
     }
 
-    // 执行取消订阅（使用sessionId而不是connectionId）
+    // Perform unsubscription (using sessionId instead of connectionId)
     auto pSession = pContext->getSession();
     if (!pSession) {
-        // 根据 JSON-RPC 2.0 和 MCP 协议规范，错误消息应该使用英文
+        // According to the JSON-RPC 2.0 and MCP protocol specifications, error messages should be in English
         return QSharedPointer<MCPServerErrorResponse>::create(pContext, MCPError::invalidRequest("Session not found"));
     }
 
@@ -92,14 +90,14 @@ QSharedPointer<MCPServerMessage> MCPSubscriptionHandler::handleUnsubscribe(const
     bool bSuccess = m_pResourceService->unsubscribe(strUri, strSessionId);
 
     if (!bSuccess) {
-        // 如果未订阅，返回错误（根据 MCP 协议规范，错误消息应该使用英文）
+        // If not subscribed, return an error (according to the MCP protocol specification, error messages should be in English)
         QJsonObject data;
         data["uri"] = strUri;
         return QSharedPointer<MCPServerErrorResponse>::create(pContext, MCPError(MCPErrorCode::INVALID_REQUEST, "Not subscribed to URI", data));
     }
 
-    MCP_CORE_LOG_INFO() << "MCPSubscriptionHandler: 会话" << strSessionId << "已取消订阅URI:" << strUri;
+    MCP_CORE_LOG_INFO() << "MCPSubscriptionHandler: Session" << strSessionId << "unsubscribed from URI:" << strUri;
 
-    // 返回成功响应（空结果表示成功）
+    // Return success response (empty result indicates success)
     return QSharedPointer<MCPServerMessage>::create(pContext, QJsonObject());
 }

@@ -1,33 +1,31 @@
 /**
  * @file MCPContext.cpp
- * @brief MCP上下文实现
+ * @brief MCP Context implementation
  * @author zhangheng
  * @date 2025-01-01
  * @copyright Copyright (c) 2025 zhangheng. All rights reserved.
  */
-
 #include "MCPContext.h"
 
-MCPContext::MCPContext(quint64 nConnectionId, const QSharedPointer<MCPSession>& pSession, const QSharedPointer<MCPClientMessage>& pClientMessage)
-	: m_nConnectionId(nConnectionId)
-	, m_pSession(pSession)
-	, m_pClientMessage(pClientMessage)
+MCPContext::MCPContext(quint64 nConnectionId, const QSharedPointer<MCPSession> &pSession, const QSharedPointer<MCPClientMessage> &pClientMessage)
+    : m_nConnectionId(nConnectionId)
+    , m_pClientMessage(pClientMessage)
+    , m_pSession(pSession)
 {
-
+    //
 }
 
 quint64 MCPContext::getConnectionId() const
 {
-	return m_nConnectionId;
+    return m_nConnectionId;
 }
 
 QSharedPointer<MCPClientMessage> MCPContext::getClientMessage() const
 {
-	return m_pClientMessage;
+    return m_pClientMessage;
 }
 
 QSharedPointer<MCPSession> MCPContext::getSession() const
 {
-	return m_pSession;
+    return m_pSession;
 }
-
