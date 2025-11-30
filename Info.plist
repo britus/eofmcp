@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleAllowMixedLocalizations</key>
+	<true/>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>en</string>
+	<key>CFBundleDisplayName</key>
+	<string>EoF MCP Server</string>
+	<key>CFBundleDocumentTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeIconFiles</key>
+			<array>
+				<string>icon_16x16.png</string>
+				<string>icon_32x32.png</string>
+				<string>icon_128x128.png</string>
+				<string>icon_256x256.png</string>
+				<string>icon_512x512.png</string>
+			</array>
+			<key>CFBundleTypeName</key>
+			<string>EoF MCP Server</string>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>LSHandlerRank</key>
+			<string>Alternate</string>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>org.eof.tools.eofmcp</string>
+			</array>
+		</dict>
+	</array>
+	<key>CFBundleExecutable</key>
+	<string>eofmcp</string>
+	<key>CFBundleIconFile</key>
+	<string>eofmcp.icns</string>
+	<key>CFBundleIdentifier</key>
+	<string>org.eof.tools.eofmcp</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>EoF MCP Server</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>28</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>org.eof.tools.eofmcp</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>eofmcp</string>
+			</array>
+		</dict>
+	</array>
+	<key>CFBundleVersion</key>
+	<string>1.0.0</string>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
+	<key>LSApplicationCategoryType</key>
+	<string>public.app-category.video</string>
+	<key>LSMinimumSystemVersion</key>
+	<string>13.5</string>
+	<key>LSUIElement</key>
+	<false/>
+	<key>LSUIPresentationMode</key>
+	<integer>0</integer>
+	<key>LSVisibleInClassic</key>
+	<true/>
+	<key>NOTE</key>
+	<string>Copyright © 2025 by EoF Software Labs</string>
+	<key>NSHighResolutionCapable</key>
+	<true/>
+	<key>NSHumanReadableCopyright</key>
+	<string>Copyright © 2025 by EoF Software Labs</string>
+	<key>NSPrefPaneIconFile</key>
+	<string>eofmcp.png</string>
+	<key>NSPrincipalClass</key>
+	<string>NSApplication</string>
+	<key>NSSupportsAutomaticGraphicsSwitching</key>
+	<true/>
+	<key>NSSupportsSuddenTermination</key>
+	<true/>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>fetch</string>
+		<string>processing</string>
+	</array>
+	<key>UILaunchImageFile</key>
+	<string>eofmcp.png</string>
+	<key>UIPrerenderedIcon</key>
+	<false/>
+	<key>UTExportedTypeDeclarations</key>
+	<array>
+		<dict>
+			<key>UTTypeDescription</key>
+			<string>EoF MCP Server</string>
+			<key>UTTypeIdentifier</key>
+			<string>org.eof.tools.eofmcp</string>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>eofmcp</string>
+				</array>
+			</dict>
+		</dict>
+	</array>
+	<key>UTImportedTypeDeclarations</key>
+	<array>
+		<dict>
+			<key>UTTypeDescription</key>
+			<string>EoF MCP Server</string>
+			<key>UTTypeIdentifier</key>
+			<string>org.eof.tools.eofmcp</string>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>eofmcp</string>
+				</array>
+			</dict>
+		</dict>
+	</array>
+</dict>
+</plist>

@@ -1,8 +1,6 @@
 INCLUDEPATH = $$PWD
 
-#SOURCES = \
-
-HEADERS = \
+HEADERS += \
     $$PWD/json-schema.hpp \
     $$PWD/json.hpp
 

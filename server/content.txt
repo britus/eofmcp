@@ -1,0 +1,3 @@
+-rw-r--r-- 1 eofmc staff   5760 Nov 28 10:52 json-schema.hpp
+-rw-r--r-- 1 eofmc staff 962299 Nov 28 10:52 json.hpp
+-rw-r--r-- 1 eofmc staff     48 Nov 28 13:09 nlohmann.pri

@@ -1,6 +1,6 @@
 INCLUDEPATH += $$PWD
 
-SOURCES = \
+SOURCES += \
     $$PWD/json-patch.cpp \
     $$PWD/json-schema-draft7.json.cpp \
     $$PWD/json-uri.cpp \
@@ -8,6 +8,6 @@ SOURCES = \
     $$PWD/smtp-address-validator.cpp \
     $$PWD/string-format-check.cpp
 
-HEADERS = \
+HEADERS += \
     $$PWD/json-patch.hpp \
     $$PWD/smtp-address-validator.hpp

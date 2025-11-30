@@ -1,0 +1,160 @@
+/**
+ * @file MCPResourcesConfig.cpp
+ * @brief MCP资源配置类实现
+ * @author zhangheng
+ * @date 2025-01-09
+ * @copyright Copyright (c) 2025 zhangheng. All rights reserved.
+ */
+
+#include "MCPResourcesConfig.h"
+#include "MCPLog.h"
+#include <QDir>
+#include <QDirIterator>
+#include <QFile>
+#include <QJsonDocument>
+
+// ============================================================================
+// MCPResourceConfig 实现
+// ============================================================================
+
+QJsonObject MCPResourceConfig::toJson() const
+{
+    QJsonObject json;
+    json["uri"] = strUri;
+    json["name"] = strName;
+    json["description"] = strDescription;
+    json["mimeType"] = strMimeType;
+
+    if (!strType.isEmpty() && strType != "content") {
+        json["type"] = strType;
+    }
+
+    if (!strContent.isEmpty()) {
+        json["content"] = strContent;
+    }
+
+    if (!strFilePath.isEmpty()) {
+        json["filePath"] = strFilePath;
+    }
+
+    if (!strHandlerName.isEmpty()) {
+        json["handlerName"] = strHandlerName;
+    }
+
+    // 添加 annotations（如果存在）
+    if (!annotations.isEmpty()) {
+        json["annotations"] = annotations;
+    }
+
+    return json;
+}
+
+MCPResourceConfig MCPResourceConfig::fromJson(const QJsonObject &json)
+{
+    MCPResourceConfig config;
+    config.strUri = json["uri"].toString();
+    config.strName = json["name"].toString();
+    config.strDescription = json["description"].toString();
+    config.strMimeType = json["mimeType"].toString("text/plain");
+    config.strType = json["type"].toString("content"); // 默认为content类型
+    config.strContent = json["content"].toString();
+    config.strFilePath = json["filePath"].toString();
+    config.strHandlerName = json["handlerName"].toString();
+
+    // 解析 annotations（如果存在）
+    if (json.contains("annotations") && json["annotations"].isObject()) {
+        config.annotations = json["annotations"].toObject();
+    }
+
+    return config;
+}
+
+// ============================================================================
+// MCPResourcesConfig 实现
+// ============================================================================
+
+MCPResourcesConfig::MCPResourcesConfig(QObject *pParent)
+    : QObject(pParent)
+{}
+
+MCPResourcesConfig::~MCPResourcesConfig() {}
+
+void MCPResourcesConfig::addResource(const MCPResourceConfig &resourceConfig)
+{
+    m_listResourceConfigs.append(resourceConfig);
+}
+
+QList<MCPResourceConfig> MCPResourcesConfig::getResources() const
+{
+    return m_listResourceConfigs;
+}
+
+int MCPResourcesConfig::getResourceCount() const
+{
+    return m_listResourceConfigs.size();
+}
+
+void MCPResourcesConfig::clear()
+{
+    m_listResourceConfigs.clear();
+}
+
+void MCPResourcesConfig::loadFromJson(const QJsonArray &jsonArray)
+{
+    for (const QJsonValue &value : jsonArray) {
+        if (value.isObject()) {
+            m_listResourceConfigs.append(MCPResourceConfig::fromJson(value.toObject()));
+        }
+    }
+}
+
+QJsonArray MCPResourcesConfig::toJson() const
+{
+    QJsonArray jsonArray;
+
+    for (const MCPResourceConfig &resourceConfig : m_listResourceConfigs) {
+        jsonArray.append(resourceConfig.toJson());
+    }
+
+    return jsonArray;
+}
+
+int MCPResourcesConfig::loadFromDirectory(const QString &strDirPath)
+{
+    QDir dir(strDirPath);
+    if (!dir.exists()) {
+        MCP_CORE_LOG_WARNING() << "MCPResourcesConfig: missing dir:" << strDirPath;
+        return 0;
+    }
+
+    m_listResourceConfigs.clear();
+
+    // 递归查找所有.json文件（包括所有层级的子目录，递归遍历）
+    QDirIterator it(strDirPath, QStringList() << "*.json", QDir::Files, QDirIterator::Subdirectories);
+
+    while (it.hasNext()) {
+        QString fullPath = it.next();
+
+        QFile file(fullPath);
+        if (!file.open(QIODevice::ReadOnly)) {
+            MCP_CORE_LOG_WARNING() << "MCPResourcesConfig: open failed:" << fullPath;
+            continue;
+        }
+
+        QJsonParseError parseError;
+        QJsonDocument doc = QJsonDocument::fromJson(file.readAll(), &parseError);
+        file.close();
+
+        if (parseError.error != QJsonParseError::NoError) {
+            MCP_CORE_LOG_WARNING() << "MCPResourcesConfig: JSON-ERROR:" << fullPath << parseError.errorString();
+            continue;
+        }
+
+        if (doc.isObject()) {
+            m_listResourceConfigs.append(MCPResourceConfig::fromJson(doc.object()));
+        }
+    }
+
+    MCP_CORE_LOG_INFO() << "MCPResourcesConfig: done. count:" << m_listResourceConfigs.size();
+    return m_listResourceConfigs.size();
+}

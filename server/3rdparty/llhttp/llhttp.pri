@@ -1,11 +1,10 @@
-INCLUDEPATH += $$PWD
 INCLUDEPATH += $$PWD/include
 
-SOURCES = \
+SOURCES += \
     $$PWD/src/api.c \
     $$PWD/src/http.c \
     $$PWD/src/llhttp.c
 
-HEADERS = \
+HEADERS += \
     $$PWD/include/llhttp.h
 
