@@ -1,12 +1,13 @@
 /**
  * @file MyResourceHandler.h
- * @brief 资源Handler示例类（用于验证MCPResourceWrapper）
+ * @brief Example class for a resource handler (used to verify MCPResourceWrapper)
  * @author zhangheng
  * @date 2025-01-09
  * @copyright Copyright (c) 2025 zhangheng. All rights reserved.
  */
 
 #pragma once
+#include <QFileInfo>
 #include <QJsonObject>
 #include <QObject>
 #include <QString>
@@ -30,53 +31,47 @@ class MyResourceHandler : public QObject
     Q_OBJECT
 
 public:
-    explicit MyResourceHandler(QObject *pParent = nullptr);
+    explicit MyResourceHandler(const QFileInfo &fileInfo, QObject *pParent = nullptr);
     virtual ~MyResourceHandler();
 
 public slots:
     /**
-     * @brief 获取资源元数据
-     * @return 资源元数据对象
+     * @brief Get resource metadata
+     * @return Resource metadata object
      */
     QJsonObject getMetadata() const;
 
     /**
-     * @brief 获取资源内容
-     * @return 资源内容字符串
+     * @brief Get resource content
+     * @return Resource content string
      */
     QString getContent() const;
 
     /**
-     * @brief 更新资源内容（用于测试）
-     * @param strNewContent 新的资源内容
+     * @brief Update resource content (for testing)
+     * @param strNewContent New resource content
      */
     void updateContent(const QString &strNewContent);
 
     /**
-     * @brief 更新资源名称（用于测试）
-     * @param strNewName 新的资源名称
+     * @brief Update resource name (for testing)
+     * @param strNewName New resource name
      */
     void updateName(const QString &strNewName);
 
 signals:
     /**
-     * @brief 资源变化信号
-     * @param strName 资源名称
-     * @param strDescription 资源描述
-     * @param strMimeType MIME类型
+     * @brief Resource change signal
+     * @param strName Resource name
+     * @param strDescription Resource description
+     * @param strMimeType MIME type
      */
     void changed(const QString &strName, const QString &strDescription, const QString &strMimeType);
 
-private slots:
-    /**
-     * @brief 定时器超时，模拟资源内容变化
-     */
-    void onTimerTimeout();
-
 private:
-    QString m_strName;        // 资源名称
-    QString m_strDescription; // 资源描述
-    QString m_strMimeType;    // MIME类型
-    QString m_strContent;     // 资源内容
-    QTimer *m_pTimer;         // 定时器（用于模拟资源变化）
+    QFileInfo m_fileInfo;
+    QString m_strName;        // Resource name
+    QString m_strDescription; // Resource description
+    QString m_strMimeType;    // MIME type
+    QString m_strContent;     // Resource content
 };

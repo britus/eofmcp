@@ -14,16 +14,21 @@
 #include <QFileInfoList>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QMimeData>
+#include <QMimeDatabase>
+#include <QMimeType>
 #include <QStandardPaths>
 #include <QVariant>
 
-MyResourceHandler::MyResourceHandler(QObject *pParent)
+static QMimeDatabase mimeDB;
+
+MyResourceHandler::MyResourceHandler(const QFileInfo &fileInfo, QObject *pParent)
     : QObject(pParent)
-    , m_strName("My Resource")
-    , m_strDescription("MCPResourceWrapper")
-    , m_strMimeType("application/json")
-    , m_strContent("{\"message\":\"Hello, MCP Resource!\",\"timestamp\":\"\"}")
-    , m_pTimer(nullptr)
+    , m_fileInfo(fileInfo)
+    , m_strName(fileInfo.fileName())
+    , m_strDescription(mimeDB.mimeTypeForFile(fileInfo.fileName()).comment())
+    , m_strMimeType(mimeDB.mimeTypeForFile(fileInfo.fileName()).name())
+    , m_strContent(fileInfo.absoluteFilePath())
 {
     // Set the MCPResourceHandlerName property so that
     // MCPHandlerResolver can locate this object.
@@ -32,19 +37,24 @@ MyResourceHandler::MyResourceHandler(QObject *pParent)
     // Set objectName as a fallback identifier
     setObjectName(MyResourceHandler::metaObject()->className());
 
-    // Create a timer that updates the resource content
-    // every 5 seconds (used for testing resource change notifications)
-    m_pTimer = new QTimer(this);
-    connect(m_pTimer, &QTimer::timeout, this, &MyResourceHandler::onTimerTimeout);
-    m_pTimer->setSingleShot(true);
-    m_pTimer->start(5000); // 5秒触发一次
+    // Create a async timer that updates the resource content
+    QTimer::singleShot(5000, this, [this, fileInfo]() {
+        QJsonObject contentObj;
+        contentObj["message"] = tr("Updated file: %1").arg(m_fileInfo.absoluteFilePath());
+        contentObj["timestamp"] = QDateTime::currentDateTime().toString(Qt::ISODate);
+        contentObj["updateCount"] = 1;
+
+        QJsonDocument doc(contentObj);
+        QString strNewContent = doc.toJson(QJsonDocument::Compact);
+
+        // Update content and emit changed signal
+        updateContent(strNewContent);
+    });
 }
 
 MyResourceHandler::~MyResourceHandler()
 {
-    if (m_pTimer && m_pTimer->isActive()) {
-        m_pTimer->stop();
-    }
+    //
 }
 
 QJsonObject MyResourceHandler::getMetadata() const
@@ -78,49 +88,4 @@ void MyResourceHandler::updateName(const QString &strNewName)
         // Emit changed signal to notify resource metadata change
         emit changed(m_strName, m_strDescription, m_strMimeType);
     }
-}
-
-void MyResourceHandler::onTimerTimeout()
-{
-    QJsonObject contentObj;
-    contentObj["message"] = "Hello, MCP Resource!";
-    contentObj["timestamp"] = QDateTime::currentDateTime().toString(Qt::ISODate);
-    contentObj["updateCount"] = 1;
-
-    QJsonDocument doc(contentObj);
-    QString strNewContent = doc.toJson(QJsonDocument::Compact);
-
-    // Update content and emit changed signal
-    updateContent(strNewContent);
-
-    QString toolsDir;
-
-    toolsDir = QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation);
-    toolsDir = toolsDir + QDir::separator() + "Tools";
-
-    QFile::Permissions permissions;
-    permissions.setFlag(QFile::Permission::ReadOwner, true);
-    permissions.setFlag(QFile::Permission::ReadGroup, true);
-    permissions.setFlag(QFile::Permission::WriteOwner, true);
-    permissions.setFlag(QFile::Permission::WriteGroup, true);
-    permissions.setFlag(QFile::Permission::ExeOwner, true);
-    permissions.setFlag(QFile::Permission::ExeGroup, true);
-
-    QDir dir(toolsDir);
-    if (!dir.exists()) {
-        dir.mkpath(toolsDir, permissions);
-    }
-
-    // get tool configuration files
-    QFileInfoList files = dir.entryInfoList(QStringList() << "*.json");
-
-    // propagate tools
-    foreach (auto fi, files) {
-        if (fi.isFile() && fi.isReadable()) {
-            QString strToolConfigFilePath = fi.absoluteFilePath();
-            LoadAutoMCPServerTool(this, strToolConfigFilePath.toUtf8().data());
-        }
-    }
-
-    m_pTimer->stop();
 }

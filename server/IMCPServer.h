@@ -7,13 +7,13 @@
  */
 
 #pragma once
-#include <QObject>
-#include <QString>
-#include <MCPCore_global.h.h>
+#include <IMCPPromptService.h>
+#include <IMCPResourceService.h>
 #include <IMCPServerConfig.h>
 #include <IMCPToolService.h>
-#include <IMCPResourceService.h>
-#include <IMCPPromptService.h>
+#include <MCPCore_global.h.h>
+#include <QObject>
+#include <QString>
 
 //class IMCPServerConfig;
 //class IMCPToolService;
@@ -40,13 +40,13 @@ public:
     /**
      * @brief Constructor (protected, can only be created through createServer)
      */
-    explicit IMCPServer(QObject* pParent = nullptr);
+    explicit IMCPServer(QObject *pParent = nullptr);
 
     /**
      * @brief Create server instance
      * @return Server instance pointer, returns nullptr if failed
      */
-    static IMCPServer* createServer();
+    static IMCPServer *createServer();
 
     /**
      * @brief Destroy server instance (recommended to use this method)
@@ -54,7 +54,7 @@ public:
      *
      * Note: Don't directly use delete to destroy server instances, should use this method
      */
-    static void destroyServer(IMCPServer* pServer);
+    static void destroyServer(IMCPServer *pServer);
 
 public:
     /**
@@ -93,7 +93,7 @@ public:
      * pConfig->setServerName("My Server");
      * @endcode
      */
-    virtual IMCPServerConfig* getConfig() = 0;
+    virtual IMCPServerConfig *getConfig() = 0;
 
     /**
      * @brief Get tool service interface
@@ -114,7 +114,7 @@ public:
      *     });
      * @endcode
      */
-    virtual IMCPToolService* getToolService() = 0;
+    virtual IMCPToolService *getToolService() = 0;
 
     /**
      * @brief Get resource service interface
@@ -128,7 +128,7 @@ public:
      * pResourceService->add("file:///path/to/file.txt", "My File", "A text file", "/path/to/file.txt");
      * @endcode
      */
-    virtual IMCPResourceService* getResourceService() = 0;
+    virtual IMCPResourceService *getResourceService() = 0;
 
     /**
      * @brief Get prompt service interface
@@ -144,10 +144,9 @@ public:
      * pPromptService->add("greeting", "Greeting prompt", args, "Hello {{name}}, welcome!");
      * @endcode
      */
-    virtual IMCPPromptService* getPromptService() = 0;
+    virtual IMCPPromptService *getPromptService() = 0;
 
 protected:
-
     /**
      * @brief Destructor (protected, can only be destroyed through destroyServer)
      */
@@ -156,5 +155,3 @@ protected:
 
 //#define IMCPServer_iid "org.eof.IMCPServer"
 //Q_DECLARE_INTERFACE(IMCPServer, IMCPServer_iid)
-
-extern "C" MCPCORE_EXPORT void LoadAutoMCPServerTool(QObject *sender, const char* szToolConfigFile);
