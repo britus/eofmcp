@@ -22,13 +22,13 @@
 
 static QMimeDatabase mimeDB;
 
-MyResourceHandler::MyResourceHandler(const QFileInfo &fileInfo, QObject *pParent)
+MyResourceHandler::MyResourceHandler(QObject *pParent)
     : QObject(pParent)
-    , m_fileInfo(fileInfo)
-    , m_strName(fileInfo.fileName())
-    , m_strDescription(mimeDB.mimeTypeForFile(fileInfo.fileName()).comment())
-    , m_strMimeType(mimeDB.mimeTypeForFile(fileInfo.fileName()).name())
-    , m_strContent(fileInfo.absoluteFilePath())
+    , m_fileInfo()
+    , m_strName()
+    , m_strDescription()
+    , m_strMimeType()
+    , m_strContent()
 {
     // Set the MCPResourceHandlerName property so that
     // MCPHandlerResolver can locate this object.
@@ -38,16 +38,16 @@ MyResourceHandler::MyResourceHandler(const QFileInfo &fileInfo, QObject *pParent
     setObjectName(MyResourceHandler::metaObject()->className());
 
     // Create a async timer that updates the resource content
-    QTimer::singleShot(5000, this, [this, fileInfo]() {
+    QTimer::singleShot(5000, this, [this]() {
         QJsonObject contentObj;
-        contentObj["message"] = tr("Updated file: %1").arg(m_fileInfo.absoluteFilePath());
+        contentObj["message"] = tr("Updated resource: %1").arg("");
         contentObj["timestamp"] = QDateTime::currentDateTime().toString(Qt::ISODate);
         contentObj["updateCount"] = 1;
 
         QJsonDocument doc(contentObj);
         QString strNewContent = doc.toJson(QJsonDocument::Compact);
 
-        //MCP_RESOURCE_LOG_DEBUG() << "MyResourceHandler: Update content:" << strNewContent;
+        //  MCP_RESOURCE_LOG_DEBUG() << "MyResourceHandler: Update content:" << strNewContent;
 
         // Update content and emit changed signal
         updateContent(strNewContent);

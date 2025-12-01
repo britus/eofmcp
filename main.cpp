@@ -77,47 +77,6 @@ void LoadMcpToolset()
     toolsTimer.start();
 }
 
-static inline void createResources(QObjectList *handlers, const QDir &projectDir, bool bRecursive = true)
-{
-    QStringList strExtensions = QStringList() //
-                                << ".cpp"     //
-                                << ".h"       //
-                                << ".hpp"     //
-                                << ".c"       //
-                                << ".cc"      //
-                                << ".cxx"     //
-                                << ".hxx"     //
-                                << ".java";
-    QDir::Filters filters = QDir::Files | QDir::Readable;
-
-    if (bRecursive) {
-        filters |= QDir::AllDirs;
-    }
-
-    QFileInfoList dirList = projectDir.entryInfoList();
-    foreach (const QFileInfo &fileInfo, dirList) {
-        if (fileInfo.isDir()) {
-            if (bRecursive                           //
-                && fileInfo.fileName() != "."        //
-                && fileInfo.fileName() != ".."       //
-                && fileInfo.fileName() != "build"    // QT/CMAKE build directory
-                && fileInfo.fileName() != "bin"      // Java binaries
-                && fileInfo.fileName() != "classes") // Java binaries
-            {
-                createResources(handlers, fileInfo.filePath(), bRecursive);
-            }
-        } else {
-            foreach (const QString &strExt, strExtensions) {
-                if (fileInfo.suffix() == strExt.mid(1)) { // skip dot
-                    //MCP_RESOURCE_LOG_DEBUG() << "[MAIN-RES] Register resource:" << fileInfo.absoluteFilePath();
-                    handlers->append(new MyResourceHandler(fileInfo, qApp));
-                    break;
-                }
-            }
-        }
-    }
-}
-
 int main(int argc, char *argv[])
 {
     // Same as in Info.plist
@@ -155,10 +114,7 @@ int main(int argc, char *argv[])
     // The resource Handler must be created; MCPHandlerResolver will locate it
     // via objectName or the "MCPResourceHandlerName" property
     // The "MCPResourceHandlerName" property is already set in the MyResourceHandler constructor
-    createResources(&handlers,
-                    QDir(QStandardPaths::writableLocation( //
-                             QStandardPaths::HomeLocation)
-                         + "/EoF/eofmcp"));
+    handlers.append(new MyResourceHandler(qApp));
 
     // Load supported MCP toolset
     LoadMcpToolset();

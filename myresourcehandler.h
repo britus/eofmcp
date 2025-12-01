@@ -31,7 +31,7 @@ class MyResourceHandler : public QObject
     Q_OBJECT
 
 public:
-    explicit MyResourceHandler(const QFileInfo &fileInfo, QObject *pParent = nullptr);
+    explicit MyResourceHandler(QObject *pParent = nullptr);
     virtual ~MyResourceHandler();
 
 public slots:
