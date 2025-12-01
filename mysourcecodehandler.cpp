@@ -316,7 +316,13 @@ QList<QFileInfo> SourceCodeHandler::findSourceFiles(const QString &strPath, cons
 
     foreach (const QFileInfo &fileInfo, dirList) {
         if (fileInfo.isDir()) {
-            if (bRecursive && fileInfo.fileName() != "." && fileInfo.fileName() != "..") {
+            if (bRecursive                           //
+                && fileInfo.fileName() != "."        //
+                && fileInfo.fileName() != ".."       //
+                && fileInfo.fileName() != "build"    // QT/CMAKE build directory
+                && fileInfo.fileName() != "bin"      // Java binaries
+                && fileInfo.fileName() != "classes") // Java binaries
+            {
                 fileList.append(findSourceFiles(fileInfo.filePath(), strExtensions, bRecursive));
             }
         } else {
