@@ -32,9 +32,9 @@ QJsonObject SourceCodeHandler::displayProjectFiles(const QVariant &project_path,
         return createErrorResponse("Parameter 'project_path' required");
     }
 
-    MCP_TOOLS_LOG_DEBUG() << "TOOL-SRCH:listSourceFiles: path:" << project_path //
-                          << "extensions:" << sort_by                           //
-                          << "recusive:" << recursive;
+    MCP_TOOLS_LOG_DEBUG().noquote()                                    //
+        << "TOOL-SRCH:displayProjectFiles:" << project_path.toString() //
+        << "extensions:" << sort_by << "recusive:" << recursive;
 
     QString strProjectPath = project_path.toString();
     QString strSortBy = sort_by.isValid() ? sort_by.toString() : "name";
@@ -119,8 +119,9 @@ QJsonObject SourceCodeHandler::listSourceFiles(const QVariant &project_path, con
         return createErrorResponse("Parameter 'project_path' required");
     }
 
-    MCP_TOOLS_LOG_DEBUG() << "TOOL-SRCH:listSourceFiles: path:" //
-                          << project_path << "extensions:" << extensions;
+    MCP_TOOLS_LOG_DEBUG().noquote()     //
+        << "TOOL-SRCH:listSourceFiles:" //
+        << project_path.toString() << "extensions:" << extensions;
 
     QString strProjectPath = project_path.toString();
     QStringList strExtensions = DEFAULT_EXTENSIONS;
@@ -170,6 +171,8 @@ QJsonObject SourceCodeHandler::readSourceFile(const QVariant &file_path)
     if (!file_path.isValid()) {
         return createErrorResponse("Parameter 'file_path' required");
     }
+
+    MCP_TOOLS_LOG_DEBUG() << "TOOL-SRCH:readSourceFile:" << file_path;
 
     QString strFilePath = file_path.toString();
 
@@ -223,10 +226,13 @@ QJsonObject SourceCodeHandler::writeSourceFile(const QVariant &file_path, const 
     if (!file_path.isValid()) {
         return createErrorResponse("Parameter 'file_path' required");
     }
-
     if (!content.isValid()) {
         return createErrorResponse("Parameter 'content' required");
     }
+
+    MCP_TOOLS_LOG_DEBUG().noquote()     //
+        << "TOOL-SRCH:writeSourceFile:" //
+        << file_path.toString() << "backup:" << create_backup;
 
     QString strFilePath = file_path.toString();
     QString strContent = content.toString();
