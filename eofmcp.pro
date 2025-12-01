@@ -71,7 +71,7 @@ mac {
     CONFIG += embed_libraries
     CONFIG += embed_translations
 
-    DEFINES += OSX_SANDBOXED_APP
+    #DEFINES += OSX_SANDBOXED_APP
 
     QMAKE_CFLAGS += -mmacosx-version-min=13.5
     QMAKE_CXXFLAGS += -mmacosx-version-min=13.5

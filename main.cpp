@@ -41,6 +41,10 @@ void LoadAutoMCPServerTool(QObject * /*sender*/, const char *szToolConfigFile)
 
 int main(int argc, char *argv[])
 {
+    // Same as in Info.plist
+    QCoreApplication::setOrganizationDomain("org.eof.tools");
+    QCoreApplication::setApplicationName("EoF MCP Server");
+
     QCoreApplication a(argc, argv);
 
     QTranslator translator;

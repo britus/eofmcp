@@ -161,16 +161,17 @@ QVariant MCPMethodHelper::call(QObject *pHandler, const QSharedPointer<QMetaMeth
 QVariant MCPMethodHelper::call(QObject *pHandler, const QSharedPointer<QMetaMethod> &pMetaMethod, const QVariantMap &dictArguments)
 {
     auto lstMethodParameterNames = pMetaMethod->parameterNames();
-    if (dictArguments.size() > lstMethodParameterNames.size()) {
-        MCP_CORE_LOG_WARNING().noquote() << "MCPMethodHelper::createMethodArguments(arguments count error): " << dictArguments.values() << dictArguments;
-        return QVariant();
-    }
 
     MCP_CORE_LOG_DEBUG().noquote() << "TOOL-CALL(" << pHandler->objectName() << "):" //
                                    << pMetaMethod->name() << ": dictArguments:" << dictArguments;
     MCP_CORE_LOG_DEBUG().noquote() << "TOOL-CALL(" << pHandler->objectName() << "):" //
                                    << pMetaMethod->name() << ": lstMethodParameterNames:" << lstMethodParameterNames;
-
+#if 0
+    if (dictArguments.size() > lstMethodParameterNames.size()) {
+        MCP_CORE_LOG_WARNING().noquote() << "MCPMethodHelper::call: arguments count error.";
+        return QVariant();
+    }
+#endif
     // The MCP client must generate the same parameter name from
     // the JSON input scheme as is declared in C++.
     // dictArguments contain names from MCP client.
@@ -183,9 +184,10 @@ QVariant MCPMethodHelper::call(QObject *pHandler, const QSharedPointer<QMetaMeth
     }
 
     if (lstArguments.size() != dictArguments.size()) {
-        MCP_CORE_LOG_WARNING() << "MCPMethodHelper::createMethodArguments(arguments mismatch error): lstArguments:" << lstArguments.size() //
-                               << "!= dictArguments:" << dictArguments.size() << dictArguments << "vs" << lstArguments;
-        return QVariant();
+        MCP_CORE_LOG_WARNING() << "MCPMethodHelper::call(arguments mismatch):" //
+                               << "lstArguments:" << lstArguments.size()       //
+                               << "!= dictArguments:" << dictArguments.size()  //
+                               << dictArguments << "vs" << lstArguments;
     }
 
     return call(pHandler, pMetaMethod, lstArguments);

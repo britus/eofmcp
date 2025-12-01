@@ -20,7 +20,7 @@ MCPResourceNotificationHandler::~MCPResourceNotificationHandler() {}
 
 void MCPResourceNotificationHandler::onResourceContentChanged(const QString &strUri)
 {
-    MCP_CORE_LOG_INFO() << "MCPResourceNotificationHandler: 资源内容变化，通知订阅者:" << strUri;
+    //MCP_CORE_LOG_INFO() << "MCPResourceNotificationHandler: 资源内容变化，通知订阅者:" << strUri;
 
     // 获取订阅该URI的所有会话ID
     auto pResourceService = m_pServer->getResourceService();
@@ -50,7 +50,7 @@ void MCPResourceNotificationHandler::onResourceContentChanged(const QString &str
     // 根据 MCP 协议规范，资源更新通知方法名是 "notifications/resources/updated"
     sendNotificationToSubscribers("notifications/resources/updated", params, lstSubscribedSessionIds);
 
-    MCP_CORE_LOG_INFO() << "MCPResourceNotificationHandler: URI" << strUri << "的内容变化通知已处理，共" << lstSubscribedSessionIds.size() << "个订阅者";
+    //MCP_CORE_LOG_INFO() << "MCPResourceNotificationHandler: URI" << strUri << "的内容变化通知已处理，共" << lstSubscribedSessionIds.size() << "个订阅者";
 }
 
 void MCPResourceNotificationHandler::onResourceDeleted(const QString &strUri)

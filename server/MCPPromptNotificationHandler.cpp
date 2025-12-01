@@ -19,7 +19,7 @@ MCPPromptNotificationHandler::~MCPPromptNotificationHandler() {}
 
 void MCPPromptNotificationHandler::onPromptsListChanged()
 {
-    MCP_CORE_LOG_INFO() << "MCPPromptNotificationHandler: onPromptsListChanged";
+    //MCP_CORE_LOG_INFO() << "MCPPromptNotificationHandler: onPromptsListChanged";
 
     // 获取最新的提示词列表
     QJsonArray arrPrompts = m_pServer->getPromptService()->list();
@@ -31,5 +31,5 @@ void MCPPromptNotificationHandler::onPromptsListChanged()
     // 广播通知
     broadcastNotification("notifications/prompts/list_changed", params);
 
-    MCP_CORE_LOG_INFO() << "MCPPromptNotificationHandler: onPromptsListChanged done.";
+    //MCP_CORE_LOG_INFO() << "MCPPromptNotificationHandler: onPromptsListChanged done.";
 }

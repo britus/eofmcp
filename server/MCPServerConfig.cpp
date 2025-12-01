@@ -47,7 +47,7 @@ bool MCPServerConfig::loadFromDirectory(const QString &strConfigDir)
             return false;
         }
     } else {
-        MCP_CORE_LOG_WARNING() << "MCPServerConfig: ok:" << strServerConfigPath;
+        MCP_CORE_LOG_INFO() << "MCPServerConfig: loaded from:" << strServerConfigPath;
     }
 
     // 2. 加载工具配置目录
