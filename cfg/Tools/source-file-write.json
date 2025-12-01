@@ -53,6 +53,6 @@
         "description": "Status message"
       }
     },
-    "required": ["success", "file_path", "backup_path", "bytes_written", "message"]
+    "required": ["success", "file_path"]
   }
 }
