@@ -142,12 +142,6 @@ QJsonObject SourceCodeHandler::writeSourceFile(const QVariant &file_path, const 
         return createErrorResponse(QString("Invalid file path: %1").arg(strFilePath));
     }
 
-    /*
-    "file_path": "[~]/eofmcp/changed/server/IMCPMiddleware.h",
-    "message": "Error: File could not be written - No such file or directory",
-    "success": false
-    */
-    QFileInfo fi(strFilePath);
     QFile::Permissions permissions;
     permissions.setFlag(QFile::Permission::ReadOwner, true);
     permissions.setFlag(QFile::Permission::ReadGroup, true);
@@ -155,6 +149,8 @@ QJsonObject SourceCodeHandler::writeSourceFile(const QVariant &file_path, const 
     permissions.setFlag(QFile::Permission::WriteGroup, true);
     permissions.setFlag(QFile::Permission::ExeOwner, true);
     permissions.setFlag(QFile::Permission::ExeGroup, true);
+
+    QFileInfo fi(strFilePath);
     QDir tdir(fi.path());
     if (!tdir.exists()) {
         tdir.mkpath(fi.path(), permissions);
