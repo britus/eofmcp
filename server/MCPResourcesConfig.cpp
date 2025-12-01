@@ -1,6 +1,6 @@
 /**
  * @file MCPResourcesConfig.cpp
- * @brief MCP资源配置类实现
+ * @brief MCP resource configuration class implementation
  * @author zhangheng
  * @date 2025-01-09
  * @copyright Copyright (c) 2025 zhangheng. All rights reserved.
@@ -14,7 +14,7 @@
 #include <QJsonDocument>
 
 // ============================================================================
-// MCPResourceConfig 实现
+// MCPResourceConfig implementation
 // ============================================================================
 
 QJsonObject MCPResourceConfig::toJson() const
@@ -41,7 +41,7 @@ QJsonObject MCPResourceConfig::toJson() const
         json["handlerName"] = strHandlerName;
     }
 
-    // 添加 annotations（如果存在）
+    // Add annotations (if any)
     if (!annotations.isEmpty()) {
         json["annotations"] = annotations;
     }
@@ -56,12 +56,12 @@ MCPResourceConfig MCPResourceConfig::fromJson(const QJsonObject &json)
     config.strName = json["name"].toString();
     config.strDescription = json["description"].toString();
     config.strMimeType = json["mimeType"].toString("text/plain");
-    config.strType = json["type"].toString("content"); // 默认为content类型
+    config.strType = json["type"].toString("content"); // Default to content type
     config.strContent = json["content"].toString();
     config.strFilePath = json["filePath"].toString();
     config.strHandlerName = json["handlerName"].toString();
 
-    // 解析 annotations（如果存在）
+    // Parse annotations (if any)
     if (json.contains("annotations") && json["annotations"].isObject()) {
         config.annotations = json["annotations"].toObject();
     }
@@ -70,7 +70,7 @@ MCPResourceConfig MCPResourceConfig::fromJson(const QJsonObject &json)
 }
 
 // ============================================================================
-// MCPResourcesConfig 实现
+// MCPResourcesConfig implementation
 // ============================================================================
 
 MCPResourcesConfig::MCPResourcesConfig(QObject *pParent)
@@ -129,7 +129,7 @@ int MCPResourcesConfig::loadFromDirectory(const QString &strDirPath)
 
     m_listResourceConfigs.clear();
 
-    // 递归查找所有.json文件（包括所有层级的子目录，递归遍历）
+    // Recursively find all .json files (including subdirectories at all levels, recursive traversal)
     QDirIterator it(strDirPath, QStringList() << "*.json", QDir::Files, QDirIterator::Subdirectories);
 
     while (it.hasNext()) {

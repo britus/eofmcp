@@ -1,6 +1,6 @@
 /**
  * @file MCPPromptService.cpp
- * @brief MCP提示词服务实现
+ * @brief MCP prompt service implementation
  * @author zhangheng
  * @date 2025-01-09
  * @copyright Copyright (c) 2025 zhangheng. All rights reserved.
@@ -17,9 +17,11 @@ MCPPromptService::MCPPromptService(QObject* pParent)
 {
 }
 
+
 MCPPromptService::~MCPPromptService()
 {
 }
+
 
 bool MCPPromptService::add(const QString& strName,
                            const QString& strDescription,
@@ -32,6 +34,7 @@ bool MCPPromptService::add(const QString& strName,
     });
 }
 
+
 bool MCPPromptService::add(const QString& strName,
                            const QString& strDescription,
                            const QList<QPair<QString, QPair<QString, bool>>>& arguments,
@@ -43,24 +46,26 @@ bool MCPPromptService::add(const QString& strName,
     });
 }
 
+
 bool MCPPromptService::registerPrompt(MCPPrompt* pPrompt)
 {
     QString strName = pPrompt->getName();
 
-    // 如果已存在，先删除旧的（覆盖），不发送信号，因为后面注册新对象时会发送
+    // If it already exists, first remove the old one (overwrite), don't send signal because a new object will be sent later
     if (m_dictPrompts.contains(strName))
     {
-        MCP_CORE_LOG_INFO() << "MCPPromptService: 提示词已存在，覆盖旧提示词:" << strName;
+        MCP_CORE_LOG_INFO() << "MCPPromptService: Prompt already exists, overwriting old prompt:" << strName;
         doRemoveImpl(strName, false);
     }
 
     m_dictPrompts[strName] = pPrompt;
-    MCP_CORE_LOG_INFO() << "MCPPromptService: 提示词已注册:" << strName;
+    MCP_CORE_LOG_INFO() << "MCPPromptService: Prompt registered:" << strName;
 
     emit promptChanged(strName);
     emit promptsListChanged();
     return true;
 }
+
 
 bool MCPPromptService::remove(const QString& strName)
 {
@@ -70,6 +75,7 @@ bool MCPPromptService::remove(const QString& strName)
     });
 }
 
+
 bool MCPPromptService::has(const QString& strName) const
 {
     return MCPInvokeHelper::syncInvokeReturn(const_cast<MCPPromptService*>(this), [this, strName]()
@@ -78,6 +84,7 @@ bool MCPPromptService::has(const QString& strName) const
     });
 }
 
+
 QJsonArray MCPPromptService::list() const
 {
     return MCPInvokeHelper::syncInvokeReturnT<QJsonArray>(const_cast<MCPPromptService*>(this), [this]()->QJsonArray
@@ -85,6 +92,7 @@ QJsonArray MCPPromptService::list() const
         return doListImpl();
     });
 }
+
 
 QJsonObject MCPPromptService::getPrompt(const QString& strName, const QMap<QString, QString>& arguments)
 {
@@ -96,19 +104,21 @@ QJsonObject MCPPromptService::getPrompt(const QString& strName, const QMap<QStri
     return objResult;
 }
 
+
 bool MCPPromptService::addFromJson(const QJsonObject& jsonPrompt)
 {
     return MCPInvokeHelper::syncInvokeReturn(this, [this, jsonPrompt]()
     {
-        // 将JSON对象转换为MCPPromptConfig
+        // Convert JSON object to MCPPromptConfig
         MCPPromptConfig promptConfig = MCPPromptConfig::fromJson(jsonPrompt);
         return addFromConfig(promptConfig);
     });
 }
 
+
 bool MCPPromptService::addFromConfig(const MCPPromptConfig& promptConfig)
 {
-    // 转换参数格式
+    // Convert argument format
     QList<QPair<QString, QPair<QString, bool>>> arguments;
     for (const MCPPromptArgumentConfig& arg : promptConfig.listArguments)
     {
@@ -118,7 +128,7 @@ bool MCPPromptService::addFromConfig(const MCPPromptConfig& promptConfig)
         ));
     }
 
-    // 使用模板方式注册（会自动使用默认的模板替换生成器）
+    // Register using template method (will automatically use default template replacement generator)
     return doAddImpl(
         promptConfig.strName,
         promptConfig.strDescription,
@@ -126,15 +136,16 @@ bool MCPPromptService::addFromConfig(const MCPPromptConfig& promptConfig)
         promptConfig.strTemplate) != nullptr;
 }
 
+
 MCPPrompt* MCPPromptService::createAndConfigurePrompt(const QString& strName,
                                                        const QString& strDescription,
                                                        const QList<QPair<QString, QPair<QString, bool>>>& arguments)
 {
-    // 创建提示词对象（父对象设为this）
+    // Create prompt object (parent set to this)
     MCPPrompt* pPrompt = new MCPPrompt(strName, this);
     pPrompt->withDescription(strDescription);
 
-    // 添加参数
+    // Add arguments
     for (const auto& arg : arguments)
     {
         pPrompt->withArgument(arg.first, arg.second.first, arg.second.second);
@@ -143,39 +154,41 @@ MCPPrompt* MCPPromptService::createAndConfigurePrompt(const QString& strName,
     return pPrompt;
 }
 
+
 MCPPrompt* MCPPromptService::doAddImpl(const QString& strName,
                                        const QString& strDescription,
                                        const QList<QPair<QString, QPair<QString, bool>>>& arguments,
                                        std::function<QString(const QMap<QString, QString>&)> generator)
 {
-    // 创建并配置提示词对象
+    // Create and configure prompt object
     MCPPrompt* pPrompt = createAndConfigurePrompt(strName, strDescription, arguments);
     pPrompt->withGenerator(generator);
 
-    // 注册到服务
+    // Register to service
     if (!registerPrompt(pPrompt))
     {
-        // 如果注册失败，删除Prompt对象避免内存泄漏
+        // If registration fails, delete Prompt object to avoid memory leak
         pPrompt->deleteLater();
         return nullptr;
     }
 
     return pPrompt;
 }
+
 
 MCPPrompt* MCPPromptService::doAddImpl(const QString& strName,
                                        const QString& strDescription,
                                        const QList<QPair<QString, QPair<QString, bool>>>& arguments,
                                        const QString& strTemplate)
 {
-    // 创建并配置提示词对象
+    // Create and configure prompt object
     MCPPrompt* pPrompt = createAndConfigurePrompt(strName, strDescription, arguments);
     pPrompt->withTemplate(strTemplate);
 
-    // 注册到服务
+    // Register to service
     if (!registerPrompt(pPrompt))
     {
-        // 如果注册失败，删除Prompt对象避免内存泄漏
+        // If registration fails, delete Prompt object to avoid memory leak
         pPrompt->deleteLater();
         return nullptr;
     }
@@ -183,11 +196,12 @@ MCPPrompt* MCPPromptService::doAddImpl(const QString& strName,
     return pPrompt;
 }
 
+
 bool MCPPromptService::doRemoveImpl(const QString& strName, bool bEmitSignal)
 {
     if (!m_dictPrompts.contains(strName))
     {
-        MCP_CORE_LOG_WARNING() << "MCPPromptService: 提示词不存在:" << strName;
+        MCP_CORE_LOG_WARNING() << "MCPPromptService: Prompt does not exist:" << strName;
         return false;
     }
 
@@ -197,7 +211,7 @@ bool MCPPromptService::doRemoveImpl(const QString& strName, bool bEmitSignal)
         pPrompt->deleteLater();
     }
 
-    MCP_CORE_LOG_INFO() << "MCPPromptService: 提示词已注销:" << strName;
+    MCP_CORE_LOG_INFO() << "MCPPromptService: Prompt unregistered:" << strName;
     if (bEmitSignal)
     {
         emit promptChanged(strName);
@@ -206,10 +220,12 @@ bool MCPPromptService::doRemoveImpl(const QString& strName, bool bEmitSignal)
     return true;
 }
 
+
 bool MCPPromptService::doHasImpl(const QString& strName) const
 {
     return m_dictPrompts.contains(strName);
 }
+
 
 QJsonArray MCPPromptService::doListImpl() const
 {
@@ -224,11 +240,12 @@ QJsonArray MCPPromptService::doListImpl() const
     return arrPrompts;
 }
 
+
 QJsonObject MCPPromptService::doGetPromptImpl(const QString& strName, const QMap<QString, QString>& arguments)
 {
     if (!m_dictPrompts.contains(strName))
     {
-        MCP_CORE_LOG_WARNING() << "MCPPromptService: 尝试获取不存在的提示词:" << strName;
+        MCP_CORE_LOG_WARNING() << "MCPPromptService: Attempting to get non-existent prompt:" << strName;
         return QJsonObject();
     }
 
@@ -241,4 +258,3 @@ QJsonObject MCPPromptService::doGetPromptImpl(const QString& strName, const QMap
 
     return result;
 }
-

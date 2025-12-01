@@ -1,9 +1,9 @@
 {
-    "uri": "file://config",
-    "name": "config_name",
-    "description": "file://config | config_name",
-    "mimeType": "text/plain",
+    "uri": "config://eofmcp.config",
+    "name": "config",
+    "description": "File resource | eofmcp.config",
+    "mimeType": "application/json",
     "type": "file",
-    "filePath": "json:config_filePath.txt"
+    "filePath": "file://Users/eofmc/Library/Preferences/EoF MCP Server/eofmcp.config"
 }
 

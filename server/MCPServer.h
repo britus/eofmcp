@@ -19,19 +19,19 @@ class MCPToolsConfig;
 class MCPResourcesConfig;
 class MCPPromptsConfig;
 /**
- * @brief MCP 服务器实现类
+ * @brief MCP Server Implementation Class
  *
- * 职责：
- * - 服务器生命周期管理
- * - 组件初始化协调
- * - 扩展注册接口
- * - 信号槽连接管理
- * - 独立线程运行
+ * Responsibilities:
+ * - Server lifecycle management
+ * - Component initialization coordination
+ * - Extension registration interface
+ * - Signal-slot connection management
+ * - Running in an independent thread
  *
- * 编码规范：
- * - 类成员添加 m_ 前缀
- * - 指针类型添加 p 前缀
- * - { 和 } 要单独一行
+ * Coding standards:
+ * - Add m_ prefix to class members
+ * - Add p prefix to pointer types
+ * - { and } should be on separate lines
  */
 class MCPServer : public IMCPServer
 {
@@ -42,50 +42,50 @@ public:
 
 protected:
     /**
-     * @brief 析构函数（protected，只能通过 destroyServer 销毁）
+     * @brief Destructor (protected, can only be destroyed by destroyServer)
      */
     virtual ~MCPServer();
 
 public:
     /**
-     * @brief 启动服务器
-     * @return 是否启动成功
+     * @brief Start the server
+     * @return Whether startup was successful
      */
     bool start() override;
 
     /**
-     * @brief 停止服务器
+     * @brief Stop the server
      */
     void stop() override;
 
     /**
-     * @brief 是否正在运行
-     * @return true表示正在运行，false表示未运行
+     * @brief Check if the server is running
+     * @return true indicates it's running, false otherwise
      */
     bool isRunning() override;
 
 public:
     /**
-     * @brief 获取配置对象
-     * @return 配置对象指针
+     * @brief Get the configuration object
+     * @return Pointer to the configuration object
      */
     IMCPServerConfig *getConfig() override;
 
     /**
-     * @brief 获取工具服务（返回具体实现类指针，方便内部使用）
-     * @return 工具服务实现类指针
+     * @brief Get the tool service (returns a concrete implementation pointer for internal use)
+     * @return Pointer to the tool service implementation
      */
     MCPToolService *getToolService() override;
 
     /**
-     * @brief 获取资源服务（返回具体实现类指针，方便内部使用）
-     * @return 资源服务实现类指针
+     * @brief Get the resource service (returns a concrete implementation pointer for internal use)
+     * @return Pointer to the resource service implementation
      */
     MCPResourceService *getResourceService() override;
 
     /**
-     * @brief 获取提示词服务（返回具体实现类指针，方便内部使用）
-     * @return 提示词服务实现类指针
+     * @brief Get the prompt service (returns a concrete implementation pointer for internal use)
+     * @return Pointer to the prompt service implementation
      */
     MCPPromptService *getPromptService() override;
 

@@ -1,6 +1,6 @@
 /**
  * @file MCPServerConfig.cpp
- * @brief MCP X服务器配置实现
+ * @brief MCP X server configuration implementation
  * @author zhangheng
  * @date 2025-01-09
  * @copyright Copyright (c) 2025 zhangheng. All rights reserved.
@@ -17,16 +17,16 @@
 #include <QJsonDocument>
 
 // ============================================================================
-// MCPServerConfig 实现
+// MCPServerConfig implementation
 // ============================================================================
 
 MCPServerConfig::MCPServerConfig(QObject *pParent)
     : IMCPServerConfig(pParent)
     , m_nPort(6605)
-    , m_strServerName("C++ MCPServer")
-    , m_strServerTitle("C++ MCP Server Implementation")
+    , m_strServerName("EoF MCP Server")
+    , m_strServerTitle("MCP Server for C++, Java, Qt Instructions")
     , m_strServerVersion("1.0.0")
-    , m_strInstructions(" C++ Qt MCP Instructions")
+    , m_strInstructions("C++ Qt MCP Instructions")
 {}
 
 MCPServerConfig::~MCPServerConfig() {}
@@ -39,7 +39,7 @@ bool MCPServerConfig::loadFromDirectory(const QString &strConfigDir)
         return false;
     }
 
-    // 1. 加载主配置文件 ServerConfig.json
+    // 1. Load main configuration file ServerConfig.json
     QString strServerConfigPath = configDir.absoluteFilePath("eofmc.config");
     if (QFile::exists(strServerConfigPath)) {
         if (!loadFromFile(strServerConfigPath)) {
@@ -50,21 +50,21 @@ bool MCPServerConfig::loadFromDirectory(const QString &strConfigDir)
         MCP_CORE_LOG_INFO() << "MCPServerConfig: loaded from:" << strServerConfigPath;
     }
 
-    // 2. 加载工具配置目录
+    // 2. Load tools configuration directory
     QSharedPointer<MCPToolsConfig> pToolsConfig(new MCPToolsConfig());
     QString strToolsDir = configDir.absoluteFilePath("Tools");
     if (QDir(strToolsDir).exists()) {
         pToolsConfig->loadFromDirectory(strToolsDir);
     }
 
-    // 3. 加载资源配置目录
+    // 3. Load resource configuration directory
     QSharedPointer<MCPResourcesConfig> pResourcesConfig(new MCPResourcesConfig());
     QString strResourcesDir = configDir.absoluteFilePath("Resources");
     if (QDir(strResourcesDir).exists()) {
         pResourcesConfig->loadFromDirectory(strResourcesDir);
     }
 
-    // 4. 加载提示词配置目录
+    // 4. Load prompts configuration directory
     QSharedPointer<MCPPromptsConfig> pPromptsConfig(new MCPPromptsConfig());
     QString strPromptsDir = configDir.absoluteFilePath("Prompts");
     if (QDir(strPromptsDir).exists()) {
@@ -76,7 +76,7 @@ bool MCPServerConfig::loadFromDirectory(const QString &strConfigDir)
                         << "resources:" << pResourcesConfig->getResourceCount()                //
                         << "prompts:" << pPromptsConfig->getPromptCount();
 
-    // 发送配置加载完成信号，传递配置对象
+    // Send configuration loaded signal, passing configuration objects
     emit configLoaded(pToolsConfig, pResourcesConfig, pPromptsConfig);
 
     return true;
@@ -111,10 +111,10 @@ bool MCPServerConfig::loadFromFile(const QString &strFilePath)
 
 bool MCPServerConfig::loadFromJson(const QJsonObject &jsonConfig)
 {
-    // 读取端口
+    // Read port
     m_nPort = static_cast<quint16>(jsonConfig.value("port").toInt(6605));
 
-    // 读取服务器信息
+    // Read server information
     if (jsonConfig.contains("serverInfo")) {
         QJsonObject serverInfo = jsonConfig["serverInfo"].toObject();
         m_strServerName = serverInfo["name"].toString("C++ MCPServer");
@@ -122,7 +122,7 @@ bool MCPServerConfig::loadFromJson(const QJsonObject &jsonConfig)
         m_strServerVersion = serverInfo["version"].toString("1.0.0");
     }
 
-    // 读取使用说明
+    // Read instructions
     if (jsonConfig.contains("instructions")) {
         m_strInstructions = jsonConfig["instructions"].toString();
     }
@@ -159,7 +159,7 @@ QJsonObject MCPServerConfig::toJson() const
     QJsonObject json;
     json["port"] = m_nPort;
 
-    // 导出服务器信息
+    // Export server information
     QJsonObject serverInfo;
     serverInfo["name"] = m_strServerName;
     serverInfo["title"] = m_strServerTitle;

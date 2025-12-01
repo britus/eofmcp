@@ -1,6 +1,6 @@
 /**
  * @file MCPResourceWrapper.h
- * @brief MCP资源包装器（将QObject包装为MCPResource）
+ * @brief MCP resource wrapper (wrapping QObject as MCPResource)
  * @author zhangheng
  * @date 2025-01-09
  * @copyright Copyright (c) 2025 zhangheng. All rights reserved.
@@ -12,26 +12,26 @@
 #include <QMetaMethod>
 
 /**
- * @brief MCP资源包装器
+ * @brief MCP resource wrapper
  * 
- * 职责：
- * - 将任意QObject对象包装为MCPResource
- * - 通过Qt Meta机制动态调用包装对象的方法和信号
- * - 在构造时验证包装对象是否满足最小实现要求
- * - 提供友好的错误处理和验证反馈
+ * Responsibilities:
+ * - Wrap any QObject object as MCPResource
+ * - Dynamically call wrapped object's methods and signals through Qt Meta mechanism
+ * - Validate the wrapped object meets minimum implementation requirements at construction time
+ * - Provide friendly error handling and validation feedback
  * 
- * 包装对象需要提供以下接口：
- * - QJsonObject getMetadata() const;  // slot方法，获取资源元数据
- * - QString getContent() const;        // slot方法，获取资源内容
- * - void changed(const QString&, const QString&, const QString&);  // 信号，通知资源变化
+ * The wrapped object needs to provide the following interface:
+ * - QJsonObject getMetadata() const;  // slot method, get resource metadata
+ * - QString getContent() const;        // slot method, get resource content
+ * - void changed(const QString&, const QString&, const QString&);  // signal, notify resource changes
  * 
- * 使用场景：
- * - 当已有QObject对象实现了资源接口，需要适配为MCPResource时
+ * Use cases:
+ * - When there's an existing QObject that implements the resource interface, and needs to be adapted as MCPResource
  * 
- * 编码规范：
- * - 类成员添加 m_ 前缀
- * - 指针类型添加 p 前缀
- * - { 和 } 要单独一行
+ * Coding conventions:
+ * - Class members add m_ prefix
+ * - Pointer types add p prefix
+ * - { and } should be on separate lines
  */
 class MCPResourceWrapper : public MCPResource
 {
@@ -41,22 +41,22 @@ public:
     virtual ~MCPResourceWrapper();
     
     /**
-     * @brief 静态创建函数，创建一个MCPResourceWrapper对象
-     * @param strUri 资源URI
-     * @param pWrappedObject 要包装的QObject对象指针
-     * @param pParent 父对象
-     * @return 创建的MCPResourceWrapper对象指针，如果pWrappedObject为空或不满足最小要求则返回nullptr
+     * @brief Static creation function, creates an MCPResourceWrapper object
+     * @param strUri Resource URI
+     * @param pWrappedObject Pointer to the QObject object to wrap
+     * @param pParent Parent object
+     * @return Pointer to created MCPResourceWrapper object, returns nullptr if pWrappedObject is null or doesn't meet minimum requirements
      * 
-     * 此函数会自动获取QObject的最小接口元数据（getMetadata、getContent方法，changed信号）
-     * 并进行参数验证，验证通过后调用私有构造函数创建对象
+     * This function will automatically get the minimal interface metadata (getMetadata, getContent methods, changed signal) 
+     * from QObject and perform parameter validation. After passing validation, it calls the private constructor to create the object
      * 
-     * 使用示例：
+     * Usage example:
      * @code
      * QObject* pMyObject = new MyObject();
      * MCPResourceWrapper* pWrapper = MCPResourceWrapper::create("uri://my-resource", pMyObject);
      * if (pWrapper)
      * {
-     *     // 使用包装器（create()已保证对象合法）
+     *     // Use the wrapper (create() guarantees object is valid)
      * }
      * @endcode
      */
@@ -66,75 +66,75 @@ public:
     
 public:
     /**
-     * @brief 读取资源内容（实现基类纯虚函数）
-     * @return 资源内容字符串
+     * @brief Read resource content (implements base class pure virtual function)
+     * @return Resource content string
      * 
-     * 通过Qt Meta机制调用包装对象的getContent()方法
+     * Call the wrapped object's getContent() method through Qt Meta mechanism
      */
     QString readContent() const override;
     
     /**
-     * @brief 获取资源元数据（重写基类方法）
-     * @return 资源元数据对象
+     * @brief Get resource metadata (override base class method)
+     * @return Resource metadata object
      * 
-     * 通过Qt Meta机制调用包装对象的getMetadata()方法
+     * Call the wrapped object's getMetadata() method through Qt Meta mechanism
      */
     QJsonObject getMetadata() const override;
     
     /**
-     * @brief 获取资源注解（Annotations）（重写基类方法）
-     * @return 资源注解对象，包含 audience、priority、lastModified 等字段
+     * @brief Get resource annotations (Annotations) (override base class method)
+     * @return Resource annotation object, containing fields such as audience, priority, lastModified
      * 
-     * 如果包装对象实现了 getAnnotations() 方法，则调用它
-     * 否则返回基类的实现（可能为空对象）
+     * If the wrapped object implements getAnnotations() method, call it
+     * Otherwise return base class implementation (possibly an empty object)
      */
     QJsonObject getAnnotations() const override;
     
     /**
-     * @brief 获取包装对象指针
-     * @return 包装对象指针
+     * @brief Get pointer to wrapped object
+     * @return Pointer to wrapped object
      */
     QObject* getWrappedObject() const;
     
 private:
     /**
-     * @brief 验证changed信号
-     * @param changedSignal 已获取的changed信号QMetaMethod
-     * @param strErrorMessage 输出参数，验证失败时的错误信息
-     * @return 如果验证通过返回true，否则返回false
+     * @brief Validate changed signal
+     * @param changedSignal QMetaMethod of the obtained changed signal
+     * @param strErrorMessage Output parameter, error message when validation fails
+     * @return Returns true if validation passes, otherwise returns false
      */
     static bool validateChangedSignal(const QMetaMethod& changedSignal, QString& strErrorMessage);
     
     /**
-     * @brief 验证getMetadata方法
-     * @param getMetadataMethod 已获取的getMetadata方法QMetaMethod
-     * @param strErrorMessage 输出参数，验证失败时的错误信息
-     * @return 如果验证通过返回true，否则返回false
+     * @brief Validate getMetadata method
+     * @param getMetadataMethod QMetaMethod of the obtained getMetadata method
+     * @param strErrorMessage Output parameter, error message when validation fails
+     * @return Returns true if validation passes, otherwise returns false
      */
     static bool validateGetMetadata(const QMetaMethod& getMetadataMethod, QString& strErrorMessage);
     
     /**
-     * @brief 验证getContent方法
-     * @param getContentMethod 已获取的getContent方法QMetaMethod
-     * @param strErrorMessage 输出参数，验证失败时的错误信息
-     * @return 如果验证通过返回true，否则返回false
+     * @brief Validate getContent method
+     * @param getContentMethod QMetaMethod of the obtained getContent method
+     * @param strErrorMessage Output parameter, error message when validation fails
+     * @return Returns true if validation passes, otherwise returns false
      */
     static bool validateGetContent(const QMetaMethod& getContentMethod, QString& strErrorMessage);
     
     /**
-     * @brief 私有构造函数
-     * @param strUri 资源URI
-     * @param pWrappedObject 要包装的QObject对象指针（必须不为空）
-     * @param changedSignal changed信号的QMetaMethod（必须有效）
-     * @param getMetadata getMetadata方法的QMetaMethod（必须有效）
-     * @param getContent getContent方法的QMetaMethod（必须有效）
-     * @param getAnnotations getAnnotations方法的QMetaMethod（可选，可能无效）
-     * @param pParent 父对象
+     * @brief Private constructor
+     * @param strUri Resource URI
+     * @param pWrappedObject Pointer to the QObject object to wrap (must not be null)
+     * @param changedSignal QMetaMethod of the changed signal (must be valid)
+     * @param getMetadata QMetaMethod of the getMetadata method (must be valid)
+     * @param getContent QMetaMethod of the getContent method (must be valid)
+     * @param getAnnotations QMetaMethod of the getAnnotations method (optional, may be invalid)
+     * @param pParent Parent object
      * 
-     * 注意：
-     * - 此构造函数为私有，只能通过create()静态函数调用
-     * - 构造函数不进行参数验证，假设所有参数都已通过create()验证
-     * - 会从pWrappedObject的getMetadata()方法中获取元数据（name、description、mimeType、annotations）
+     * Note:
+     * - This constructor is private, can only be called by create() static function
+     * - Constructor does not perform parameter validation, assumes all parameters have been validated by create()
+     * - Will get metadata (name, description, mimeType, annotations) from the pWrappedObject's getMetadata() method
      */
     explicit MCPResourceWrapper(const QString& strUri,
                                 QObject* pWrappedObject,
@@ -145,36 +145,36 @@ private:
                                 QObject* pParent = nullptr);
     
     /**
-     * @brief 初始化包装连接
-     * 连接包装对象的changed信号到onWrappedObjectChanged槽
-     * 连接包装对象的destroyed信号到onWrappedObjectDestroyed槽
+     * @brief Initialize wrapper connection
+     * Connects the wrapped object's changed signal to onWrappedObjectChanged slot
+     * Connects the wrapped object's destroyed signal to onWrappedObjectDestroyed slot
      */
     void initWrapperConnection();
     
     /**
-     * @brief 从包装对象获取元数据并更新本地属性
-     * 从包装对象的getMetadata()返回的JSON中提取name、description、mimeType
-     * 如果包装对象实现了getAnnotations()方法，也会提取annotations并设置到基类成员变量中
+     * @brief Get metadata from wrapped object and update local properties
+     * Extract name, description, mimeType from the JSON returned by getMetadata() of wrapped object
+     * If the wrapped object implements getAnnotations() method, also extract annotations and set to base class member variables
      */
     void updatePropertiesFromWrappedObject();
     
 private slots:
     /**
-     * @brief 处理包装对象的changed信号
-     * 当包装对象发出changed信号时，转发为MCPResource的changed信号
+     * @brief Handle changed signal from wrapped object
+     * When the wrapped object emits a changed signal, forward it as MCPResource's changed signal
      */
     void onWrappedObjectChanged(const QString& strName, const QString& strDescription, const QString& strMimeType);
     
     /**
-     * @brief 处理包装对象的destroyed信号
-     * 当包装对象被删除时，发送资源失效信号
+     * @brief Handle destroyed signal from wrapped object
+     * When the wrapped object is deleted, emit resource invalidation signal
      */
     void onWrappedObjectDestroyed();
     
 private:
-    QObject* m_pWrappedObject;        // 包装的QObject对象指针
-    QMetaMethod m_changedSignal;     // changed信号的QMetaMethod
-    QMetaMethod m_getMetadata;       // getMetadata方法的QMetaMethod
-    QMetaMethod m_getContent;        // getContent方法的QMetaMethod
-    QMetaMethod m_getAnnotations;    // getAnnotations方法的QMetaMethod（可选，可能无效）
+    QObject* m_pWrappedObject;        // Pointer to the wrapped QObject object
+    QMetaMethod m_changedSignal;     // QMetaMethod of changed signal
+    QMetaMethod m_getMetadata;       // QMetaMethod of getMetadata method
+    QMetaMethod m_getContent;        // QMetaMethod of getContent method
+    QMetaMethod m_getAnnotations;    // QMetaMethod of getAnnotations method (optional, may be invalid)
 };

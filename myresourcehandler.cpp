@@ -6,7 +6,7 @@
  * @copyright Copyright (c) 2025 zhangheng. All rights reserved.
  */
 #include "myresourcehandler.h"
-#include "IMCPServer.h"
+#include <MCPLog.h>
 #include <QCoreApplication>
 #include <QDateTime>
 #include <QDir>
@@ -46,6 +46,8 @@ MyResourceHandler::MyResourceHandler(const QFileInfo &fileInfo, QObject *pParent
 
         QJsonDocument doc(contentObj);
         QString strNewContent = doc.toJson(QJsonDocument::Compact);
+
+        //MCP_RESOURCE_LOG_DEBUG() << "MyResourceHandler: Update content:" << strNewContent;
 
         // Update content and emit changed signal
         updateContent(strNewContent);

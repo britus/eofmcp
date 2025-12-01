@@ -1,6 +1,6 @@
 /**
  * @file MCPResourceWrapper.cpp
- * @brief MCP资源包装器实现
+ * @brief MCP resource wrapper implementation
  * @author zhangheng
  * @date 2025-01-09
  * @copyright Copyright (c) 2025 zhangheng. All rights reserved.
@@ -26,18 +26,20 @@ MCPResourceWrapper::MCPResourceWrapper(const QString& strUri,
     , m_changedSignal(changedSignal)
     , m_getMetadata(getMetadata)
     , m_getContent(getContent)
-    , m_getAnnotations(getAnnotations)  // 从create()方法传入，可能无效
+    , m_getAnnotations(getAnnotations)  // Passed from create() method, may be invalid
 {
-    // 从包装对象的getMetadata()方法中获取元数据（name、description、mimeType、annotations）
+    // Get metadata (name, description, mimeType, annotations) from the wrapped object's getMetadata() method
     updatePropertiesFromWrappedObject();
 
-    // 初始化包装连接
+    // Initialize wrapper connection
     initWrapperConnection();
 }
+
 
 MCPResourceWrapper::~MCPResourceWrapper()
 {
 }
+
 
 MCPResourceWrapper* MCPResourceWrapper::create(const QString& strUri,
                                                 QObject* pWrappedObject,
@@ -45,58 +47,58 @@ MCPResourceWrapper* MCPResourceWrapper::create(const QString& strUri,
 {
     if (pWrappedObject == nullptr)
     {
-        MCP_CORE_LOG_CRITICAL() << "MCPResourceWrapper::create: 包装对象不能为空";
+        MCP_CORE_LOG_CRITICAL() << "MCPResourceWrapper::create: Wrapped object cannot be null";
         return nullptr;
     }
 
     if (strUri.isEmpty())
     {
-        MCP_CORE_LOG_CRITICAL() << "MCPResourceWrapper::create: URI不能为空";
+        MCP_CORE_LOG_CRITICAL() << "MCPResourceWrapper::create: URI cannot be empty";
         return nullptr;
     }
 
     QString strErrorMessage;
 
-    // 获取changed信号并验证
+    // Get changed signal and validate it
     QMetaMethod changedSignal = MCPMetaObjectHelper::getSignal(pWrappedObject, "changed(QString,QString,QString)");
     if (!changedSignal.isValid())
     {
-        MCP_CORE_LOG_CRITICAL() << "MCPResourceWrapper::create: 缺少changed(QString,QString,QString)信号";
+        MCP_CORE_LOG_CRITICAL() << "MCPResourceWrapper::create: Missing changed(QString,QString,QString) signal";
         return nullptr;
     }
     if (!validateChangedSignal(changedSignal, strErrorMessage))
     {
-        MCP_CORE_LOG_CRITICAL() << "MCPResourceWrapper::create: 包装对象不满足最小实现要求:" << strErrorMessage;
+        MCP_CORE_LOG_CRITICAL() << "MCPResourceWrapper::create: Wrapped object does not meet minimum implementation requirements:" << strErrorMessage;
         return nullptr;
     }
 
-    // 获取getMetadata()方法并验证
+    // Get getMetadata() method and validate it
     QMetaMethod getMetadataMethod = MCPMetaObjectHelper::getMethod(pWrappedObject, "getMetadata()");
     if (!getMetadataMethod.isValid())
     {
-        MCP_CORE_LOG_CRITICAL() << "MCPResourceWrapper::create: 缺少getMetadata()方法";
+        MCP_CORE_LOG_CRITICAL() << "MCPResourceWrapper::create: Missing getMetadata() method";
         return nullptr;
     }
     if (!validateGetMetadata(getMetadataMethod, strErrorMessage))
     {
-        MCP_CORE_LOG_CRITICAL() << "MCPResourceWrapper::create: 包装对象不满足最小实现要求:" << strErrorMessage;
+        MCP_CORE_LOG_CRITICAL() << "MCPResourceWrapper::create: Wrapped object does not meet minimum implementation requirements:" << strErrorMessage;
         return nullptr;
     }
 
-    // 获取getContent()方法并验证
+    // Get getContent() method and validate it
     QMetaMethod getContentMethod = MCPMetaObjectHelper::getMethod(pWrappedObject, "getContent()");
     if (!getContentMethod.isValid())
     {
-        MCP_CORE_LOG_CRITICAL() << "MCPResourceWrapper::create: 缺少getContent()方法";
+        MCP_CORE_LOG_CRITICAL() << "MCPResourceWrapper::create: Missing getContent() method";
         return nullptr;
     }
     if (!validateGetContent(getContentMethod, strErrorMessage))
     {
-        MCP_CORE_LOG_CRITICAL() << "MCPResourceWrapper::create: 包装对象不满足最小实现要求:" << strErrorMessage;
+        MCP_CORE_LOG_CRITICAL() << "MCPResourceWrapper::create: Wrapped object does not meet minimum implementation requirements:" << strErrorMessage;
         return nullptr;
     }
 
-    // 尝试获取getAnnotations()方法（可选）
+    // Try to get getAnnotations() method (optional)
     QMetaMethod getAnnotationsMethod;
     QMetaMethod getAnnotationsMethodCandidate = MCPMetaObjectHelper::getMethod(pWrappedObject, "getAnnotations()");
     if (getAnnotationsMethodCandidate.isValid() &&
@@ -104,10 +106,10 @@ MCPResourceWrapper* MCPResourceWrapper::create(const QString& strUri,
         getAnnotationsMethodCandidate.parameterCount() == 0)
     {
         getAnnotationsMethod = getAnnotationsMethodCandidate;
-        MCP_CORE_LOG_DEBUG() << "MCPResourceWrapper::create: 包装对象支持getAnnotations()方法";
+        MCP_CORE_LOG_DEBUG() << "MCPResourceWrapper::create: Wrapped object supports getAnnotations() method";
     }
 
-    // 所有验证通过，创建对象
+    // All validations passed, create the object
     MCPResourceWrapper* pWrapper = new MCPResourceWrapper(strUri, pWrappedObject,
                                                            changedSignal,
                                                            getMetadataMethod,
@@ -118,19 +120,21 @@ MCPResourceWrapper* MCPResourceWrapper::create(const QString& strUri,
     return pWrapper;
 }
 
+
 QString MCPResourceWrapper::readContent() const
 {
-    // 检查包装对象是否已被删除
+
+    // Check if the wrapped object has been deleted
     if (m_pWrappedObject == nullptr)
     {
-        MCP_CORE_LOG_WARNING() << "MCPResourceWrapper: 包装对象已被删除，无法获取内容";
+        MCP_CORE_LOG_WARNING() << "MCPResourceWrapper: Wrapped object has been deleted, cannot get content";
         return QString();
     }
 
-    // 通过保存的QMetaMethod调用包装对象的getContent()方法
-    // 使用Qt::AutoConnection自动处理线程问题：
-    // - 同线程：使用DirectConnection（直接调用）
-    // - 跨线程：使用QueuedConnection（异步调用，但这里需要返回值，所以使用BlockingQueuedConnection）
+    // Call the wrapped object's getContent() method using the saved QMetaMethod
+    // Use Qt::AutoConnection to handle threading automatically:
+    // - Same thread: use DirectConnection (direct call)
+    // - Cross-thread: use QueuedConnection (asynchronous call, but here we need return value, so using BlockingQueuedConnection)
     QString strContent;
     m_getContent.invoke(m_pWrappedObject,
         QThread::currentThread() == m_pWrappedObject->thread()
@@ -140,27 +144,31 @@ QString MCPResourceWrapper::readContent() const
     return strContent;
 }
 
+
 QObject* MCPResourceWrapper::getWrappedObject() const
 {
+
     return m_pWrappedObject;
 }
 
+
 QJsonObject MCPResourceWrapper::getMetadata() const
 {
-    // 检查包装对象是否已被删除
+
+    // Check if the wrapped object has been deleted
     if (m_pWrappedObject == nullptr)
     {
-        MCP_CORE_LOG_WARNING() << "MCPResourceWrapper: 包装对象已被删除，返回基类元数据";
+        MCP_CORE_LOG_WARNING() << "MCPResourceWrapper: Wrapped object has been deleted, return base metadata";
         return MCPResource::getMetadata();
     }
 
-    // 通过保存的QMetaMethod调用包装对象的getMetadata()方法
-    // 使用Qt::AutoConnection自动处理线程问题：
-    // - 同线程：使用DirectConnection（直接调用）
-    // - 跨线程：使用BlockingQueuedConnection（同步调用以获取返回值）
+    // Call the wrapped object's getMetadata() method using the saved QMetaMethod
+    // Use Qt::AutoConnection to handle threading automatically:
+    // - Same thread: use DirectConnection (direct call)
+    // - Cross-thread: use BlockingQueuedConnection (synchronous call to get return value)
     QJsonObject metadata;
 
-    // 检查是否跨线程
+    // Check if cross-thread
     m_getMetadata.invoke(m_pWrappedObject,
         QThread::currentThread() == m_pWrappedObject->thread()
         ? Qt::DirectConnection
@@ -169,16 +177,18 @@ QJsonObject MCPResourceWrapper::getMetadata() const
     return metadata;
 }
 
+
 QJsonObject MCPResourceWrapper::getAnnotations() const
 {
-    // 检查包装对象是否已被删除
+
+    // Check if the wrapped object has been deleted
     if (m_pWrappedObject == nullptr)
     {
-        MCP_CORE_LOG_WARNING() << "MCPResourceWrapper: 包装对象已被删除，返回基类annotations";
+        MCP_CORE_LOG_WARNING() << "MCPResourceWrapper: Wrapped object has been deleted, return base annotations";
         return MCPResource::getAnnotations();
     }
 
-    // 如果包装对象实现了getAnnotations()方法，则调用它
+    // If the wrapped object implements getAnnotations() method, call it
     if (m_getAnnotations.isValid())
     {
         QJsonObject annotations;
@@ -190,104 +200,114 @@ QJsonObject MCPResourceWrapper::getAnnotations() const
         return annotations;
     }
 
-    // 如果包装对象没有实现getAnnotations()方法，返回基类的实现
+    // If the wrapped object does not implement getAnnotations() method, return base implementation
     return MCPResource::getAnnotations();
 }
 
+
 bool MCPResourceWrapper::validateChangedSignal(const QMetaMethod& changedSignal, QString& strErrorMessage)
 {
+
     if (!changedSignal.isValid())
     {
-        strErrorMessage = "changed信号无效";
+        strErrorMessage = "changed signal is invalid";
         return false;
     }
 
     if (changedSignal.parameterCount() != 3)
     {
-        strErrorMessage = "changed信号必须有3个QString参数";
+        strErrorMessage = "changed signal must have 3 QString parameters";
         return false;
     }
 
-    // 验证参数类型都是QString
+    // Validate parameter types are all QString
     if (changedSignal.parameterType(0) != QMetaType::QString ||
         changedSignal.parameterType(1) != QMetaType::QString ||
         changedSignal.parameterType(2) != QMetaType::QString)
     {
-        strErrorMessage = "changed信号的3个参数都必须是QString类型";
+        strErrorMessage = "all 3 parameters of changed signal must be QString type";
         return false;
     }
 
     return true;
 }
 
+
 bool MCPResourceWrapper::validateGetMetadata(const QMetaMethod& getMetadataMethod, QString& strErrorMessage)
 {
+
     if (!getMetadataMethod.isValid())
     {
-        strErrorMessage = "getMetadata()方法无效";
+        strErrorMessage = "getMetadata() method is invalid";
         return false;
     }
 
     if (getMetadataMethod.returnType() != QMetaType::QJsonObject)
     {
-        strErrorMessage = "getMetadata()方法必须返回QJsonObject类型";
+        strErrorMessage = "getMetadata() method must return QJsonObject type";
         return false;
     }
 
     if (getMetadataMethod.parameterCount() != 0)
     {
-        strErrorMessage = "getMetadata()方法必须无参数";
+        strErrorMessage = "getMetadata() method must have no parameters";
         return false;
     }
 
     return true;
 }
 
+
 bool MCPResourceWrapper::validateGetContent(const QMetaMethod& getContentMethod, QString& strErrorMessage)
 {
+
     if (!getContentMethod.isValid())
     {
-        strErrorMessage = "getContent()方法无效";
+        strErrorMessage = "getContent() method is invalid";
         return false;
     }
 
     if (getContentMethod.returnType() != QMetaType::QString)
     {
-        strErrorMessage = "getContent()方法必须返回QString类型";
+        strErrorMessage = "getContent() method must return QString type";
         return false;
     }
 
     if (getContentMethod.parameterCount() != 0)
     {
-        strErrorMessage = "getContent()方法必须无参数";
+        strErrorMessage = "getContent() method must have no parameters";
         return false;
     }
 
     return true;
 }
 
+
 void MCPResourceWrapper::onWrappedObjectChanged(const QString& strName, const QString& strDescription, const QString& strMimeType)
 {
-    // 检查包装对象是否已被删除（虽然理论上不应该发生，但为了安全起见）
+
+    // Check if the wrapped object has been deleted (theoretically shouldn't happen, but for safety)
     if (m_pWrappedObject == nullptr)
     {
-        MCP_CORE_LOG_WARNING() << "MCPResourceWrapper: 包装对象已被删除，忽略changed信号";
+        MCP_CORE_LOG_WARNING() << "MCPResourceWrapper: Wrapped object has been deleted, ignore changed signal";
         return;
     }
 
-    // 更新本地属性（不触发信号，因为这是从包装对象同步数据）
+    // Update local properties (without emitting signals since this synchronizes data from the wrapped object)
     m_strName = strName;
     m_strDescription = strDescription;
     m_strMimeType = strMimeType;
 
-    // 转发changed信号
+    // Forward changed signal
     emit changed(strName, strDescription, strMimeType);
 }
 
+
 void MCPResourceWrapper::initWrapperConnection()
 {
-    // 使用QMetaObject::connect连接包装对象的changed信号到onWrappedObjectChanged槽
-    // 注意：QObject::connect不能直接使用QMetaMethod，需要使用QMetaObject::connect
+
+    // Use QMetaObject::connect to connect the wrapped object's changed signal to onWrappedObjectChanged slot
+    // Note: QObject::connect cannot directly use QMetaMethod, need to use QMetaObject::connect
     const QMetaObject* pMetaObject = this->metaObject();
     int nSlotIndex = pMetaObject->indexOfSlot("onWrappedObjectChanged(QString,QString,QString)");
 
@@ -299,47 +319,51 @@ void MCPResourceWrapper::initWrapperConnection()
 
         if (!bConnected)
         {
-            MCP_CORE_LOG_WARNING() << "MCPResourceWrapper: 无法连接包装对象的changed()信号";
+            MCP_CORE_LOG_WARNING() << "MCPResourceWrapper: Cannot connect wrapped object's changed() signal";
         }
         else
         {
-            MCP_CORE_LOG_DEBUG() << "MCPResourceWrapper: 已连接包装对象的changed()信号";
+            MCP_CORE_LOG_DEBUG() << "MCPResourceWrapper: Connected wrapped object's changed() signal";
         }
     }
     else
     {
-        MCP_CORE_LOG_WARNING() << "MCPResourceWrapper: 找不到onWrappedObjectChanged槽";
+        MCP_CORE_LOG_WARNING() << "MCPResourceWrapper: Cannot find onWrappedObjectChanged slot";
     }
 
-    // 连接包装对象的destroyed信号到onWrappedObjectDestroyed槽
-    // 当包装对象被删除时，自动发送资源失效信号
+    // Connect the wrapped object's destroyed signal to onWrappedObjectDestroyed slot
+    // When the wrapped object is deleted, automatically emit resource invalidation signal
     bool bConnected = QObject::connect(m_pWrappedObject, &QObject::destroyed,
                                       this, &MCPResourceWrapper::onWrappedObjectDestroyed);
 
     if (!bConnected)
     {
-        MCP_CORE_LOG_WARNING() << "MCPResourceWrapper: 无法连接包装对象的destroyed()信号";
+        MCP_CORE_LOG_WARNING() << "MCPResourceWrapper: Cannot connect wrapped object's destroyed() signal";
     }
     else
     {
-        MCP_CORE_LOG_DEBUG() << "MCPResourceWrapper: 已连接包装对象的destroyed()信号";
+        MCP_CORE_LOG_DEBUG() << "MCPResourceWrapper: Connected wrapped object's destroyed() signal";
     }
 }
 
+
 void MCPResourceWrapper::onWrappedObjectDestroyed()
 {
-    // 包装对象已被删除，清空指针并发送失效信号
-    MCP_CORE_LOG_WARNING() << "MCPResourceWrapper: 包装对象已被删除，资源失效:" << getUri();
+
+    // The wrapped object has been deleted, clear the pointer and send invalidation signal
+    MCP_CORE_LOG_WARNING() << "MCPResourceWrapper: Wrapped object has been deleted, resource invalidated:" << getUri();
     m_pWrappedObject = nullptr;
     notifyInvalidated();
 }
 
+
 void MCPResourceWrapper::updatePropertiesFromWrappedObject()
 {
-    // 获取包装对象的元数据
+
+    // Get metadata from wrapped object
     QJsonObject metadata = getMetadata(); // Calls the overridden getMetadata, which gets from wrapped object
 
-    // 更新本地属性（不触发信号，因为这是从包装对象同步数据）
+    // Update local properties (without emitting signals since this synchronizes data from the wrapped object)
     if (metadata.contains("name"))
     {
         m_strName = metadata["name"].toString();
@@ -355,15 +379,15 @@ void MCPResourceWrapper::updatePropertiesFromWrappedObject()
         m_strMimeType = metadata["mimeType"].toString();
     }
 
-    // 提取 annotations（如果存在）
-    // 优先从 metadata 中的 annotations 字段获取
+    // Extract annotations (if present)
+    // Prefer to get from the annotations field in metadata
     if (metadata.contains("annotations") && metadata["annotations"].isObject())
     {
         QJsonObject annotations = metadata["annotations"].toObject();
         setAnnotations(annotations);
     }
-    // 如果 metadata 中没有 annotations，直接调用 getAnnotations() 方法
-    // getAnnotations() 会自动处理：如果包装对象实现了就调用它，否则返回基类实现
+    // If metadata doesn't contain annotations, directly call getAnnotations() method
+    // getAnnotations() will automatically handle: if the wrapped object implements it, call it; otherwise return base implementation
     else
     {
         QJsonObject annotations = getAnnotations();

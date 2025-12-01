@@ -1,6 +1,6 @@
 /**
  * @file MCPResourceNotificationHandler.cpp
- * @brief MCP资源通知处理器实现
+ * @brief MCP resource notification handler implementation
  * @author zhangheng
  * @date 2025-01-09
  * @copyright Copyright (c) 2025 zhangheng. All rights reserved.
@@ -20,37 +20,37 @@ MCPResourceNotificationHandler::~MCPResourceNotificationHandler() {}
 
 void MCPResourceNotificationHandler::onResourceContentChanged(const QString &strUri)
 {
-    //MCP_CORE_LOG_INFO() << "MCPResourceNotificationHandler: 资源内容变化，通知订阅者:" << strUri;
+    MCP_CORE_LOG_INFO() << "MCPResourceNotificationHandler: Resource content changed, notify subscribers:" << strUri;
 
-    // 获取订阅该URI的所有会话ID
+    // Get all session IDs subscribed to this URI
     auto pResourceService = m_pServer->getResourceService();
     QSet<QString> lstSubscribedSessionIds = pResourceService->getSubscribedSessionIds(strUri);
     if (lstSubscribedSessionIds.isEmpty()) {
-        MCP_CORE_LOG_DEBUG() << "MCPResourceNotificationHandler: URI没有订阅者:" << strUri;
+        MCP_CORE_LOG_DEBUG() << "MCPResourceNotificationHandler: URI has no subscribers:" << strUri;
         return;
     }
 
-    // 读取资源内容和元数据
+    // Read resource content and metadata
     QJsonObject resourceInfo = pResourceService->readResource(strUri);
-    // 获取资源元数据（name、description、mimeType）
+    // Get resource metadata (name, description, mimeType)
     auto pResource = pResourceService->getResource(strUri);
     QJsonObject metadata = pResource->getMetadata();
     resourceInfo["name"] = metadata["name"];
     resourceInfo["description"] = metadata["description"];
     resourceInfo["mimeType"] = metadata["mimeType"];
 
-    // 构建通知参数
+    // Build notification parameters
     QJsonObject params;
     params["uri"] = strUri;
     QJsonObject resourceData;
     resourceData["resource"] = resourceInfo;
     params["data"] = resourceData;
 
-    // 发送通知到订阅者
-    // 根据 MCP 协议规范，资源更新通知方法名是 "notifications/resources/updated"
+    // Send notification to subscribers
+    // According to MCP protocol specification, the method name for resource update notifications is "notifications/resources/updated"
     sendNotificationToSubscribers("notifications/resources/updated", params, lstSubscribedSessionIds);
 
-    //MCP_CORE_LOG_INFO() << "MCPResourceNotificationHandler: URI" << strUri << "的内容变化通知已处理，共" << lstSubscribedSessionIds.size() << "个订阅者";
+    MCP_CORE_LOG_INFO() << "MCPResourceNotificationHandler: URI" << strUri << "'s content change notification has been processed, total" << lstSubscribedSessionIds.size() << "subscribers";
 }
 
 void MCPResourceNotificationHandler::onResourceDeleted(const QString &strUri)
@@ -61,44 +61,44 @@ void MCPResourceNotificationHandler::onResourceDeleted(const QString &strUri)
 
     auto pResourceService = m_pServer->getResourceService();
 
-    MCP_CORE_LOG_INFO() << "MCPResourceNotificationHandler: 资源删除，通知订阅者:" << strUri;
+    MCP_CORE_LOG_INFO() << "MCPResourceNotificationHandler: Resource deleted, notify subscribers:" << strUri;
 
-    // 获取订阅该URI的所有会话ID
+    // Get all session IDs subscribed to this URI
     QSet<QString> subscribedSessionIds = pResourceService->getSubscribedSessionIds(strUri);
     if (subscribedSessionIds.isEmpty()) {
-        MCP_CORE_LOG_DEBUG() << "MCPResourceNotificationHandler: URI没有订阅者:" << strUri;
+        MCP_CORE_LOG_DEBUG() << "MCPResourceNotificationHandler: URI has no subscribers:" << strUri;
         return;
     }
 
-    // 构建删除通知参数
+    // Build deletion notification parameters
     QJsonObject params;
     params["uri"] = strUri;
     QJsonObject resourceData;
     resourceData["deleted"] = true;
     params["data"] = resourceData;
 
-    // 发送通知到订阅者
-    // 根据 MCP 协议规范，资源更新通知方法名是 "notifications/resources/updated"
+    // Send notification to subscribers
+    // According to MCP protocol specification, the method name for resource update notifications is "notifications/resources/updated"
     sendNotificationToSubscribers("notifications/resources/updated", params, subscribedSessionIds);
 
-    MCP_CORE_LOG_INFO() << "MCPResourceNotificationHandler: URI" << strUri << "的删除通知已处理，共" << subscribedSessionIds.size() << "个订阅者";
+    MCP_CORE_LOG_INFO() << "MCPResourceNotificationHandler: URI" << strUri << "'s deletion notification has been processed, total" << subscribedSessionIds.size() << "subscribers";
 }
 
 void MCPResourceNotificationHandler::onResourcesListChanged()
 {
     auto pResourceService = m_pServer->getResourceService();
 
-    MCP_CORE_LOG_INFO() << "MCPResourceNotificationHandler: 资源列表变化，向所有客户端发送通知";
+    MCP_CORE_LOG_INFO() << "MCPResourceNotificationHandler: Resource list changed, send notification to all clients";
 
-    // 获取最新的资源列表
+    // Get the latest resource list
     QJsonArray arrResources = pResourceService->list();
 
-    // 构建通知参数
+    // Build notification parameters
     QJsonObject params;
     params["resources"] = arrResources;
 
-    // 广播通知
+    // Broadcast notification
     broadcastNotification("notifications/resources/list_changed", params);
 
-    MCP_CORE_LOG_INFO() << "MCPResourceNotificationHandler: 资源列表变化通知处理完成";
+    MCP_CORE_LOG_INFO() << "MCPResourceNotificationHandler: Resource list change notification processing completed";
 }

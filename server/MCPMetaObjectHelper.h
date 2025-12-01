@@ -1,6 +1,6 @@
 /**
  * @file MCPMetaObjectHelper.h
- * @brief MCP元对象助手类（提供QObject元对象操作的通用工具）
+ * @brief MCP Meta Object Helper class (Provides通用 tools for QObject meta object operations)
  * @author zhangheng
  * @date 2025-01-09
  * @copyright Copyright (c) 2025 zhangheng. All rights reserved.
@@ -14,30 +14,30 @@
 #include <QJsonObject>
 
 /**
- * @brief MCP元对象助手类
+ * @brief MCP Meta Object Helper class
  * 
- * 职责：
- * - 提供QObject元对象的通用操作工具
- * - 查找和获取信号、方法、属性等元对象信息
- * - 通过Qt Meta机制调用对象的方法
- * - 提供统一的错误处理和日志记录
+ * Responsibilities:
+ * - Provide generic operation tools for QObject meta objects
+ * - Find and retrieve meta object information such as signals, methods, and properties
+ * - Invoke object methods through Qt Meta mechanism
+ * - Provide unified error handling and logging
  * 
- * 编码规范：
- * - 类成员添加 m_ 前缀
- * - 指针类型添加 p 前缀
- * - 字符串类型添加 str 前缀
- * - { 和 } 要单独一行
+ * Coding conventions:
+ * - Class members add m_ prefix
+ * - Pointer types add p prefix
+ * - String types add str prefix
+ * - { and } should be on separate lines
  */
 class MCPMetaObjectHelper
 {
 public:
     /**
-     * @brief 获取指定QObject的信号
-     * @param pObject QObject对象指针
-     * @param strSignalSignature 信号签名（如 "changed()"）
-     * @return 信号的QMetaMethod，如果不存在或对象为空则返回无效的QMetaMethod
+     * @brief Get signal of specified QObject
+     * @param pObject QObject object pointer
+     * @param strSignalSignature Signal signature (e.g., "changed()")
+     * @return QMetaMethod of the signal, returns invalid QMetaMethod if not found or object is null
      * 
-     * 使用示例：
+     * Usage example:
      * @code
      * QObject* pMyObject = new MyObject();
      * QMetaMethod changedSignal = MCPMetaObjectHelper::getSignal(pMyObject, "changed()");
@@ -50,84 +50,83 @@ public:
     static QMetaMethod getSignal(QObject* pObject, const QString& strSignalSignature);
     
     /**
-     * @brief 获取指定QObject的方法（slot或method）
-     * @param pObject QObject对象指针
-     * @param strMethodSignature 方法签名（如 "getContent()"）
-     * @return 方法的QMetaMethod，如果不存在或对象为空则返回无效的QMetaMethod
+     * @brief Get method (slot or method) of specified QObject
+     * @param pObject QObject object pointer
+     * @param strMethodSignature Method signature (e.g., "getContent()")
+     * @return QMetaMethod of the method, returns invalid QMetaMethod if not found or object is null
      * 
-     * 使用示例：
+     * Usage example:
      * @code
      * QObject* pMyObject = new MyObject();
      * QMetaMethod getContentMethod = MCPMetaObjectHelper::getMethod(pMyObject, "getContent()");
      * if (getContentMethod.isValid())
      * {
-     *     // 使用方法
+     *     // Use method
      * }
      * @endcode
      */
     static QMetaMethod getMethod(QObject* pObject, const QString& strMethodSignature);
     
     /**
-     * @brief 检查QObject是否有指定的信号
-     * @param pObject QObject对象指针
-     * @param strSignalSignature 信号签名（如 "changed()"）
-     * @return 如果存在返回true，否则返回false
+     * @brief Check if QObject has specified signal
+     * @param pObject QObject object pointer
+     * @param strSignalSignature Signal signature (e.g., "changed()")
+     * @return Returns true if exists, otherwise false
      */
     static bool hasSignal(QObject* pObject, const QString& strSignalSignature);
     
     /**
-     * @brief 检查QObject是否有指定的方法（slot或method）
-     * @param pObject QObject对象指针
-     * @param strMethodSignature 方法签名（如 "getContent()"）
-     * @return 如果存在返回true，否则返回false
+     * @brief Check if QObject has specified method (slot or method)
+     * @param pObject QObject object pointer
+     * @param strMethodSignature Method signature (e.g., "getContent()")
+     * @return Returns true if exists, otherwise false
      */
     static bool hasMethod(QObject* pObject, const QString& strMethodSignature);
     
     /**
-     * @brief 检查QObject是否有指定名称和返回类型的slot方法
-     * @param pObject QObject对象指针
-     * @param strMethodName 方法名（不含参数，如 "getContent"）
-     * @param nReturnType 返回类型（QMetaType类型）
-     * @return 如果存在返回true，否则返回false
+     * @brief Check if QObject has slot method with specified name and return type
+     * @param pObject QObject object pointer
+     * @param strMethodName Method name (without parameters, e.g., "getContent")
+     * @param nReturnType Return type (QMetaType type)
+     * @return Returns true if exists, otherwise false
      */
     static bool hasSlot(QObject* pObject, const QString& strMethodName, int nReturnType);
     
     /**
-     * @brief 通过Qt Meta机制调用对象的方法（无返回值）
-     * @param pObject QObject对象指针
-     * @param strMethodName 方法名
-     * @return 如果调用成功返回true，否则返回false
+     * @brief Invoke object method through Qt Meta mechanism (no return value)
+     * @param pObject QObject object pointer
+     * @param strMethodName Method name
+     * @return Returns true if invocation successful, otherwise false
      */
     static bool invokeMethod(QObject* pObject, const QString& strMethodName);
     
     /**
-     * @brief 通过Qt Meta机制调用对象的方法（返回QString）
-     * @param pObject QObject对象指针
-     * @param strMethodName 方法名
-     * @param strResult 输出参数，方法返回值
-     * @return 如果调用成功返回true，否则返回false
+     * @brief Invoke object method through Qt Meta mechanism (returns QString)
+     * @param pObject QObject object pointer
+     * @param strMethodName Method name
+     * @param strResult Output parameter, method return value
+     * @return Returns true if invocation successful, otherwise false
      */
     static bool invokeMethod(QObject* pObject, const QString& strMethodName, QString& strResult);
     
     /**
-     * @brief 通过Qt Meta机制调用对象的方法（返回QJsonObject）
-     * @param pObject QObject对象指针
-     * @param strMethodName 方法名
-     * @param objResult 输出参数，方法返回值
-     * @return 如果调用成功返回true，否则返回false
+     * @brief Invoke object method through Qt Meta mechanism (returns QJsonObject)
+     * @param pObject QObject object pointer
+     * @param strMethodName Method name
+     * @param objResult Output parameter, method return value
+     * @return Returns true if invocation successful, otherwise false
      */
     static bool invokeMethod(QObject* pObject, const QString& strMethodName, QJsonObject& objResult);
     
     /**
-     * @brief 获取QObject的元对象
-     * @param pObject QObject对象指针
-     * @return 元对象指针，如果对象为空则返回nullptr
+     * @brief Get meta object of QObject
+     * @param pObject QObject object pointer
+     * @return Meta object pointer, returns nullptr if object is null
      */
     static const QMetaObject* getMetaObject(QObject* pObject);
 
 private:
-    // 禁止实例化，所有方法都是静态的
+    // Disable instantiation, all methods are static
     MCPMetaObjectHelper() = delete;
     ~MCPMetaObjectHelper() = delete;
 };
-

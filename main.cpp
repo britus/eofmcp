@@ -109,6 +109,7 @@ static inline void createResources(QObjectList *handlers, const QDir &projectDir
         } else {
             foreach (const QString &strExt, strExtensions) {
                 if (fileInfo.suffix() == strExt.mid(1)) { // skip dot
+                    //MCP_RESOURCE_LOG_DEBUG() << "[MAIN-RES] Register resource:" << fileInfo.absoluteFilePath();
                     handlers->append(new MyResourceHandler(fileInfo, qApp));
                     break;
                 }

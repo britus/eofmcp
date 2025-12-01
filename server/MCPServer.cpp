@@ -1,6 +1,6 @@
 /**
- * @file MCPXServer.cpp
- * @brief MCP X服务器实现
+ * @file MCPServer.cpp
+ * @brief MCP X Server Implementation
  * @author zhangheng
  * @date 2025-01-01
  * @copyright Copyright (c) 2025 zhangheng. All rights reserved.
@@ -64,28 +64,28 @@ MCPServer::MCPServer(QObject *pParent)
         dir.mkpath(logDir, permissions);
     }
 
-    // 初始化模块日志系统
+    // Initialize module logging system
     QString logFile = dir.absoluteFilePath("mcpserver.log");
     MCPLog::instance()->initialize(logFile, LogLevel::Debug, true);
 
-    // 创建业务处理器，负责消息处理和业务逻辑（内部会创建请求调度器）
+    // Create business handler, responsible for message processing and business logic (internally creates request dispatcher)
     m_pHandler = new MCPServerHandler(this, this);
 
-    // 连接传输层的消息接收信号到业务处理器
+    // Connect transport layer's message received signal to business handler
     QObject::connect(m_pTransport, &IMCPTransport::messageReceived, m_pHandler, &MCPServerHandler::onClientMessageReceived);
 
-    // 连接资源服务的信号到业务处理器（MCPServerHandler内部会转发到对应的子Handler）
+    // Connect resource service's signal to business handler (MCPServerHandler internally forwards to corresponding sub-Handler)
     QObject::connect(m_pResourceService, &MCPResourceService::resourceContentChanged, m_pHandler, &MCPServerHandler::onResourceContentChanged);
     QObject::connect(m_pResourceService, &MCPResourceService::resourcesListChanged, m_pHandler, &MCPServerHandler::onResourcesListChanged);
     QObject::connect(m_pResourceService, &MCPResourceService::resourceDeleted, m_pHandler, &MCPServerHandler::onResourceDeleted);
 
-    // 连接工具服务的信号到业务处理器（MCPServerHandler内部会转发到对应的子Handler）
+    // Connect tool service's signal to business handler (MCPServerHandler internally forwards to corresponding sub-Handler)
     QObject::connect(m_pToolService, &MCPToolService::toolsListChanged, m_pHandler, &MCPServerHandler::onToolsListChanged);
 
-    // 连接提示词服务的信号到业务处理器（MCPServerHandler内部会转发到对应的子Handler）
+    // Connect prompt service's signal to business handler (MCPServerHandler internally forwards to corresponding sub-Handler)
     QObject::connect(m_pPromptService, &MCPPromptService::promptsListChanged, m_pHandler, &MCPServerHandler::onPromptsListChanged);
 
-    // 连接配置加载完成信号到配置应用槽（传递配置数据）
+    // Connect configuration loaded signal to config application slot
     QObject::connect(m_pConfig, &MCPServerConfig::configLoaded, this, &MCPServer::onConfigLoaded);
 
     m_pThread->setObjectName("MCPServer-WorkerThread");
@@ -103,12 +103,12 @@ MCPServer::~MCPServer()
 
 bool MCPServer::start()
 {
-    // 如果线程已经在运行，直接调用 doStart
+    // If thread is already running, directly call doStart
     if (!m_pThread->isRunning()) {
-        // 启动工作线程
+        // Start worker thread
         moveToThread(m_pThread);
         m_pThread->start();
-        // 在工作线程中启动服务器
+        // Start server in worker thread
         MCPInvokeHelper::asynInvoke(this, [this]() { doStart(); });
     }
     return true;
@@ -161,7 +161,7 @@ MCPSessionService *MCPServer::getSessionService() const
 
 bool MCPServer::doStart()
 {
-    // 启动传输层
+    // Start transport layer
     auto nPort = m_pConfig->getPort();
     if (!m_pTransport->start(nPort)) {
         MCP_CORE_LOG_WARNING() << "MCPServer: doStart error";
@@ -183,20 +183,27 @@ bool MCPServer::initServer(QSharedPointer<MCPToolsConfig> pToolsConfig, QSharedP
 {
     Q_UNUSED(pResourcesConfig);
 
-    // 预先解析所有Handlers（一次性解析，避免重复遍历对象树）
+    // Pre-resolve all Handlers (one-time resolution to avoid repeated traversal of object tree)
     QMap<QString, QObject *> dictHandlers = MCPHandlerResolver::resolveDefaultHandlers();
 
-    // 1. 应用工具配置
+    // 1. Apply tool configuration
     if (pToolsConfig != nullptr) {
-        for (const auto &toolConfig : pToolsConfig->getTools()) {
-            m_pToolService->addFromConfig(toolConfig, dictHandlers);
+        for (const auto &config : pToolsConfig->getTools()) {
+            m_pToolService->addFromConfig(config, dictHandlers);
         }
     }
 
-    // 3. 应用提示词配置
+    // 2. Apply resource configuration
+    if (pResourcesConfig != nullptr) {
+        for (const auto &config : pResourcesConfig->getResources()) {
+            m_pResourceService->addFromConfig(config, dictHandlers);
+        }
+    }
+
+    // 3. Apply prompt configuration
     if (pPromptsConfig != nullptr) {
-        for (const auto &promptConfig : pPromptsConfig->getPrompts()) {
-            m_pPromptService->addFromConfig(promptConfig);
+        for (const auto &config : pPromptsConfig->getPrompts()) {
+            m_pPromptService->addFromConfig(config);
         }
     }
     return true;
@@ -204,11 +211,11 @@ bool MCPServer::initServer(QSharedPointer<MCPToolsConfig> pToolsConfig, QSharedP
 
 void MCPServer::onThreadReady()
 {
-    // 空实现，仅用于确保工作线程事件循环已启动
+    // Empty implementation, only used to ensure worker thread event loop is started
 }
 
 void MCPServer::onConfigLoaded(QSharedPointer<MCPToolsConfig> pToolsConfig, QSharedPointer<MCPResourcesConfig> pResourcesConfig, QSharedPointer<MCPPromptsConfig> pPromptsConfig)
 {
-    // 配置加载完成，应用配置
+    // Configuration loaded, apply configuration
     initServer(pToolsConfig, pResourcesConfig, pPromptsConfig);
 }

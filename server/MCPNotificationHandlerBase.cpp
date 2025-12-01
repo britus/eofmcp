@@ -33,7 +33,7 @@ void MCPNotificationHandlerBase::broadcastNotification(const QString &strMethod,
     notification["params"] = objParams;
 
     // 遍历所有会话，根据传输类型决定处理方式
-    for (const auto &pSession : allSessions) {
+    foreach (const auto &pSession, allSessions) {
         if (pSession == nullptr) {
             continue;
         }

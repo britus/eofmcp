@@ -1,6 +1,6 @@
 /**
  * @file IMCPTransport.h
- * @brief MCP传输层抽象接口
+ * @brief MCP transport layer abstract interface
  * @author zhangheng
  * @date 2025-01-09
  * @copyright Copyright (c) 2025 zhangheng. All rights reserved.
@@ -13,22 +13,22 @@
 class MCPMessage;
 
 /**
- * @brief MCP传输层抽象接口
+ * @brief MCP transport layer abstract interface
  * 
- * 职责：
- * - 定义传输层的通用行为
- * - 支持多种传输实现（HTTP、WebSocket、Stdio等）
- * - 提供统一的消息收发接口
+ * Responsibilities:
+ * - Define common behaviors of the transport layer
+ * - Support multiple transport implementations (HTTP, WebSocket, Stdio, etc.)
+ * - Provide unified message sending and receiving interface
  * 
- * 设计说明：
- * - 继承QObject以支持信号槽机制
- * - 具体实现通过适配器模式聚合底层传输类，避免菱形继承
- * - 所有方法使用纯虚函数，由子类实现
+ * Design notes:
+ * - Inherit QObject to support signal-slot mechanism
+ * - Specific implementations aggregate underlying transport classes through adapter pattern to avoid diamond inheritance
+ * - All methods use pure virtual functions, implemented by subclasses
  * 
- * 编码规范：
- * - 接口方法使用纯虚函数
- * - 参数命名遵循项目规范（n前缀表示数值、p前缀表示指针、str前缀表示字符串）
- * - { 和 } 单独一行
+ * Coding standards:
+ * - Interface methods use pure virtual functions
+ * - Parameter naming follows project conventions (n prefix for numeric, p prefix for pointers, str prefix for strings)
+ * - { and } on separate lines
  */
 class IMCPTransport : public QObject
 {
@@ -39,49 +39,48 @@ public:
     virtual ~IMCPTransport() {}
     
     /**
-     * @brief 启动传输层
-     * @param nPort 监听端口号（对于网络传输）
-     * @return true表示启动成功，false表示启动失败
+     * @brief Start the transport layer
+     * @param nPort Listening port number (for network transport)
+     * @return true if successfully started, false if failed to start
      */
     virtual bool start(quint16 nPort = 8888) = 0;
     
     /**
-     * @brief 停止传输层
-     * @return true表示停止成功，false表示停止失败
+     * @brief Stop the transport layer
+     * @return true if successfully stopped, false if failed to stop
      */
     virtual bool stop() = 0;
     
     /**
-     * @brief 是否正在运行
-     * @return true表示正在运行，false表示未运行
+     * @brief Check if running
+     * @return true if running, false if not running
      */
     virtual bool isRunning() = 0;
     /**
-     * @brief 发送消息
-     * @param nConnectionId 连接ID
-     * @param pMessage 消息对象指针
+     * @brief Send message
+     * @param nConnectionId Connection ID
+     * @param pMessage Message object pointer
      */
     virtual void sendMessage(quint64 nConnectionId, QSharedPointer<MCPMessage> pMessage) = 0;
     
     /**
-     * @brief 发送消息后关闭连接
-     * @param nConnectionId 连接ID
-     * @param pMessage 消息对象指针
+     * @brief Send message and close connection
+     * @param nConnectionId Connection ID
+     * @param pMessage Message object pointer
      */
     virtual void sendCloseMessage(quint64 nConnectionId, QSharedPointer<MCPMessage> pMessage) = 0;
-    
+
 signals:
     /**
-     * @brief 收到消息信号
-     * @param nConnectionId 连接ID
-     * @param pMessage 消息对象指针
+     * @brief Message received signal
+     * @param nConnectionId Connection ID
+     * @param pMessage Message object pointer
      */
     void messageReceived(quint64 nConnectionId, const QSharedPointer<MCPMessage>& pMessage);
 
     /**
-     * @brief 连接断开信号
-     * @param nConnectionId 连接ID
+     * @brief Connection disconnected signal
+     * @param nConnectionId Connection ID
      */
     void connectionDisconnected(quint64 nConnectionId);
 };
-

@@ -1,6 +1,6 @@
 /**
  * @file MCPResourcesConfig.h
- * @brief MCP资源配置类
+ * @brief MCP resource configuration class
  * @author zhangheng
  * @date 2025-01-09
  * @copyright Copyright (c) 2025 zhangheng. All rights reserved.
@@ -14,21 +14,21 @@
 #include <QList>
 
 /**
- * @brief 资源配置结构
+ * @brief Resource configuration structure
  */
 struct MCPResourceConfig
 {
-    QString strUri;           // 资源URI
-    QString strName;          // 资源名称
-    QString strDescription;   // 资源描述
-    QString strMimeType;      // MIME类型
-    QString strType;          // 资源类型："file"（文件资源）、"wrapper"（包装资源）、"content"（内容资源，默认）
-    QString strContent;       // 静态内容（可选，用于content类型）
-    QString strFilePath;      // 文件路径（可选，用于file类型）
-    QString strHandlerName;  // Handler名称（可选，用于wrapper类型，通过MCPResourceHandlerName属性查找QObject）
+    QString strUri;           // Resource URI
+    QString strName;          // Resource name
+    QString strDescription;   // Resource description
+    QString strMimeType;      // MIME type
+    QString strType;          // Resource type: "file" (file resource), "wrapper" (wrapper resource), "content" (content resource, default)
+    QString strContent;       // Static content (optional, for content type)
+    QString strFilePath;      // File path (optional, for file type)
+    QString strHandlerName;  // Handler name (optional, for wrapper type, found by MCPResourceHandlerName property in QObject)
     
-    // 资源注解（Annotations），根据 MCP 协议规范，可选
-    QJsonObject annotations;   // 包含 audience、priority、lastModified 等字段
+    // Resource annotations (Annotations), optional according to MCP protocol specification
+    QJsonObject annotations;   // Contains fields such as audience, priority, lastModified
     
     MCPResourceConfig() : strMimeType("text/plain"), strType("content") {}
     
@@ -36,17 +36,18 @@ struct MCPResourceConfig
     static MCPResourceConfig fromJson(const QJsonObject& json);
 };
 
+
 /**
- * @brief MCP资源配置类
+ * @brief MCP resource configuration class
  * 
- * 职责：
- * - 管理资源配置列表
- * - 从目录加载多个资源配置文件
+ * Responsibilities:
+ * - Manage resource configuration list
+ * - Load multiple resource configuration files from directory
  * 
- * 编码规范：
- * - 类成员添加 m_ 前缀
- * - 字符串类型添加 str 前缀
- * - { 和 } 要单独一行
+ * Coding conventions:
+ * - Add m_ prefix to class members
+ * - Add str prefix to string types
+ * - { and } should be on separate lines
  */
 class MCPResourcesConfig : public QObject
 {
@@ -65,13 +66,12 @@ public:
     QJsonArray toJson() const;
     
     /**
-     * @brief 从目录加载所有资源配置文件
-     * @param strDirPath 资源配置目录路径
-     * @return 成功加载的资源数量
+     * @brief Load all resource configuration files from directory
+     * @param strDirPath Resource configuration directory path
+     * @return Number of successfully loaded resources
      */
     int loadFromDirectory(const QString& strDirPath);
 
 private:
     QList<MCPResourceConfig> m_listResourceConfigs;
 };
-

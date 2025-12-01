@@ -1,6 +1,6 @@
 /**
  * @file MCPMetaObjectHelper.cpp
- * @brief MCP元对象助手类实现
+ * @brief MCP Meta Object Helper class implementation
  * @author zhangheng
  * @date 2025-01-09
  * @copyright Copyright (c) 2025 zhangheng. All rights reserved.
@@ -13,19 +13,19 @@
 QMetaMethod MCPMetaObjectHelper::getSignal(QObject *pObject, const QString &strSignalSignature)
 {
     if (pObject == nullptr) {
-        MCP_CORE_LOG_WARNING() << "MCPMetaObjectHelper::getSignal: 对象指针为空";
+        MCP_CORE_LOG_WARNING() << "MCPMetaObjectHelper::getSignal: Object pointer is null";
         return QMetaMethod();
     }
 
     const QMetaObject *pMetaObject = pObject->metaObject();
     if (pMetaObject == nullptr) {
-        MCP_CORE_LOG_WARNING() << "MCPMetaObjectHelper::getSignal: 无法获取对象的元对象信息";
+        MCP_CORE_LOG_WARNING() << "MCPMetaObjectHelper::getSignal: Cannot get object's meta object information";
         return QMetaMethod();
     }
 
     int nSignalIndex = pMetaObject->indexOfSignal(strSignalSignature.toUtf8().constData());
     if (nSignalIndex < 0) {
-        MCP_CORE_LOG_DEBUG() << "MCPMetaObjectHelper::getSignal: 对象没有信号:" << strSignalSignature;
+        MCP_CORE_LOG_DEBUG() << "MCPMetaObjectHelper::getSignal: Object has no signal:" << strSignalSignature;
         return QMetaMethod();
     }
 
@@ -35,19 +35,19 @@ QMetaMethod MCPMetaObjectHelper::getSignal(QObject *pObject, const QString &strS
 QMetaMethod MCPMetaObjectHelper::getMethod(QObject *pObject, const QString &strMethodSignature)
 {
     if (pObject == nullptr) {
-        MCP_CORE_LOG_WARNING() << "MCPMetaObjectHelper::getMethod: 对象指针为空";
+        MCP_CORE_LOG_WARNING() << "MCPMetaObjectHelper::getMethod: Object pointer is null";
         return QMetaMethod();
     }
 
     const QMetaObject *pMetaObject = pObject->metaObject();
     if (pMetaObject == nullptr) {
-        MCP_CORE_LOG_WARNING() << "MCPMetaObjectHelper::getMethod: 无法获取对象的元对象信息";
+        MCP_CORE_LOG_WARNING() << "MCPMetaObjectHelper::getMethod: Cannot get object's meta object information";
         return QMetaMethod();
     }
 
     int nMethodIndex = pMetaObject->indexOfMethod(strMethodSignature.toUtf8().constData());
     if (nMethodIndex < 0) {
-        MCP_CORE_LOG_DEBUG() << "MCPMetaObjectHelper::getMethod: 对象没有方法:" << strMethodSignature;
+        MCP_CORE_LOG_DEBUG() << "MCPMetaObjectHelper::getMethod: Object has no method:" << strMethodSignature;
         return QMetaMethod();
     }
 
@@ -77,7 +77,7 @@ bool MCPMetaObjectHelper::hasSlot(QObject *pObject, const QString &strMethodName
         return false;
     }
 
-    // 查找指定名称和返回类型的slot方法
+    // Find slot method with specified name and return type
     int nMethodCount = pMetaObject->methodCount();
     for (int i = 0; i < nMethodCount; ++i) {
         QMetaMethod method = pMetaObject->method(i);
@@ -93,14 +93,14 @@ bool MCPMetaObjectHelper::hasSlot(QObject *pObject, const QString &strMethodName
 bool MCPMetaObjectHelper::invokeMethod(QObject *pObject, const QString &strMethodName)
 {
     if (pObject == nullptr) {
-        MCP_CORE_LOG_WARNING() << "MCPMetaObjectHelper::invokeMethod: 对象指针为空";
+        MCP_CORE_LOG_WARNING() << "MCPMetaObjectHelper::invokeMethod: Object pointer is null";
         return false;
     }
 
     bool bSuccess = QMetaObject::invokeMethod(pObject, strMethodName.toUtf8().constData(), Qt::DirectConnection);
 
     if (!bSuccess) {
-        MCP_CORE_LOG_WARNING() << "MCPMetaObjectHelper::invokeMethod: 无法调用方法:" << strMethodName;
+        MCP_CORE_LOG_WARNING() << "MCPMetaObjectHelper::invokeMethod: Cannot invoke method:" << strMethodName;
     }
 
     return bSuccess;
@@ -109,14 +109,14 @@ bool MCPMetaObjectHelper::invokeMethod(QObject *pObject, const QString &strMetho
 bool MCPMetaObjectHelper::invokeMethod(QObject *pObject, const QString &strMethodName, QString &strResult)
 {
     if (pObject == nullptr) {
-        MCP_CORE_LOG_WARNING() << "MCPMetaObjectHelper::invokeMethod: 对象指针为空";
+        MCP_CORE_LOG_WARNING() << "MCPMetaObjectHelper::invokeMethod: Object pointer is null";
         return false;
     }
 
     bool bSuccess = QMetaObject::invokeMethod(pObject, strMethodName.toUtf8().constData(), Qt::DirectConnection, Q_RETURN_ARG(QString, strResult));
 
     if (!bSuccess) {
-        MCP_CORE_LOG_WARNING() << "MCPMetaObjectHelper::invokeMethod: 无法调用方法:" << strMethodName;
+        MCP_CORE_LOG_WARNING() << "MCPMetaObjectHelper::invokeMethod: Cannot invoke method:" << strMethodName;
     }
 
     return bSuccess;
@@ -125,14 +125,14 @@ bool MCPMetaObjectHelper::invokeMethod(QObject *pObject, const QString &strMetho
 bool MCPMetaObjectHelper::invokeMethod(QObject *pObject, const QString &strMethodName, QJsonObject &objResult)
 {
     if (pObject == nullptr) {
-        MCP_CORE_LOG_WARNING() << "MCPMetaObjectHelper::invokeMethod: 对象指针为空";
+        MCP_CORE_LOG_WARNING() << "MCPMetaObjectHelper::invokeMethod: Object pointer is null";
         return false;
     }
 
     bool bSuccess = QMetaObject::invokeMethod(pObject, strMethodName.toUtf8().constData(), Qt::DirectConnection, Q_RETURN_ARG(QJsonObject, objResult));
 
     if (!bSuccess) {
-        MCP_CORE_LOG_WARNING() << "MCPMetaObjectHelper::invokeMethod: 无法调用方法:" << strMethodName;
+        MCP_CORE_LOG_WARNING() << "MCPMetaObjectHelper::invokeMethod: Cannot invoke method:" << strMethodName;
     }
 
     return bSuccess;
@@ -141,7 +141,7 @@ bool MCPMetaObjectHelper::invokeMethod(QObject *pObject, const QString &strMetho
 const QMetaObject *MCPMetaObjectHelper::getMetaObject(QObject *pObject)
 {
     if (pObject == nullptr) {
-        MCP_CORE_LOG_WARNING() << "MCPMetaObjectHelper::getMetaObject: 对象指针为空";
+        MCP_CORE_LOG_WARNING() << "MCPMetaObjectHelper::getMetaObject: Object pointer is null";
         return nullptr;
     }
 
