@@ -375,10 +375,10 @@ DISTFILES += \
     cfg/Resources/wrapper_dynamic.json \
     cfg/Resources/wrapper_example.json \
     cfg/Tools/calculator.json \
-    cfg/Tools/list-source-file.json \
-    cfg/Tools/read-source-file.json \
-    cfg/Tools/write-source-file.json \
-    cfg/Tools/display-project-files.json \
+    cfg/Tools/project-file-list.json \
+    cfg/Tools/source-file-list.json \
+    cfg/Tools/source-file-read.json \
+    cfg/Tools/source-file-write.json \
     cfg/Tools/src-scraper.json \
     cfg/eofmcp.config \
     LICENSE \
