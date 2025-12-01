@@ -26,19 +26,108 @@ SourceCodeHandler::SourceCodeHandler(QObject *pParent)
 
 SourceCodeHandler::~SourceCodeHandler() {}
 
+QJsonObject SourceCodeHandler::displayProjectFiles(const QVariant &project_path, const QVariant &recursive, const QVariant &sort_by)
+{
+    if (!project_path.isValid()) {
+        return createErrorResponse("Parameter 'project_path' required");
+    }
+
+    MCP_TOOLS_LOG_DEBUG() << "TOOL-SRCH:listSourceFiles: path:" << project_path //
+                          << "extensions:" << sort_by                           //
+                          << "recusive:" << recursive;
+
+    QString strProjectPath = project_path.toString();
+    QString strSortBy = sort_by.isValid() ? sort_by.toString() : "name";
+    bool bRecursive = recursive.isValid() ? recursive.toBool() : true;
+
+    if (!isValidPath(strProjectPath)) {
+        return createErrorResponse(QString("Invalid project path: %1").arg(strProjectPath));
+    }
+
+    QStringList strExtensions = DEFAULT_EXTENSIONS;
+
+    QList<QFileInfo> fileList = findSourceFiles(strProjectPath, strExtensions, bRecursive);
+
+    if (strSortBy == "size") {
+        std::sort(fileList.begin(), fileList.end(), [](const QFileInfo &a, const QFileInfo &b) { //
+            return a.size() < b.size();
+        });
+    } else if (strSortBy == "date") {
+        std::sort(fileList.begin(), fileList.end(), [](const QFileInfo &a, const QFileInfo &b) { //
+            return a.lastModified() < b.lastModified();
+        });
+    } else {
+        std::sort(fileList.begin(), fileList.end(), [](const QFileInfo &a, const QFileInfo &b) { //
+            return a.fileName() < b.fileName();
+        });
+    }
+
+    QJsonObject structContent;
+    QJsonArray jsonFiles;
+    QSet<QString> directories;
+    QStringList textLines;
+    qint64 iTotalSize = 0;
+    auto toTextLine = [](const QFileInfo &fileInfo, const QString &strBaseDir) -> QString { //
+        QString filePath = fileInfo.absoluteFilePath();
+        QString relativePath = ".";
+
+        if (!strBaseDir.isEmpty()) {
+            QDir baseDir(strBaseDir);
+            relativePath = baseDir.relativeFilePath(fileInfo.absoluteFilePath());
+        }
+
+        QString size = QString::number(static_cast<int>(fileInfo.size()));
+        QString lastModified = fileInfo.lastModified().toString(Qt::ISODate);
+        QString directory = fileInfo.absolutePath();
+
+        return QStringLiteral("%1|%2|%3|%4|%5").arg(filePath, size, lastModified, directory, relativePath);
+    };
+    foreach (const QFileInfo &fileInfo, fileList) {
+        jsonFiles.append(fileInfoToJson(fileInfo, strProjectPath));
+        textLines.append(toTextLine(fileInfo, strProjectPath));
+        directories.insert(fileInfo.path());
+        iTotalSize += fileInfo.size();
+    }
+    structContent["files"] = jsonFiles;
+
+    QJsonObject jsonSummary;
+    jsonSummary["total_files"] = static_cast<int>(fileList.size());
+    jsonSummary["total_size"] = static_cast<int>(iTotalSize);
+    jsonSummary["directories"] = static_cast<int>(directories.size());
+    structContent["summary"] = jsonSummary;
+
+    // result
+    auto timestamp = QDateTime::currentDateTime().toString(Qt::ISODate) + "Z";
+
+    QJsonDocument doc = QJsonDocument(jsonFiles);
+    QJsonArray resultText = QJsonArray({QJsonObject({
+        QPair<QString, QString>("type", "text"), //
+        QPair<QString, QString>("text", doc.toJson(QJsonDocument::Compact) /*textLines.join("\n")*/),
+    })});
+
+    QJsonObject response = QJsonObject({
+        QPair<QString, QJsonValue>("structuredContent", structContent),
+        QPair<QString, QJsonValue>("content", QJsonArray({resultText})),
+    });
+
+    return response;
+}
+
 QJsonObject SourceCodeHandler::listSourceFiles(const QVariant &project_path, const QVariant &extensions)
 {
     if (!project_path.isValid()) {
         return createErrorResponse("Parameter 'project_path' required");
     }
 
-    MCP_TOOLS_LOG_DEBUG() << "SourceCodeHandler:listSourceFiles: path:" //
+    MCP_TOOLS_LOG_DEBUG() << "TOOL-SRCH:listSourceFiles: path:" //
                           << project_path << "extensions:" << extensions;
 
     QString strProjectPath = project_path.toString();
     QStringList strExtensions = DEFAULT_EXTENSIONS;
     if (extensions.isValid() && extensions.typeId() == QMetaType::QStringList) {
         strExtensions = extensions.toStringList();
+    } else if (extensions.isValid() && extensions.typeId() == QMetaType::QJsonArray) {
+        strExtensions = getFileExtensions(extensions.toJsonArray());
     }
 
     if (!isValidPath(strProjectPath)) {
@@ -214,91 +303,9 @@ QJsonObject SourceCodeHandler::writeSourceFile(const QVariant &file_path, const 
     return response;
 }
 
-QJsonObject SourceCodeHandler::displayProjectFiles(const QVariant &project_path, const QVariant &recursive, const QVariant &sort_by)
-{
-    if (!project_path.isValid()) {
-        return createErrorResponse("Parameter 'project_path' required");
-    }
-
-    QString strProjectPath = project_path.toString();
-    QString strSortBy = sort_by.isValid() ? sort_by.toString() : "name";
-    bool bRecursive = recursive.isValid() ? recursive.toBool() : true;
-
-    if (!isValidPath(strProjectPath)) {
-        return createErrorResponse(QString("Invalid project path: %1").arg(strProjectPath));
-    }
-
-    QStringList strExtensions;
-    for (const auto &ext : DEFAULT_EXTENSIONS) {
-        strExtensions.append(ext);
-    }
-
-    QList<QFileInfo> fileList = findSourceFiles(strProjectPath, strExtensions, bRecursive);
-
-    if (strSortBy == "size") {
-        std::sort(fileList.begin(), fileList.end(), [](const QFileInfo &a, const QFileInfo &b) { //
-            return a.size() < b.size();
-        });
-    } else if (strSortBy == "date") {
-        std::sort(fileList.begin(), fileList.end(), [](const QFileInfo &a, const QFileInfo &b) { //
-            return a.lastModified() < b.lastModified();
-        });
-    } else {
-        std::sort(fileList.begin(), fileList.end(), [](const QFileInfo &a, const QFileInfo &b) { //
-            return a.fileName() < b.fileName();
-        });
-    }
-
-    QJsonObject structContent;
-    QJsonArray jsonFiles;
-    QSet<QString> directories;
-    QStringList textLines;
-    qint64 iTotalSize = 0;
-    auto toTextLine = [](const QFileInfo &fileInfo, const QString &strBaseDir) -> QString { //
-        QString filePath = fileInfo.absoluteFilePath();
-        QString relativePath = ".";
-
-        if (!strBaseDir.isEmpty()) {
-            QDir baseDir(strBaseDir);
-            relativePath = baseDir.relativeFilePath(fileInfo.absoluteFilePath());
-        }
-
-        QString size = QString::number(static_cast<int>(fileInfo.size()));
-        QString lastModified = fileInfo.lastModified().toString(Qt::ISODate);
-        QString directory = fileInfo.absolutePath();
-
-        return QStringLiteral("%1|%2|%3|%4|%5").arg(filePath, size, lastModified, directory, relativePath);
-    };
-    foreach (const QFileInfo &fileInfo, fileList) {
-        jsonFiles.append(fileInfoToJson(fileInfo, strProjectPath));
-        textLines.append(toTextLine(fileInfo, strProjectPath));
-        directories.insert(fileInfo.path());
-        iTotalSize += fileInfo.size();
-    }
-    structContent["files"] = jsonFiles;
-
-    QJsonObject jsonSummary;
-    jsonSummary["total_files"] = static_cast<int>(fileList.size());
-    jsonSummary["total_size"] = static_cast<int>(iTotalSize);
-    jsonSummary["directories"] = static_cast<int>(directories.size());
-    structContent["summary"] = jsonSummary;
-
-    // result
-    auto timestamp = QDateTime::currentDateTime().toString(Qt::ISODate) + "Z";
-
-    QJsonDocument doc = QJsonDocument(jsonFiles);
-    QJsonArray resultText = QJsonArray({QJsonObject({
-        QPair<QString, QString>("type", "text"), //
-        QPair<QString, QString>("text", doc.toJson(QJsonDocument::Compact) /*textLines.join("\n")*/),
-    })});
-
-    QJsonObject response = QJsonObject({
-        QPair<QString, QJsonValue>("structuredContent", structContent),
-        QPair<QString, QJsonValue>("content", QJsonArray({resultText})),
-    });
-
-    return response;
-}
+// ---------------------------------------------------------
+// Private stuff
+// ---------------------------------------------------------
 
 QList<QFileInfo> SourceCodeHandler::findSourceFiles(const QString &strPath, const QStringList &strExtensions, bool bRecursive)
 {
@@ -401,7 +408,7 @@ QStringList SourceCodeHandler::getFileExtensions(const QJsonArray &jsonArray)
             }
         }
     } else {
-        for (const auto &ext : DEFAULT_EXTENSIONS) {
+        foreach (const auto &ext, DEFAULT_EXTENSIONS) {
             strExtensions.append(ext);
         }
     }
