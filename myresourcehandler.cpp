@@ -58,7 +58,7 @@ QJsonObject MyResourceHandler::getMetadata() const
 
 QString MyResourceHandler::getContent() const
 {
-    // 返回当前资源内容
+    // Return current resource content
     return m_strContent;
 }
 
@@ -66,7 +66,7 @@ void MyResourceHandler::updateContent(const QString &strNewContent)
 {
     if (m_strContent != strNewContent) {
         m_strContent = strNewContent;
-        // 发出changed信号通知资源内容变化
+        // Emit changed signal to notify resource content change
         emit changed(m_strName, m_strDescription, m_strMimeType);
     }
 }
@@ -75,7 +75,7 @@ void MyResourceHandler::updateName(const QString &strNewName)
 {
     if (m_strName != strNewName) {
         m_strName = strNewName;
-        // 发出changed信号通知资源元数据变化
+        // Emit changed signal to notify resource metadata change
         emit changed(m_strName, m_strDescription, m_strMimeType);
     }
 }
@@ -90,7 +90,7 @@ void MyResourceHandler::onTimerTimeout()
     QJsonDocument doc(contentObj);
     QString strNewContent = doc.toJson(QJsonDocument::Compact);
 
-    // 更新内容并发出changed信号
+    // Update content and emit changed signal
     updateContent(strNewContent);
 
     QString toolsDir;
