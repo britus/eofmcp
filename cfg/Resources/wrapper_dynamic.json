@@ -1,0 +1,9 @@
+{
+    "uri": "wrapper://dynamic",
+    "name": "dynamic_MyResourceHandler",
+    "description": "wrapper://dynamic | dynamic MyResourceHandler",
+    "mimeType": "application/json",
+    "type": "wrapper",
+    "handlerName": "MyResourceHandler"
+}
+

@@ -1,0 +1,9 @@
+{
+    "uri": "file://config",
+    "name": "config_name",
+    "description": "file://config | config_name",
+    "mimeType": "text/plain",
+    "type": "file",
+    "filePath": "json:config_filePath.txt"
+}
+
