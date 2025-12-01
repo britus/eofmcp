@@ -74,6 +74,7 @@ void LoadMcpToolset()
             }
         }
     });
+    toolsTimer.start();
 }
 
 static inline void createResources(QObjectList *handlers, const QDir &projectDir, bool bRecursive = true)
