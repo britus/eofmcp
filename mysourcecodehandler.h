@@ -46,10 +46,11 @@ public:
 public slots:
     /**
      * @brief Lists all source code files in the project directory
-     * @param jsonInput JSON object with input parameters
+     * @param project_path Project path
+     * @param extensions File extension filter
      * @return JSON object with results
      */
-    Q_INVOKABLE QJsonObject listSourceFiles(const QVariant &project_path);
+    Q_INVOKABLE QJsonObject listSourceFiles(const QVariant &project_path, const QVariant &extensions);
 
     /**
      * @brief Reads the contents of a source code file
@@ -124,14 +125,13 @@ private:
 
 private:
     // Standard file extensions for source code
-    static constexpr const char *DEFAULT_EXTENSIONS[] = {
-        ".cpp",
-        ".h",
-        ".hpp",
-        ".c",
-        ".cc",
-        ".cxx",
-        ".hxx",
-        ".java",
-    };
+    QStringList DEFAULT_EXTENSIONS = QStringList() //
+                                     << ".cpp"     //
+                                     << ".h"       //
+                                     << ".hpp"     //
+                                     << ".c"       //
+                                     << ".cc"      //
+                                     << ".cxx"     //
+                                     << ".hxx"     //
+                                     << ".java";
 };

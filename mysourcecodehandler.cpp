@@ -4,6 +4,7 @@
 // SPDX-License-Identifier: GPLv3
 // ********************************************************************
 #include "mysourcecodehandler.h"
+#include <MCPLog.h>
 #include <algorithm>
 #include <QDateTime>
 #include <QDir>
@@ -25,16 +26,20 @@ SourceCodeHandler::SourceCodeHandler(QObject *pParent)
 
 SourceCodeHandler::~SourceCodeHandler() {}
 
-QJsonObject SourceCodeHandler::listSourceFiles(const QVariant &project_path)
+QJsonObject SourceCodeHandler::listSourceFiles(const QVariant &project_path, const QVariant &extensions)
 {
     if (!project_path.isValid()) {
         return createErrorResponse("Parameter 'project_path' required");
     }
 
-    QString strProjectPath = project_path.toString();
+    MCP_TOOLS_LOG_DEBUG() << "SourceCodeHandler:listSourceFiles: path:" //
+                          << project_path << "extensions:" << extensions;
 
-    QJsonArray jsonExtArray = {}; //jsonInput.value("extensions").toArray();
-    QStringList strExtensions = getFileExtensions(jsonExtArray);
+    QString strProjectPath = project_path.toString();
+    QStringList strExtensions = DEFAULT_EXTENSIONS;
+    if (extensions.isValid() && extensions.typeId() == QMetaType::QStringList) {
+        strExtensions = extensions.toStringList();
+    }
 
     if (!isValidPath(strProjectPath)) {
         return createErrorResponse(QString("Invalid project path: %1").arg(strProjectPath));
