@@ -17,15 +17,18 @@ MCPContext::MCPContext(quint64 nConnectionId, const QSharedPointer<MCPSession> &
 
 quint64 MCPContext::getConnectionId() const
 {
+
     return m_nConnectionId;
 }
 
 QSharedPointer<MCPClientMessage> MCPContext::getClientMessage() const
 {
+
     return m_pClientMessage;
 }
 
 QSharedPointer<MCPSession> MCPContext::getSession() const
 {
+
     return m_pSession;
 }

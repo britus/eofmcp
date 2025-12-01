@@ -1,6 +1,6 @@
 /**
  * @file MCPResource.h
- * @brief MCP资源基类（使用Qt Meta机制）
+ * @brief MCP resource base class (using Qt Meta mechanism)
  * @author zhangheng
  * @date 2025-01-09
  * @copyright Copyright (c) 2025 zhangheng. All rights reserved.
@@ -14,28 +14,28 @@
 #include <QDateTime>
 
 /**
- * @brief MCP资源基类
+ * @brief MCP resource base class
  * 
- * 职责：
- * - 定义资源的元数据（URI、名称、描述、MIME类型等）
- * - 使用Qt Meta机制（Q_PROPERTY）提供属性系统
- * - 提供资源变化的信号通知
- * - 定义资源内容的读取接口（纯虚函数）
+ * Responsibilities:
+ * - Define metadata of resources (URI, name, description, MIME type, etc.)
+ * - Use Qt Meta mechanism (Q_PROPERTY) to provide property system
+ * - Provide signal notification for resource changes
+ * - Define read interface for resource content (pure virtual function)
  * 
- * 重要说明：
- * - URI是资源的唯一标识符，创建后不可修改
- * - 资源的身份由URI决定，元数据变化不影响资源身份
- * - 元数据（name、description、mimeType）可以修改，修改时会发出变化信号
+ * Important notes:
+ * - URI is the unique identifier of the resource, cannot be modified after creation
+ * - Resource identity is determined by URI, metadata changes don't affect resource identity
+ * - Metadata (name, description, mimeType) can be modified, modification emits changed signal
  * 
- * 编码规范：
- * - 类成员添加 m_ 前缀
- * - 字符串类型添加 str 前缀
- * - { 和 } 要单独一行
+ * Coding standards:
+ * - Class members add m_ prefix
+ * - String types add str prefix
+ * - { and } should be on separate lines
  */
 class MCPResource : public QObject
 {
     Q_OBJECT
-    Q_PROPERTY(QString uri READ getUri CONSTANT)  // URI不可变，使用CONSTANT
+    Q_PROPERTY(QString uri READ getUri CONSTANT)  // URI is immutable, use CONSTANT
     Q_PROPERTY(QString name READ getName WRITE setName)
     Q_PROPERTY(QString description READ getDescription WRITE setDescription)
     Q_PROPERTY(QString mimeType READ getMimeType WRITE setMimeType)
@@ -46,201 +46,201 @@ public:
     virtual ~MCPResource();
 signals:
     /**
-     * @brief 资源变化信号
-     * 当资源元数据或内容发生变化时发出此信号
-     * @param strName 资源名称
-     * @param strDescription 资源描述
-     * @param strMimeType MIME类型
+     * @brief Resource changed signal
+     * Emitted when resource metadata or content changes
+     * @param strName Resource name
+     * @param strDescription Resource description
+     * @param strMimeType MIME type
      * 
-     * 注意：元数据变化（name、description、mimeType）或内容变化时都会发出此信号
+     * Note: Changed signal is emitted when metadata (name, description, mimeType) or content changes
      */
     void changed(const QString& strName, const QString& strDescription, const QString& strMimeType);
     
     /**
-     * @brief 资源失效信号
-     * 当资源失效（如文件被删除、资源不可用等）时发出此信号
+     * @brief Resource invalidated signal
+     * Emitted when resource is invalidated (e.g., file deleted, resource unavailable)
      * 
-     * 注意：资源失效后，资源对象可能仍然存在，但已无法正常使用
-     * 订阅者应该取消订阅或处理失效情况
+     * Note: After resource invalidation, the resource object may still exist but cannot be used normally
+     * Subscribers should cancel subscriptions or handle invalidation cases
      */
     void invalidated();
 public:
-    // ============ 属性访问器（Q_PROPERTY） ============
+    // ============ Property accessors (Q_PROPERTY) ============
     
     /**
-     * @brief 获取资源URI
-     * @return 资源URI
+     * @brief Get resource URI
+     * @return Resource URI
      * 
-     * 注意：URI是资源的唯一标识符，创建后不可修改
+     * Note: URI is the unique identifier of the resource, cannot be modified after creation
      */
     QString getUri() const;
     
     /**
-     * @brief 获取资源名称
-     * @return 资源名称
+     * @brief Get resource name
+     * @return Resource name
      */
     QString getName() const;
     
     /**
-     * @brief 设置资源名称
-     * @param strName 资源名称
+     * @brief Set resource name
+     * @param strName Resource name
      * 
-     * 注意：修改名称不会改变资源身份（URI不变），但会发出 changed 信号
+     * Note: Modifying name doesn't change resource identity (URI unchanged), but emits changed signal
      */
     void setName(const QString& strName);
     
     /**
-     * @brief 获取资源描述
-     * @return 资源描述
+     * @brief Get resource description
+     * @return Resource description
      */
     QString getDescription() const;
     
     /**
-     * @brief 设置资源描述
-     * @param strDescription 资源描述
+     * @brief Set resource description
+     * @param strDescription Resource description
      * 
-     * 注意：修改描述不会改变资源身份（URI不变），但会发出 changed 信号
+     * Note: Modifying description doesn't change resource identity (URI unchanged), but emits changed signal
      */
     void setDescription(const QString& strDescription);
     
     /**
-     * @brief 获取MIME类型
-     * @return MIME类型
+     * @brief Get MIME type
+     * @return MIME type
      */
     QString getMimeType() const;
     
     /**
-     * @brief 设置MIME类型
-     * @param strMimeType MIME类型
+     * @brief Set MIME type
+     * @param strMimeType MIME type
      * 
-     * 注意：修改MIME类型不会改变资源身份（URI不变），但会发出 changed 信号
+     * Note: Modifying MIME type doesn't change resource identity (URI unchanged), but emits changed signal
      */
     void setMimeType(const QString& strMimeType);
     
     /**
-     * @brief 设置资源注解（Annotations）
-     * @param annotations 注解对象
+     * @brief Set resource annotations (Annotations)
+     * @param annotations Annotation object
      * 
-     * 根据 MCP 协议规范，annotations 包含：
-     * - audience: 数组，有效值为 "user" 和 "assistant"
-     * - priority: 0.0 到 1.0 的数字，表示重要性
-     * - lastModified: ISO 8601 格式的时间戳
+     * According to MCP protocol specification, annotations include:
+     * - audience: Array, valid values are "user" and "assistant"
+     * - priority: Number between 0.0 and 1.0, indicating importance
+     * - lastModified: ISO 8601 formatted timestamp
      */
     void setAnnotations(const QJsonObject& annotations);
     
     /**
-     * @brief 获取目标受众（audience）
-     * @return 受众数组，包含 "user" 和/或 "assistant"
+     * @brief Get audience (audience)
+     * @return Audience array, containing "user" and/or "assistant"
      */
     QJsonArray getAudience() const;
     
     /**
-     * @brief 设置目标受众（audience）
-     * @param audience 受众数组，有效值为 "user" 和 "assistant"
+     * @brief Set audience (audience)
+     * @param audience Audience array, valid values are "user" and "assistant"
      */
     void setAudience(const QJsonArray& audience);
     
     /**
-     * @brief 获取优先级（priority）
-     * @return 优先级值，范围 0.0 到 1.0
+     * @brief Get priority (priority)
+     * @return Priority value, range 0.0 to 1.0
      */
     double getPriority() const;
     
     /**
-     * @brief 设置优先级（priority）
-     * @param priority 优先级值，范围 0.0 到 1.0（1.0 表示最重要，0.0 表示最不重要）
+     * @brief Set priority (priority)
+     * @param priority Priority value, range 0.0 to 1.0 (1.0 means most important, 0.0 means least important)
      */
     void setPriority(double priority);
     
     /**
-     * @brief 获取最后修改时间（lastModified）
-     * @return ISO 8601 格式的时间戳字符串
+     * @brief Get last modified time (lastModified)
+     * @return ISO 8601 formatted timestamp string
      */
     QString getLastModified() const;
     
     /**
-     * @brief 设置最后修改时间（lastModified）
-     * @param lastModified ISO 8601 格式的时间戳字符串（例如："2025-01-12T15:00:58Z"）
+     * @brief Set last modified time (lastModified)
+     * @param lastModified ISO 8601 formatted timestamp string (e.g., "2025-01-12T15:00:58Z")
      */
     void setLastModified(const QString& lastModified);
     
     /**
-     * @brief 更新最后修改时间为当前时间
+     * @brief Update last modified time to current time
      */
     void updateLastModified();
     
     /**
-     * @brief 通知资源变化
-     * 手动触发资源变化信号，用于内容变化时通知订阅者
+     * @brief Notify resource changed
+     * Manually trigger resource change signal, used to notify subscribers when content changes
      */
     void notifyChanged();
     
     /**
-     * @brief 通知资源失效
-     * 手动触发资源失效信号，用于资源不可用时通知订阅者
+     * @brief Notify resource invalidated
+     * Manually trigger resource invalidation signal, used to notify subscribers when resource is unavailable
      * 
-     * 使用场景：
-     * - 资源文件被删除
-     * - 资源提供者不可用
-     * - 资源权限被撤销
-     * - 其他导致资源无法使用的情况
+     * Use cases:
+     * - Resource file deleted
+     * - Resource provider unavailable
+     * - Resource permissions revoked
+     * - Other cases where resource cannot be used
      */
     void notifyInvalidated();
     
 public slots:
-    // ============ 资源元数据和内容接口（Qt Meta机制） ============
+    // ============ Resource metadata and content interfaces (Qt Meta mechanism) ============
     
     /**
-     * @brief 获取资源元数据（JSON格式）
-     * @return 资源元数据对象
+     * @brief Get resource metadata (JSON format)
+     * @return Resource metadata object
      * 
-     * 作为slot，可以通过QMetaObject::invokeMethod调用
-     * 子类可以重写此方法以提供自定义的元数据获取逻辑
+     * As slot, can be called via QMetaObject::invokeMethod
+     * Subclasses can override this method to provide custom metadata retrieval logic
      */
     virtual QJsonObject getMetadata() const;
     
     /**
-     * @brief 获取资源注解（Annotations）
-     * @return 资源注解对象，包含 audience、priority、lastModified 等字段
+     * @brief Get resource annotations
+     * @return Resource annotation object, including audience, priority, lastModified fields
      * 
-     * 根据 MCP 协议规范，annotations 是可选的，用于提供客户端如何使用或显示资源的提示
-     * 作为slot，可以通过QMetaObject::invokeMethod调用
+     * According to MCP protocol specification, annotations are optional and provide hints for how clients should use or display resources
+     * As slot, can be called via QMetaObject::invokeMethod
      */
     virtual QJsonObject getAnnotations() const;
     
     /**
-     * @brief 获取资源内容
-     * @return 资源内容字符串
+     * @brief Get resource content
+     * @return Resource content string
      * 
-     * 这是获取资源内容的公共接口，内部调用 readContent()
-     * 对于文本资源，返回文本内容；对于二进制资源，返回Base64编码的内容
+     * This is the public interface for getting resource content, internally calls readContent()
+     * For text resources, returns text content; for binary resources, returns Base64 encoded content
      * 
-     * 作为slot，可以通过QMetaObject::invokeMethod调用
+     * As slot, can be called via QMetaObject::invokeMethod
      */
     QString getContent() const;
     
     
 public:
-    // ============ 资源内容读取接口（纯虚函数，由子类实现） ============
+    // ============ Resource content reading interface (pure virtual function, implemented by subclass) ============
     
     /**
-     * @brief 读取资源内容（纯虚函数，由子类实现）
-     * @return 资源内容字符串
+     * @brief Read resource content (pure virtual function, implemented by subclass)
+     * @return Resource content string
      * 
-     * 注意：子类必须实现此方法，提供具体的资源内容读取逻辑
-     * 此方法应该是 const 的，因为读取内容不应该修改对象状态
+     * Note: Subclasses must implement this method, providing specific resource content reading logic
+     * This method should be const, because reading content shouldn't modify object state
      * 
-     * 注意：此方法不是slot，因为它是纯虚函数，需要通过 getContent() slot 来调用
+     * Note: This method is not a slot, because it's a pure virtual function and needs to be called via getContent() slot
      */
-    virtual QString readContent() const = 0;    
+    virtual QString readContent() const = 0;
 protected:
     QString m_strUri;
     QString m_strName;
     QString m_strDescription;
     QString m_strMimeType;
     
-    // 资源注解（Annotations），根据 MCP 协议规范
-    QJsonArray m_audience;        // 目标受众数组，有效值为 "user" 和 "assistant"
-    double m_priority;             // 优先级，范围 0.0 到 1.0
-    QString m_strLastModified;     // 最后修改时间，ISO 8601 格式
+    // Resource annotations (Annotations), according to MCP protocol specification
+    QJsonArray m_audience;        // Audience array, valid values are "user" and "assistant"
+    double m_priority;             // Priority, range 0.0 to 1.0
+    QString m_strLastModified;     // Last modified time, ISO 8601 format
 };

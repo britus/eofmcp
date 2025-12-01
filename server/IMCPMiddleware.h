@@ -1,6 +1,6 @@
 /**
  * @file IMCPMiddleware.h
- * @brief MCP中间件接口
+ * @brief MCP middleware interface
  * @author zhangheng
  * @date 2025-01-09
  * @copyright Copyright (c) 2025 zhangheng. All rights reserved.
@@ -14,25 +14,25 @@ class MCPContext;
 class MCPServerMessage;
 
 /**
- * @brief MCP中间件接口
+ * @brief MCP middleware interface
  * 
- * 职责：
- * - 定义中间件的通用行为
- * - 支持请求处理前后的拦截
- * - 实现横切关注点（日志、监控、验证等）
+ * Responsibilities:
+ * - Define common behavior of middleware
+ * - Support interception before and after request processing
+ * - Implement cross-cutting concerns (logging, monitoring, validation, etc.)
  * 
- * 设计模式：
- * - 责任链模式（Chain of Responsibility）
- * - 中间件模式（Middleware Pattern）
+ * Design pattern:
+ * - Chain of Responsibility pattern
+ * - Middleware pattern
  * 
- * 使用说明：
- * - process方法中调用next()继续执行下一个中间件
- * - 可以在next()前后添加处理逻辑
- * - 返回nullptr表示继续执行，返回非空则中断管道
+ * Usage instructions:
+ * - Call next() in process method to continue to the next middleware
+ * - Add processing logic before and after next()
+ * - Return nullptr to continue execution, return non-null to use this response
  * 
- * 编码规范：
- * - 指针类型添加 p 前缀
- * - { 和 } 要单独一行
+ * Coding standards:
+ * - Add p prefix to pointer types
+ * - { and } should be on separate lines
  */
 class IMCPMiddleware
 {
@@ -40,22 +40,22 @@ public:
     virtual ~IMCPMiddleware() {}
     
     /**
-     * @brief 处理请求
-     * @param pContext 请求上下文
-     * @param next 下一个中间件/处理器函数
-     * @return 响应消息。返回nullptr表示继续执行next，返回非空则使用该响应
+     * @brief Process request
+     * @param pContext Request context
+     * @param next Next middleware/processor function
+     * @return Response message. Return nullptr to continue execution, return non-null to use this response
      * 
-     * 使用示例：
+     * Usage example:
      * @code
      * QSharedPointer<MCPServerMessage> process(...)
      * {
-     *     // 前置处理
+     *     // Pre-processing
      *     qDebug() << "Before processing";
      *     
-     *     // 调用下一个中间件
+     *     // Call next middleware
      *     auto pResponse = next();
      *     
-     *     // 后置处理
+     *     // Post-processing
      *     qDebug() << "After processing";
      *     
      *     return pResponse;
@@ -66,4 +66,3 @@ public:
         const QSharedPointer<MCPContext>& pContext,
         std::function<QSharedPointer<MCPServerMessage>()> next) = 0;
 };
-

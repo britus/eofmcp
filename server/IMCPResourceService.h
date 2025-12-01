@@ -1,6 +1,6 @@
 /**
  * @file IMCPResourceService.h
- * @brief MCP资源服务接口
+ * @brief MCP resource service interface
  * @author zhangheng
  * @date 2025-01-09
  * @copyright Copyright (c) 2025 zhangheng. All rights reserved.
@@ -15,20 +15,20 @@
 #include <functional>
 
 /**
- * @brief MCP资源服务接口
+ * @brief MCP resource service interface
  *
- * 职责：
- * - 定义资源服务的公开接口
- * - 提供资源注册和管理功能
- * - 隐藏具体实现细节
+ * Responsibilities:
+ * - Define public interface of resource service
+ * - Provide resource registration and management functions
+ * - Hide specific implementation details
  *
- * 编码规范：
- * - 接口方法使用纯虚函数
- * - { 和 } 要单独一行
+ * Coding standards:
+ * - Use pure virtual functions for interface methods
+ * - { and } should be on separate lines
  *
- * @note 死锁风险说明：在服务运行过程中调用addFromJson等方法添加wrapper类型资源时，
- *       如果调用方与包装对象在同一线程，可能导致死锁。此问题目前暂时不处理，
- *       建议在服务初始化阶段完成资源添加操作。
+ * @note Deadlock risk explanation: In service runtime, when calling addFromJson and other methods to add wrapper type resources,
+ *       if the caller and wrapper object are in the same thread, it may cause a deadlock. This issue is currently not handled,
+ *       and it's recommended to complete resource addition operations during service initialization.
  */
 class MCPCORE_EXPORT IMCPResourceService : public QObject
 {
@@ -39,19 +39,19 @@ public:
 
 protected:
     /**
-     * @brief 析构函数（protected，Service 对象由 Server 管理，不要直接删除）
+     * @brief Destructor (protected, Service objects are managed by Server, don't delete directly)
      */
     virtual ~IMCPResourceService() {}
 
 public:
     /**
-     * @brief 注册资源
-     * @param strUri 资源URI
-     * @param strName 资源名称
-     * @param strDescription 资源描述
-     * @param strMimeType MIME类型
-     * @param contentProvider 内容提供函数
-     * @return true表示注册成功，false表示失败
+     * @brief Register resource
+     * @param strUri Resource URI
+     * @param strName Resource name
+     * @param strDescription Resource description
+     * @param strMimeType MIME type
+     * @param contentProvider Content provider function
+     * @return true if registration successful, false if failed
      */
     virtual bool add(const QString& strUri,
                      const QString& strName,
@@ -60,21 +60,21 @@ public:
                      std::function<QString()> contentProvider) = 0;
 
     /**
-     * @brief 注册资源（从文件路径）
-     * @param strUri 资源URI
-     * @param strName 资源名称
-     * @param strDescription 资源描述
-     * @param strFilePath 文件路径
-     * @param strMimeType MIME类型（可选，如果不提供则根据文件扩展名推断）
-     * @return true表示注册成功，false表示失败
+     * @brief Register resource (from file path)
+     * @param strUri Resource URI
+     * @param strName Resource name
+     * @param strDescription Resource description
+     * @param strFilePath File path
+     * @param strMimeType MIME type (optional, if not provided it will be inferred from file extension)
+     * @return true if registration successful, false if failed
      *
-     * 使用示例：
+     * Usage example:
      * @code
      * auto pResourceService = pServer->getResourceService();
-     * // 方式1：自动推断MIME类型
+     * // Method 1: Auto-infer MIME type
      * pResourceService->add("file:///path/to/file.txt", "My File", "A text file", "/path/to/file.txt");
      *
-     * // 方式2：指定MIME类型
+     * // Method 2: Specify MIME type
      * pResourceService->add("file:///path/to/image.png", "My Image", "An image", "/path/to/image.png", "image/png");
      * @endcode
      */
@@ -85,53 +85,53 @@ public:
                      const QString& strMimeType = QString()) = 0;
 
     /**
-     * @brief 注销资源
-     * @param strUri 资源URI
-     * @return true表示注销成功，false表示失败
+     * @brief Unregister resource
+     * @param strUri Resource URI
+     * @return true if unregistration successful, false if failed
      */
     virtual bool remove(const QString& strUri) = 0;
 
     /**
-     * @brief 检查资源是否存在
-     * @param strUri 资源URI
-     * @return true表示存在，false表示不存在
+     * @brief Check if resource exists
+     * @param strUri Resource URI
+     * @return true if exists, false if not exists
      */
     virtual bool has(const QString& strUri) const = 0;
 
     /**
-     * @brief 获取资源列表
-     * @param strUriPrefix URI前缀（可选，用于过滤）
-     * @return 资源列表（JSON数组格式）
+     * @brief Get resource list
+     * @param strUriPrefix URI prefix (optional, for filtering)
+     * @return Resource list (JSON array format)
      */
     virtual QJsonArray list(const QString& strUriPrefix = QString()) const = 0;
 
     /**
-     * @brief 读取资源内容
-     * @param strUri 资源URI
-     * @return 资源内容（JSON对象格式）
+     * @brief Read resource content
+     * @param strUri Resource URI
+     * @return Resource content (JSON object format)
      */
     virtual QJsonObject readResource(const QString& strUri) = 0;
 
     /**
-     * @brief 从JSON对象添加资源
-     * @param jsonResource JSON对象，包含资源的配置信息
-     * @param pSearchRoot 搜索Handler的根对象，默认为nullptr（使用qApp）
-     * @return true表示注册成功，false表示失败
+     * @brief Add resource from JSON object
+     * @param jsonResource JSON object containing configuration information of the resource
+     * @param pSearchRoot Search root object for Handler (defaults to nullptr, use qApp)
+     * @return true if registration successful, false if failed
      *
-     * JSON对象格式：
+     * JSON object format:
      * {
-     *   "uri": "资源URI",
-     *   "name": "资源名称",
-     *   "description": "资源描述",
-     *   "mimeType": "MIME类型（可选，默认text/plain）",
-     *   "type": "资源类型：file/wrapper/content（可选，默认content）",
-     *   "filePath": "文件路径（file类型必需）",
-     *   "content": "静态内容（content类型必需）",
-     *   "handlerName": "Handler名称（wrapper类型必需）",
-     *   "annotations": { ... }（可选）
+     *   "uri": "Resource URI",
+     *   "name": "Resource name",
+     *   "description": "Resource description",
+     *   "mimeType": "MIME type (optional, default text/plain)",
+     *   "type": "Resource type: file/wrapper/content (optional, default content)",
+     *   "filePath": "File path (required for file type)",
+     *   "content": "Static content (required for content type)",
+     *   "handlerName": "Handler name (required for wrapper type)",
+     *   "annotations": { ... } (optional)
      * }
      *
-     * 使用示例：
+     * Usage example:
      * @code
      * QJsonObject json;
      * json["uri"] = "file:///path/to/file";
@@ -145,8 +145,8 @@ public:
 
 signals:
     /**
-     * @brief 资源列表变化信号
-     * 当资源注册或注销时发出此信号
+     * @brief Resources list changed signal
+     * Emitted when resources are registered or unregistered
      */
     void resourcesListChanged();
 };

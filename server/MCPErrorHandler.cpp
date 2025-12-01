@@ -1,6 +1,6 @@
 /**
  * @file MCPErrorHandler.cpp
- * @brief MCP错误处理工具类实现
+ * @brief MCP error handling utility class implementation
  * @author zhangheng
  * @date 2025-01-08
  * @copyright Copyright (c) 2025 zhangheng. All rights reserved.
@@ -15,14 +15,19 @@
 MCPErrorHandler::MCPErrorHandler(QObject* parent)
     : QObject(parent)
 {
+
 }
+
 
 MCPErrorHandler::~MCPErrorHandler()
 {
+
 }
+
 
 QJsonObject MCPErrorHandler::createSuccessResponse(const QJsonValue& result, const QJsonValue& requestId)
 {
+
     QJsonObject response;
     response.insert("jsonrpc", "2.0");
     response.insert("result", result);
@@ -37,16 +42,17 @@ QJsonObject MCPErrorHandler::createSuccessResponse(const QJsonValue& result, con
 
 void MCPErrorHandler::logError(const MCPError& error, const QString& context)
 {
-    QString strLogMessage = QString("MCP错误 [%1]: %2")
+
+    QString strLogMessage = QString("MCP error [%1]: %2")
                            .arg(static_cast<int>(error.getCode()))
                            .arg(error.getMessage());
 
     if (!context.isEmpty())
     {
-        strLogMessage += QString(" (上下文: %1)").arg(context);
+        strLogMessage += QString(" (Context: %1)").arg(context);
     }
 
-    // 根据错误级别记录不同级别的日志
+    // Log at different levels based on error level
     if (error.isServerError())
     {
         MCP_CORE_LOG_CRITICAL() << strLogMessage;
@@ -57,12 +63,13 @@ void MCPErrorHandler::logError(const MCPError& error, const QString& context)
     }
 }
 
-// 全局错误处理器
+// Global error handler
 static QMutex g_errorHandlerMutex;
 static MCPErrorHandler* g_errorHandlerInstance = nullptr;
 
 MCPErrorHandler* getGlobalErrorHandler()
 {
+
     if (!g_errorHandlerInstance)
     {
         QMutexLocker locker(&g_errorHandlerMutex);

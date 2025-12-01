@@ -1,6 +1,6 @@
 /**
  * @file MCPResourceContentGenerator.cpp
- * @brief MCP资源内容生成器实现
+ * @brief MCP resource content generator implementation
  * @author zhangheng
  * @date 2025-01-09
  * @copyright Copyright (c) 2025 zhangheng. All rights reserved.
@@ -18,14 +18,14 @@ QJsonObject MCPResourceContentGenerator::generateResourceContent(const QString &
 {
     QJsonObject result;
 
-    // 检查文件是否存在
+    // Check if file exists
     QFileInfo fileInfo(strFilePath);
     if (!fileInfo.exists() || !fileInfo.isFile()) {
-        MCP_CORE_LOG_WARNING() << "MCPResourceContentGenerator: 文件不存在或不是文件:" << strFilePath;
+        MCP_CORE_LOG_WARNING() << "MCPResourceContentGenerator: File does not exist or is not a file:" << strFilePath;
         return result;
     }
 
-    // 生成或使用提供的URI
+    // Generate or use provided URI
     QString strResourceUri = strUri;
     if (strResourceUri.isEmpty()) {
         strResourceUri = generateUriFromFilePath(strFilePath);
@@ -33,25 +33,25 @@ QJsonObject MCPResourceContentGenerator::generateResourceContent(const QString &
 
     result["uri"] = strResourceUri;
 
-    // 读取文件内容
+    // Read file content
     QJsonArray contents;
     QJsonObject contentObj;
     contentObj["uri"] = strResourceUri;
     contentObj["mimeType"] = strMimeType;
 
     if (isTextMimeType(strMimeType)) {
-        // 文本类型，使用text字段
+        // Text type, use text field
         QString strTextContent = readFileAsText(strFilePath);
         if (strTextContent.isEmpty() && fileInfo.size() > 0) {
-            MCP_CORE_LOG_WARNING() << "MCPResourceContentGenerator: 文本文件读取失败或为空:" << strFilePath;
+            MCP_CORE_LOG_WARNING() << "MCPResourceContentGenerator: Text file read failed or is empty:" << strFilePath;
             return QJsonObject();
         }
         contentObj["text"] = strTextContent;
     } else {
-        // 二进制类型，使用blob字段（Base64编码）
+        // Binary type, use blob field (Base64 encoded)
         QString strBase64Content = readFileAsBase64(strFilePath);
         if (strBase64Content.isEmpty()) {
-            MCP_CORE_LOG_WARNING() << "MCPResourceContentGenerator: 二进制文件读取失败:" << strFilePath;
+            MCP_CORE_LOG_WARNING() << "MCPResourceContentGenerator: Binary file read failed:" << strFilePath;
             return QJsonObject();
         }
         contentObj["blob"] = strBase64Content;
@@ -60,22 +60,23 @@ QJsonObject MCPResourceContentGenerator::generateResourceContent(const QString &
     contents.append(contentObj);
     result["contents"] = contents;
 
-    MCP_CORE_LOG_DEBUG() << "MCPResourceContentGenerator: 成功生成资源内容 - URI:" << strResourceUri << ", MIME类型:" << strMimeType << ", 文件路径:" << strFilePath;
+    MCP_CORE_LOG_DEBUG() << "MCPResourceContentGenerator: Successfully generated resource content - URI:" << strResourceUri << ", MIME type:" << strMimeType << ", File path:" << strFilePath;
 
     return result;
 }
 
 bool MCPResourceContentGenerator::isTextMimeType(const QString &strMimeType)
 {
-    // 文本类型MIME类型列表
+
+    // List of text type MIME types
     QString strLowerMimeType = strMimeType.toLower();
 
-    // 以text/开头的都是文本类型
+    // All types starting with text/ are text types
     if (strLowerMimeType.startsWith("text/")) {
         return true;
     }
 
-    // 常见的文本类型
+    // Common text types
     static const QStringList commonTextMimeTypes = {"application/json",         "application/xml",        "application/javascript",   "application/x-javascript", "application/ecmascript",
                                                     "application/x-ecmascript", "application/typescript", "application/x-typescript", "application/x-sh",         "application/x-shellscript",
                                                     "application/x-python",     "application/x-c",        "application/x-cpp",        "application/x-c++",        "application/x-csharp",
@@ -83,19 +84,19 @@ bool MCPResourceContentGenerator::isTextMimeType(const QString &strMimeType)
                                                     "application/x-toml",       "application/x-markdown", "application/x-svg+xml",    "application/x-json",       "application/x-ld+json",
                                                     "application/x-jsonld",     "application/x-rtf",      "application/x-rtfd",       "application/x-tex",        "application/x-latex",
                                                     "application/x-postscript", "application/x-ps",       "application/x-eps"};
-
     return commonTextMimeTypes.contains(strLowerMimeType);
 }
 
 QString MCPResourceContentGenerator::readFileAsText(const QString &strFilePath)
 {
+
     QFile file(strFilePath);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        MCP_CORE_LOG_WARNING() << "MCPResourceContentGenerator: 无法打开文本文件:" << strFilePath << ", 错误:" << file.errorString();
+        MCP_CORE_LOG_WARNING() << "MCPResourceContentGenerator: Cannot open text file:" << strFilePath << ", Error:" << file.errorString();
         return QString();
     }
 
-    // 使用UTF-8编码读取
+    // Read with UTF-8 encoding
     QTextStream textStream(&file);
     textStream.setEncoding(QStringConverter::Utf8);
     //textStream.setCodec("UTF-8");
@@ -107,9 +108,10 @@ QString MCPResourceContentGenerator::readFileAsText(const QString &strFilePath)
 
 QString MCPResourceContentGenerator::readFileAsBase64(const QString &strFilePath)
 {
+
     QFile file(strFilePath);
     if (!file.open(QIODevice::ReadOnly)) {
-        MCP_CORE_LOG_WARNING() << "MCPResourceContentGenerator: 无法打开二进制文件:" << strFilePath << ", 错误:" << file.errorString();
+        MCP_CORE_LOG_WARNING() << "MCPResourceContentGenerator: Cannot open binary file:" << strFilePath << ", Error:" << file.errorString();
         return QString();
     }
 
@@ -117,7 +119,7 @@ QString MCPResourceContentGenerator::readFileAsBase64(const QString &strFilePath
     file.close();
 
     if (data.isEmpty()) {
-        MCP_CORE_LOG_WARNING() << "MCPResourceContentGenerator: 二进制文件为空:" << strFilePath;
+        MCP_CORE_LOG_WARNING() << "MCPResourceContentGenerator: Binary file is empty:" << strFilePath;
         return QString();
     }
 
@@ -126,15 +128,17 @@ QString MCPResourceContentGenerator::readFileAsBase64(const QString &strFilePath
 
 QString MCPResourceContentGenerator::base64Encode(const QByteArray &data)
 {
+
     return QString::fromLatin1(data.toBase64());
 }
 
 QString MCPResourceContentGenerator::generateUriFromFilePath(const QString &strFilePath)
 {
+
     QFileInfo fileInfo(strFilePath);
     QString strAbsolutePath = fileInfo.absoluteFilePath();
 
-    // 将路径转换为file://协议的URI
+    // Convert path to file:// protocol URI
     QUrl url = QUrl::fromLocalFile(strAbsolutePath);
     return url.toString();
 }

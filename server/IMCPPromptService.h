@@ -1,6 +1,6 @@
 /**
  * @file IMCPPromptService.h
- * @brief MCP提示词服务接口
+ * @brief MCP prompt service interface
  * @author zhangheng
  * @date 2025-01-09
  * @copyright Copyright (c) 2025 zhangheng. All rights reserved.
@@ -18,20 +18,20 @@
 #include <functional>
 
 /**
- * @brief MCP提示词服务接口
+ * @brief MCP prompt service interface
  *
- * 职责：
- * - 定义提示词服务的公开接口
- * - 提供提示词注册和管理功能
- * - 隐藏具体实现细节
+ * Responsibilities:
+ * - Define public interface of prompt service
+ * - Provide prompt registration and management functions
+ * - Hide specific implementation details
  *
- * 编码规范：
- * - 接口方法使用纯虚函数
- * - { 和 } 要单独一行
+ * Coding standards:
+ * - Use pure virtual functions for interface methods
+ * - { and } should be on separate lines
  *
- * @note 死锁风险说明：在服务运行过程中调用addFromJson等方法添加提示词时，
- *       如果调用方与相关对象在同一线程，可能导致死锁。此问题目前暂时不处理，
- *       建议在服务初始化阶段完成提示词添加操作。
+ * @note Deadlock risk explanation: When calling addFromJson and other methods to add prompts during service runtime,
+ *       if the caller and related objects are in the same thread, it may cause a deadlock. This issue is currently not handled,
+ *       and it's recommended to complete prompt addition operations during service initialization.
  */
 class MCPCORE_EXPORT IMCPPromptService : public QObject
 {
@@ -42,18 +42,18 @@ public:
 
 protected:
     /**
-     * @brief 析构函数（protected，Service 对象由 Server 管理，不要直接删除）
+     * @brief Destructor (protected, Service objects are managed by Server, don't delete directly)
      */
     virtual ~IMCPPromptService() {}
 
 public:
     /**
-     * @brief 注册提示词
-     * @param strName 提示词名称
-     * @param strDescription 提示词描述
-     * @param arguments 参数列表（名称、(描述、是否必需)）
-     * @param generator 提示词生成函数
-     * @return true表示注册成功，false表示失败
+     * @brief Register prompt
+     * @param strName Prompt name
+     * @param strDescription Prompt description
+     * @param arguments Parameter list (name, (description, required))
+     * @param generator Prompt generation function
+     * @return true if registration successful, false if failed
      */
     virtual bool add(const QString& strName,
                      const QString& strDescription,
@@ -61,19 +61,19 @@ public:
                      std::function<QString(const QMap<QString, QString>&)> generator) = 0;
 
     /**
-     * @brief 注册提示词（使用模板）
-     * @param strName 提示词名称
-     * @param strDescription 提示词描述
-     * @param arguments 参数列表（名称、(描述、是否必需)）
-     * @param strTemplate 提示词模板字符串，支持 {{变量名}} 格式的占位符
-     * @return true表示注册成功，false表示失败
+     * @brief Register prompt (using template)
+     * @param strName Prompt name
+     * @param strDescription Prompt description
+     * @param arguments Parameter list (name, (description, required))
+     * @param strTemplate Prompt template string, supports {{variable name}} format placeholders
+     * @return true if registration successful, false if failed
      *
-     * 使用示例：
+     * Usage example:
      * @code
      * auto pPromptService = pServer->getPromptService();
      * QList<QPair<QString, QPair<QString, bool>>> args;
-     * args.append(qMakePair("name", qMakePair("用户名", true)));
-     * pPromptService->add("greeting", "问候提示词", args, "Hello {{name}}, welcome!");
+     * args.append(qMakePair("name", qMakePair("Username", true)));
+     * pPromptService->add("greeting", "Greeting prompt", args, "Hello {{name}}, welcome!");
      * @endcode
      */
     virtual bool add(const QString& strName,
@@ -82,63 +82,63 @@ public:
                      const QString& strTemplate) = 0;
 
     /**
-     * @brief 注销提示词
-     * @param strName 提示词名称
-     * @return true表示注销成功，false表示失败
+     * @brief Unregister prompt
+     * @param strName Prompt name
+     * @return true if unregistration successful, false if failed
      */
     virtual bool remove(const QString& strName) = 0;
 
     /**
-     * @brief 检查提示词是否存在
-     * @param strName 提示词名称
-     * @return true表示存在，false表示不存在
+     * @brief Check if prompt exists
+     * @param strName Prompt name
+     * @return true if exists, false if not exists
      */
     virtual bool has(const QString& strName) const = 0;
 
     /**
-     * @brief 获取提示词列表
-     * @return 提示词列表（JSON数组格式）
+     * @brief Get prompt list
+     * @return Prompt list (JSON array format)
      */
     virtual QJsonArray list() const = 0;
 
     /**
-     * @brief 获取提示词内容
-     * @param strName 提示词名称
-     * @param arguments 参数字典
-     * @return 提示词内容（JSON对象格式）
+     * @brief Get prompt content
+     * @param strName Prompt name
+     * @param arguments Parameter dictionary
+     * @return Prompt content (JSON object format)
      */
     virtual QJsonObject getPrompt(const QString& strName, const QMap<QString, QString>& arguments) = 0;
 
     /**
-     * @brief 从JSON对象添加提示词
-     * @param jsonPrompt JSON对象，包含提示词的配置信息
-     * @return true表示注册成功，false表示失败
+     * @brief Add prompt from JSON object
+     * @param jsonPrompt JSON object containing configuration information of the prompt
+     * @return true if registration successful, false if failed
      *
-     * JSON对象格式：
+     * JSON object format:
      * {
-     *   "name": "提示词名称",
-     *   "description": "提示词描述",
-     *   "template": "提示词模板字符串，支持 {{变量名}} 格式的占位符",
+     *   "name": "Prompt name",
+     *   "description": "Prompt description",
+     *   "template": "Prompt template string, supports {{variable name}} format placeholders",
      *   "arguments": [
      *     {
-     *       "name": "参数名",
-     *       "description": "参数描述",
+     *       "name": "Parameter name",
+     *       "description": "Parameter description",
      *       "required": true/false
      *     },
      *     ...
      *   ]
      * }
      *
-     * 使用示例：
+     * Usage example:
      * @code
      * QJsonObject json;
      * json["name"] = "greeting";
-     * json["description"] = "问候提示词";
+     * json["description"] = "Greeting prompt";
      * json["template"] = "Hello {{name}}, welcome!";
      * QJsonArray args;
      * QJsonObject arg;
      * arg["name"] = "name";
-     * arg["description"] = "用户名";
+     * arg["description"] = "Username";
      * arg["required"] = true;
      * args.append(arg);
      * json["arguments"] = args;
@@ -149,12 +149,11 @@ public:
 
 signals:
     /**
-     * @brief 提示词列表变化信号
-     * 当提示词注册或注销时发出此信号
+     * @brief Prompts list changed signal
+     * Emitted when prompts are registered or unregistered
      */
     void promptsListChanged();
 };
 
 //#define IMCPPromptService_iid "org.eof.IMCPPromptService"
 //Q_DECLARE_INTERFACE(IMCPPromptService, IMCPPromptService_iid)
-

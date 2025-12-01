@@ -1,6 +1,6 @@
 /**
  * @file MCPServer.cpp
- * @brief MCP服务器实现
+ * @brief MCP server implementation
  * @author zhangheng
  * @date 2025-01-01
  * @copyright Copyright (c) 2025 zhangheng. All rights reserved.
@@ -21,6 +21,7 @@ IMCPServer::IMCPServer(QObject *pParent)
 
 IMCPServer *IMCPServer::createServer()
 {
+
     MCPServer *server = new MCPServer();
 
     auto pConfig = server->getConfig();
@@ -61,6 +62,7 @@ IMCPServer *IMCPServer::createServer()
 
 void IMCPServer::destroyServer(IMCPServer *pServer)
 {
+
     if (pServer != nullptr) {
         pServer->stop();
         pServer->deleteLater();
@@ -74,15 +76,18 @@ IMCPServer::~IMCPServer() {}
 static MCPAutoServer autoServer;
 void StartAutoMCPServer()
 {
+
     autoServer.performStart();
 }
 void FlushAutoMCPServerTool(const char *szToolConfigFile)
 {
+
     auto strConfigFile = QString::fromUtf8(szToolConfigFile);
     autoServer.loadTool(strConfigFile);
 }
 void StopAutoMCPServer()
 {
+
     autoServer.performStop();
 }
 #endif

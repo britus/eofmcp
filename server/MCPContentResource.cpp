@@ -1,6 +1,6 @@
 /**
  * @file MCPContentResource.cpp
- * @brief MCP内容资源类实现
+ * @brief MCP content resource class implementation
  * @author zhangheng
  * @date 2025-01-09
  * @copyright Copyright (c) 2025 zhangheng. All rights reserved.
@@ -17,36 +17,41 @@ MCPContentResource::~MCPContentResource() {}
 
 MCPContentResource *MCPContentResource::withName(const QString &strName)
 {
+
     setName(strName);
     return this;
 }
 
 MCPContentResource *MCPContentResource::withDescription(const QString &strDescription)
 {
+
     setDescription(strDescription);
     return this;
 }
 
 MCPContentResource *MCPContentResource::withMimeType(const QString &strMimeType)
 {
+
     setMimeType(strMimeType);
     return this;
 }
 
 MCPContentResource *MCPContentResource::withContentProvider(std::function<QString()> contentProvider)
 {
+
     m_contentProvider = contentProvider;
     return this;
 }
 
 QString MCPContentResource::readContent() const
 {
-    // 使用contentProvider获取内容
+
+    // Use contentProvider to get content
     if (m_contentProvider) {
         return m_contentProvider();
     }
 
-    // 如果没有contentProvider，返回空字符串
-    MCP_CORE_LOG_WARNING() << "MCPContentResource: 未设置内容提供函数，无法读取内容";
+    // If no contentProvider, return empty string
+    MCP_CORE_LOG_WARNING() << "MCPContentResource: No content provider set, cannot read content";
     return QString();
 }

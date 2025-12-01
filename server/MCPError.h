@@ -2,7 +2,7 @@
 
 /**
  * @file MCPError.h
- * @brief MCP错误类定义
+ * @brief MCP error class definition
  * @author zhangheng
  * @date 2025-01-08
  * @copyright Copyright (c) 2025 zhangheng. All rights reserved.
@@ -15,105 +15,105 @@
 #include "MCPErrorCode.h"
 
 /**
- * @brief MCP错误类
+ * @brief MCP error class
  *
- * 封装完整的错误信息，包括错误码、消息和额外数据。
- * 支持JSON序列化和反序列化，用于网络传输。
+ * Encapsulate complete error information, including error code, message and additional data.
+ * Supports JSON serialization and deserialization for network transmission.
  */
 class MCPError
 {
 public:
     /**
-     * @brief 默认构造函数
+     * @brief Default constructor
      */
     MCPError();
 
     /**
-     * @brief 构造函数
-     * @param code 错误码
-     * @param message 错误消息（可选，默认使用标准消息）
-     * @param data 额外错误数据（可选）
+     * @brief Constructor
+     * @param code Error code
+     * @param message Error message (optional, default uses standard message)
+     * @param data Additional error data (optional)
      */
     explicit MCPError(MCPErrorCode code,
                      const QString& message = QString(),
                      const QJsonValue& data = QJsonValue());
 
     /**
-     * @brief 复制构造函数
+     * @brief Copy constructor
      */
     MCPError(const MCPError& other);
 
     /**
-     * @brief 赋值操作符
+     * @brief Assignment operator
      */
     MCPError& operator=(const MCPError& other);
 
     /**
-     * @brief 析构函数
+     * @brief Destructor
      */
     ~MCPError();
 
 public:
     /**
-     * @brief 获取错误码
+     * @brief Get error code
      */
     MCPErrorCode getCode() const;
 
     /**
-     * @brief 设置错误码
+     * @brief Set error code
      */
     void setCode(MCPErrorCode code);
 
     /**
-     * @brief 获取错误消息
+     * @brief Get error message
      */
     QString getMessage() const;
 
     /**
-     * @brief 设置错误消息
+     * @brief Set error message
      */
     void setMessage(const QString& message);
 
     /**
-     * @brief 获取额外数据
+     * @brief Get additional data
      */
     QJsonValue getData() const;
 
     /**
-     * @brief 设置额外数据
+     * @brief Set additional data
      */
     void setData(const QJsonValue& data);
 
     /**
-     * @brief 检查是否为服务器错误
+     * @brief Check if it's a server error
      */
     bool isServerError() const;
 
 
 public:
     /**
-     * @brief 转换为JSON对象
-     * @return 符合JSON-RPC 2.0规范的错误对象
+     * @brief Convert to JSON object
+     * @return Error object conforming to JSON-RPC 2.0 specification
      */
     QJsonObject toJson() const;
 
     /**
-     * @brief 创建JSON-RPC错误响应
-     * @param requestId 请求ID
-     * @return JSON-RPC 2.0格式的错误响应
+     * @brief Create JSON-RPC error response
+     * @param requestId Request ID
+     * @return JSON-RPC 2.0 format error response
      */
     QJsonObject toJsonResponse(const QJsonValue& requestId = QJsonValue::Null) const;
 
     /**
-     * @brief 从JSON对象创建错误
-     * @param json JSON对象
-     * @return MCPError实例
+     * @brief Create error from JSON object
+     * @param json JSON object
+     * @return MCPError instance
      */
     static MCPError fromJson(const QJsonObject& json);
 
 
     /**
-     * @brief 创建标准错误对象
+     * @brief Create standard error objects
      */
     static MCPError parseError(const QString& details = QString());
     static MCPError invalidRequest(const QString& details = QString());
@@ -122,7 +122,7 @@ public:
     static MCPError internalError(const QString& details = QString());
 
     /**
-     * @brief 创建MCP特定错误对象
+     * @brief Create MCP specific error objects
      */
     static MCPError toolNotFound(const QString& toolName);
     static MCPError toolExecutionFailed(const QString& details = QString());
@@ -132,10 +132,10 @@ public:
     static MCPError authorizationFailed(const QString& details = QString());
 
 private:
-    MCPErrorCode m_code;        // 错误码
-    QString m_message;          // 错误消息
-    QJsonValue m_data;          // 额外数据
+    MCPErrorCode m_code;        // Error code
+    QString m_message;          // Error message
+    QJsonValue m_data;          // Additional data
 };
 
-// Qt元类型声明
+// Qt meta type declaration
 Q_DECLARE_METATYPE(MCPError)

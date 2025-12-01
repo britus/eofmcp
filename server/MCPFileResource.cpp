@@ -1,6 +1,6 @@
 /**
  * @file MCPFileResource.cpp
- * @brief MCP文件资源类实现
+ * @brief MCP file resource class implementation
  * @author zhangheng
  * @date 2025-01-09
  * @copyright Copyright (c) 2025 zhangheng. All rights reserved.
@@ -20,7 +20,7 @@ MCPFileResource::MCPFileResource(const QString& strUri,
     : MCPContentResource(strUri, pParent)
     , m_strFilePath(strFilePath)
 {
-    // 如果提供了名称，设置名称；否则使用文件名作为名称
+    // If name is provided, set it; otherwise use filename as name
     if (!strName.isEmpty())
     {
         withName(strName);
@@ -31,41 +31,45 @@ MCPFileResource::MCPFileResource(const QString& strUri,
         withName(fileInfo.fileName());
     }
 
-    // 推断MIME类型
+    // Infer MIME type
     inferMimeType();
 
-    // 设置文件内容提供函数
+    // Set file content provider function
     withContentProvider(createFileContentProvider());
 }
 
 MCPFileResource::~MCPFileResource()
 {
+
 }
+
 
 QString MCPFileResource::getFilePath() const
 {
+
     return m_strFilePath;
 }
 
 std::function<QString()> MCPFileResource::createFileContentProvider() const
 {
+
     return [this]() -> QString
     {
         if (m_strFilePath.isEmpty())
         {
-            MCP_CORE_LOG_WARNING() << "MCPFileResource: 文件路径为空，无法读取内容";
+            MCP_CORE_LOG_WARNING() << "MCPFileResource: File path is empty, cannot read content";
             return QString();
         }
 
-        // 根据MIME类型决定读取方式
+        // Determine reading method based on MIME type
         if (MCPResourceContentGenerator::isTextMimeType(getMimeType()))
         {
-            // 文本类型，直接读取文本内容
+            // Text type, read text content directly
             return MCPResourceContentGenerator::readFileAsText(m_strFilePath);
         }
         else
         {
-            // 二进制类型，返回Base64编码的内容
+            // Binary type, return Base64 encoded content
             return MCPResourceContentGenerator::readFileAsBase64(m_strFilePath);
         }
     };
@@ -73,19 +77,20 @@ std::function<QString()> MCPFileResource::createFileContentProvider() const
 
 void MCPFileResource::inferMimeType()
 {
+
     if (m_strFilePath.isEmpty())
     {
         withMimeType("text/plain");
         return;
     }
 
-    // 如果MIME类型已经设置，不重新推断
+    // If MIME type is already set, don't re-infer
     if (!getMimeType().isEmpty())
     {
         return;
     }
 
-    // 使用QMimeDatabase根据文件扩展名推断MIME类型
+    // Use QMimeDatabase to infer MIME type based on file extension
     QMimeDatabase mimeDb;
     QMimeType mimeType = mimeDb.mimeTypeForFile(m_strFilePath);
     if (mimeType.isValid())
@@ -94,9 +99,8 @@ void MCPFileResource::inferMimeType()
     }
     else
     {
-        // 如果无法推断，默认使用text/plain
+        // If cannot infer, default to text/plain
         withMimeType("text/plain");
-        MCP_CORE_LOG_WARNING() << "MCPFileResource: 无法推断文件MIME类型，使用默认值text/plain:" << m_strFilePath;
+        MCP_CORE_LOG_WARNING() << "MCPFileResource: Cannot infer file MIME type, using default value text/plain:" << m_strFilePath;
     }
 }
-

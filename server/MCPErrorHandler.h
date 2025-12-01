@@ -2,7 +2,7 @@
 
 /**
  * @file MCPErrorHandler.h
- * @brief MCP错误处理工具类
+ * @brief MCP error handling utility class
  * @author zhangheng
  * @date 2025-01-08
  * @copyright Copyright (c) 2025 zhangheng. All rights reserved.
@@ -13,9 +13,9 @@
 #include <MCPError.h>
 
 /**
- * @brief MCP错误处理工具类
+ * @brief MCP error handling utility class
  *
- * 提供简单的错误响应生成和日志记录功能。
+ * Provides simple error response generation and logging functionality.
  */
 class MCPErrorHandler : public QObject
 {
@@ -23,31 +23,31 @@ class MCPErrorHandler : public QObject
 
 public:
     /**
-     * @brief 构造函数
+     * @brief Constructor
      */
     explicit MCPErrorHandler(QObject* parent = nullptr);
 
     /**
-     * @brief 析构函数
+     * @brief Destructor
      */
     ~MCPErrorHandler();
 
 public:
     /**
-     * @brief 创建成功响应
-     * @param result 结果数据
-     * @param requestId 请求ID
-     * @return JSON-RPC 2.0格式的成功响应
+     * @brief Create success response
+     * @param result Result data
+     * @param requestId Request ID
+     * @return JSON-RPC 2.0 format success response
      */
     static QJsonObject createSuccessResponse(const QJsonValue& result, const QJsonValue& requestId = QJsonValue::Null);
 
     /**
-     * @brief 记录错误到日志
-     * @param error 错误对象
-     * @param context 错误上下文信息
+     * @brief Log error to log
+     * @param error Error object
+     * @param context Error context information
      */
     static void logError(const MCPError& error, const QString& context = QString());
 };
 
-// 全局错误处理器实例
+// Global error handler instance
 MCPErrorHandler* getGlobalErrorHandler();

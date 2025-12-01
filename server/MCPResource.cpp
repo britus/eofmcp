@@ -1,6 +1,6 @@
 /**
  * @file MCPResource.cpp
- * @brief MCP资源基类实现
+ * @brief MCP resource base class implementation
  * @author zhangheng
  * @date 2025-01-09
  * @copyright Copyright (c) 2025 zhangheng. All rights reserved.
@@ -20,27 +20,32 @@ MCPResource::MCPResource(const QString& strUri,
     , m_strDescription("")
     , m_strMimeType("text/plain")
     , m_audience(QJsonArray())
-    , m_priority(0.5)  // 默认优先级为 0.5
+    , m_priority(0.5)  // Default priority is 0.5
     , m_strLastModified("")
 {
 }
+
 
 MCPResource::~MCPResource()
 {
 }
 
+
 QString MCPResource::getUri() const
 {
+
     return m_strUri;
 }
 
 QString MCPResource::getName() const
 {
+
     return m_strName;
 }
 
 void MCPResource::setName(const QString& strName)
 {
+
     if (m_strName != strName)
     {
         m_strName = strName;
@@ -50,11 +55,13 @@ void MCPResource::setName(const QString& strName)
 
 QString MCPResource::getDescription() const
 {
+
     return m_strDescription;
 }
 
 void MCPResource::setDescription(const QString& strDescription)
 {
+
     if (m_strDescription != strDescription)
     {
         m_strDescription = strDescription;
@@ -64,11 +71,13 @@ void MCPResource::setDescription(const QString& strDescription)
 
 QString MCPResource::getMimeType() const
 {
+
     return m_strMimeType;
 }
 
 void MCPResource::setMimeType(const QString& strMimeType)
 {
+
     if (m_strMimeType != strMimeType)
     {
         m_strMimeType = strMimeType;
@@ -78,18 +87,21 @@ void MCPResource::setMimeType(const QString& strMimeType)
 
 void MCPResource::notifyChanged()
 {
+
     emit changed(m_strName, m_strDescription, m_strMimeType);
 }
 
 void MCPResource::notifyInvalidated()
 {
+
     emit invalidated();
 }
 
 QJsonObject MCPResource::getMetadata() const
 {
+
     QJsonObject metadata;
-    // 注意：URI不在元数据中，因为URI是资源的唯一标识符，通过getUri()获取
+    // Note: URI is not in metadata, because URI is the unique identifier of the resource, obtained via getUri()
     metadata["name"] = m_strName;
     
     if (!m_strDescription.isEmpty())
@@ -102,7 +114,7 @@ QJsonObject MCPResource::getMetadata() const
         metadata["mimeType"] = m_strMimeType;
     }
     
-    // 添加 annotations（如果存在）
+    // Add annotations (if any)
     QJsonObject annotations;
     bool bHasAnnotations = false;
     
@@ -134,12 +146,14 @@ QJsonObject MCPResource::getMetadata() const
 
 QString MCPResource::getContent() const
 {
-    // 调用子类实现的 readContent() 方法
+
+    // Call readContent() method implemented by subclass
     return readContent();
 }
 
 QJsonObject MCPResource::getAnnotations() const
 {
+
     QJsonObject annotations;
     
     if (!m_audience.isEmpty())
@@ -162,6 +176,7 @@ QJsonObject MCPResource::getAnnotations() const
 
 void MCPResource::setAnnotations(const QJsonObject& annotations)
 {
+
     if (annotations.contains("audience"))
     {
         QJsonValue audienceValue = annotations["audience"];
@@ -177,7 +192,7 @@ void MCPResource::setAnnotations(const QJsonObject& annotations)
         if (priorityValue.isDouble())
         {
             double priority = priorityValue.toDouble();
-            // 限制优先级范围在 0.0 到 1.0 之间
+            // Limit priority range between 0.0 and 1.0
             if (priority < 0.0)
             {
                 m_priority = 0.0;
@@ -201,22 +216,26 @@ void MCPResource::setAnnotations(const QJsonObject& annotations)
 
 QJsonArray MCPResource::getAudience() const
 {
+
     return m_audience;
 }
 
 void MCPResource::setAudience(const QJsonArray& audience)
 {
+
     m_audience = audience;
 }
 
 double MCPResource::getPriority() const
 {
+
     return m_priority;
 }
 
 void MCPResource::setPriority(double priority)
 {
-    // 限制优先级范围在 0.0 到 1.0 之间
+
+    // Limit priority range between 0.0 and 1.0
     if (priority < 0.0)
     {
         m_priority = 0.0;
@@ -233,18 +252,20 @@ void MCPResource::setPriority(double priority)
 
 QString MCPResource::getLastModified() const
 {
+
     return m_strLastModified;
 }
 
 void MCPResource::setLastModified(const QString& lastModified)
 {
+
     m_strLastModified = lastModified;
 }
 
 void MCPResource::updateLastModified()
 {
-    // 使用 ISO 8601 格式：YYYY-MM-DDTHH:mm:ssZ
+
+    // Use ISO 8601 format: YYYY-MM-DDTHH:mm:ssZ
     QDateTime now = QDateTime::currentDateTimeUtc();
     m_strLastModified = now.toString(Qt::ISODate);
 }
-

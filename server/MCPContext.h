@@ -22,4 +22,3 @@ private:
 	const QSharedPointer<MCPClientMessage> m_pClientMessage;
 	const QSharedPointer<MCPSession> m_pSession;
 };
-

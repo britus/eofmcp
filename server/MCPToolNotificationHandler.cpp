@@ -18,7 +18,7 @@ MCPToolNotificationHandler::~MCPToolNotificationHandler() {}
 
 void MCPToolNotificationHandler::onToolsListChanged()
 {
-    MCP_CORE_LOG_INFO() << "MCPToolNotificationHandler: Tools list changed, sending notification to all clients";
+    //MCP_CORE_LOG_INFO() << "MCPToolNotificationHandler: Tools list changed, sending notification to all clients";
 
     // Get the latest tools list
     QJsonArray arrTools = m_pServer->getToolService()->list();
