@@ -124,5 +124,14 @@ private:
 
 private:
     // Standard file extensions for source code
-    static constexpr const char *DEFAULT_EXTENSIONS[] = {".cpp", ".h", ".hpp", ".c", ".cc", ".cxx", ".hxx"};
+    static constexpr const char *DEFAULT_EXTENSIONS[] = {
+        ".cpp",
+        ".h",
+        ".hpp",
+        ".c",
+        ".cc",
+        ".cxx",
+        ".hxx",
+        ".java",
+    };
 };
