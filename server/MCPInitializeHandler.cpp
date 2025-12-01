@@ -8,7 +8,7 @@
 
 #include "MCPInitializeHandler.h"
 #include "IMCPServerConfig.h"
-#include "MCPClientinitializeMessage.h"
+#include "MCPClientInitializeMessage.h"
 #include "MCPContext.h"
 #include "MCPError.h"
 #include "MCPLog.h"

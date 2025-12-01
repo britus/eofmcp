@@ -3,11 +3,9 @@
 // Copyright © 2025 by EoF Software Labs
 // SPDX-License-Identifier: GPLv3
 // ********************************************************************
-#include "mcpmainwindow.h"
 #include "mycalculatorHandler.h"
 #include "myresourcehandler.h"
 #include "mysourcecodehandler.h"
-#include "mysourcescraper.h"
 #include <IMCPMiddleware.h>
 #include <IMCPPromptService.h>
 #include <IMCPResourceService.h>
@@ -63,10 +61,11 @@ int main(int argc, char *argv[])
     // The "MPCToolHandlerName" property is already set in the MyCalculatorHandler constructor
     handlers.append(new MyCalculatorHandler(qApp));
 
-    // My scraper handler
-    handlers.append(new MySourceScraper(qApp));
-
-    // My source code handler
+    // The source code handler has following invokable tools:
+    // - displayProjectFiles <project_path>  [recursive] [sort_by]
+    // - listSourceFiles <project_path>
+    // - readSourceFile <file_path>
+    // - writeSourceFile <file_path> <content> [create_backup]
     handlers.append(new SourceCodeHandler(qApp));
 
     // Create a resource Handler object (used for validating MCPResourceWrapper)
@@ -79,9 +78,6 @@ int main(int argc, char *argv[])
     // The configuration file is located in the MCPServerConfig folder within the application directory
     // --
     StartAutoMCPServer();
-
-    //MCPMainWindow w;
-    //w.show();
 
     return a.exec();
 }

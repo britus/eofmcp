@@ -5,6 +5,11 @@
 # define llhttp_t llparse_t
 #endif  /* */
 
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#endif
+
 int llhttp_message_needs_eof(const llhttp_t* parser);
 int llhttp_should_keep_alive(const llhttp_t* parser);
 
@@ -168,3 +173,7 @@ int llhttp_should_keep_alive(const llhttp_t* parser) {
 
   return !llhttp_message_needs_eof(parser);
 }
+
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif

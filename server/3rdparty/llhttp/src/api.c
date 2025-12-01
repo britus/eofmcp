@@ -2,6 +2,11 @@
 #include <stdio.h>
 #include <string.h>
 
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#endif
+
 #include "llhttp.h"
 
 #define CALLBACK_MAYBE(PARSER, NAME)                                          \
@@ -496,7 +501,7 @@ int llhttp__on_reset(llhttp_t* s, const char* p, const char* endp) {
 
 /* Private */
 
-
+#ifdef LLHTTP_DEBUG
 void llhttp__debug(llhttp_t* s, const char* p, const char* endp,
                    const char* msg) {
   if (p == endp) {
@@ -507,3 +512,11 @@ void llhttp__debug(llhttp_t* s, const char* p, const char* endp,
             s->type, s->flags, *p, msg);
   }
 }
+#else
+void llhttp__debug(llhttp_t* s, const char* p, const char* endp,
+                   const char* msg) { }
+#endif
+
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif

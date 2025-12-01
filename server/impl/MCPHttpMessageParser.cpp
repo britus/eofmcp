@@ -6,7 +6,7 @@
  * @copyright Copyright (c) 2025 zhangheng. All rights reserved.
  */
 
-#include <MCPClientinitializeMessage.h>
+#include <MCPClientInitializeMessage.h>
 #include <MCPHttpMessageParser.h>
 #include <QJsonDocument>
 #include <QJsonParseError>
@@ -70,7 +70,7 @@ QSharedPointer<MCPClientMessage> MCPHttpMessageParser::genClientMessageFromHttp(
     auto setAcceptTypes = strAcceptHeader.split(",").toList(); //Set();
     // 清理空格
     QList<QString> cleanedAcceptTypes;
-    for (const QString &type : setAcceptTypes) {
+    foreach (const QString &type, setAcceptTypes) {
         cleanedAcceptTypes.append(type.trimmed());
     }
     setAcceptTypes = cleanedAcceptTypes;

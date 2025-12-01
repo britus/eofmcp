@@ -19,7 +19,8 @@ QT  += qmlworkerscript
 
 # You can make your code fail to compile if it uses deprecated APIs.
 # In order to do so, uncomment the following line.
-#DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
+# disables all the APIs deprecated before Qt 6.0.0
+DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000
 
 TARGET = eofmcp
 
@@ -343,21 +344,16 @@ include(server/server.pri)
 
 SOURCES += \
     main.cpp \
-    mcpmainwindow.cpp \
     mycalculatorHandler.cpp \
     myresourcehandler.cpp \
-    mysourcecodehandler.cpp \
-    mysourcescraper.cpp
+    mysourcecodehandler.cpp
 
 HEADERS += \
-    mcpmainwindow.h \
     mycalculatorHandler.h \
     myresourcehandler.h \
-    mysourcecodehandler.h \
-    mysourcescraper.h
+    mysourcecodehandler.h
 
-FORMS += \
-    mcpmainwindow.ui
+FORMS +=
 
 TRANSLATIONS += \
     eofmcp_en_US.ts
@@ -385,3 +381,6 @@ DISTFILES += \
     README.md \
     privacy.txt \
     qt.conf
+
+RESOURCES += \
+    eofmcp.qrc
