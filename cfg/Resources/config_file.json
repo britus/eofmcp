@@ -1,9 +1,8 @@
 {
-    "uri": "config://eofmcp.config",
-    "name": "config",
-    "description": "File resource | eofmcp.config",
-    "mimeType": "application/json",
+    "uri": "file://config",
+    "name": "Configuration File",
+    "description": "Server Configuration Information",
+    "mimeType": "text/plain",
     "type": "file",
-    "filePath": "file://Users/eofmc/Library/Preferences/EoF MCP Server/eofmcp.config"
+    "filePath": "MCPServerConfig/Resources/config.txt"
 }
-

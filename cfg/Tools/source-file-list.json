@@ -22,7 +22,7 @@
           "type": "string"
         },
         "description": "List of file extensions to search for (e.g. ['.cpp', '.h', '.hpp'])",
-        "default": [".cpp", ".h", ".hpp", ".c", ".cc", ".java"]
+        "default": [".cpp", ".h", ".hpp", ".c", ".cc", ".java", ".json"]
       }
     },
     "required": ["project_path"]

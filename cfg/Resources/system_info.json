@@ -1,9 +1,8 @@
 {
     "uri": "system://info",
-    "name": "info",
-    "description": "system://info | info",
+    "name": "System Information",
+    "description": "Provides Server System Information",
     "mimeType": "application/json",
     "type": "content",
-    "content": "{\"platform\":\"MacOS\",\"version\":\"EoF Poops\",\"hostname\":\"localhost\",\"timestamp\":\"\"}"
+    "content": {"platform":"Windows","version":"10","hostname":"localhost","timestamp":""}
 }
-

@@ -1,9 +1,8 @@
 {
-    "uri": "/Users/eofmc/EoF/eofmcp/main.cpp",
-    "name": "main.cpp",
-    "description": "Wrap the QObject object with MCPResourceWrapper and automatically update its content every 5 second",
-    "mimeType": "text/cpp",
+    "uri": "wrapper://example",
+    "name": "Wrapper Resource Example",
+    "description": "Wraps QObject objects through MCPResourceWrapper, automatically updates content every 5 seconds",
+    "mimeType": "application/json",
     "type": "wrapper",
     "handlerName": "MyResourceHandler"
 }
-

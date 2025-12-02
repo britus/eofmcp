@@ -1,9 +1,8 @@
 {
     "uri": "wrapper://dynamic",
-    "name": "dynamic_MyResourceHandler",
-    "description": "wrapper://dynamic | dynamic MyResourceHandler",
+    "name": "Dynamic Resource",
+    "description": "Dynamic resource example demonstrating resource change notification functionality",
     "mimeType": "application/json",
     "type": "wrapper",
     "handlerName": "MyResourceHandler"
 }
-
