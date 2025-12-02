@@ -127,6 +127,12 @@ QJsonObject SourceCodeHandler::listSourceFiles(const QVariant &project_path, con
     QStringList strExtensions = DEFAULT_EXTENSIONS;
     if (extensions.isValid() && extensions.typeId() == QMetaType::QStringList) {
         strExtensions = extensions.toStringList();
+    } else if (extensions.isValid() && extensions.typeId() == QMetaType::QVariantList) {
+        foreach (auto ext, extensions.toList()) {
+            if (ext.isValid()) {
+                strExtensions.append(ext.toString());
+            }
+        }
     } else if (extensions.isValid() && extensions.typeId() == QMetaType::QJsonArray) {
         strExtensions = getFileExtensions(extensions.toJsonArray());
     }

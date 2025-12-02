@@ -26,55 +26,17 @@
 #include <QTranslator>
 
 static MCPAutoServer autoServer;
-static QTimer toolsTimer;
 
 void StartAutoMCPServer()
 {
     autoServer.performStart();
+    autoServer.generateResources("/Users/eofmc/EoF/eofmcp");
+    autoServer.loadMcpToolset();
 }
 
 void StopAutoMCPServer()
 {
     autoServer.performStop();
-}
-
-// TODO: Seperate to directory/fileWatch class
-void LoadMcpToolset()
-{
-    QString toolsCfgPath;
-
-    toolsCfgPath = QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation);
-    toolsCfgPath = toolsCfgPath + QDir::separator() + "Tools";
-
-    QFile::Permissions permissions;
-    permissions.setFlag(QFile::Permission::ReadOwner, true);
-    permissions.setFlag(QFile::Permission::ReadGroup, true);
-    permissions.setFlag(QFile::Permission::WriteOwner, true);
-    permissions.setFlag(QFile::Permission::WriteGroup, true);
-    permissions.setFlag(QFile::Permission::ExeOwner, true);
-    permissions.setFlag(QFile::Permission::ExeGroup, true);
-
-    QDir toolDir(toolsCfgPath);
-    if (!toolDir.exists()) {
-        if (!toolDir.mkpath(toolsCfgPath, permissions)) {
-            MCP_TOOLS_LOG_CRITICAL() << "Unable to create tools directory" << toolsCfgPath << "abort.";
-            return;
-        }
-    }
-
-    // propagate MCP toolset, 5 sec delay
-    toolsTimer.setInterval(5000);
-    toolsTimer.setSingleShot(true);
-    toolsTimer.connect(&toolsTimer, &QTimer::timeout, [toolDir]() {
-        // get tool configuration files
-        QFileInfoList files = toolDir.entryInfoList(QStringList() << "*.json");
-        foreach (auto fi, files) {
-            if (fi.isFile() && fi.isReadable()) {
-                autoServer.loadTool(fi.absoluteFilePath().toUtf8().constData());
-            }
-        }
-    });
-    toolsTimer.start();
 }
 
 int main(int argc, char *argv[])
@@ -84,6 +46,9 @@ int main(int argc, char *argv[])
     QCoreApplication::setApplicationName("EoF MCP Server");
 
     QCoreApplication a(argc, argv);
+    a.connect(&a, &QCoreApplication::aboutToQuit, &a, []() { //
+        StopAutoMCPServer();
+    });
 
     QTranslator translator;
     const QStringList uiLanguages = QLocale::system().uiLanguages();
@@ -115,9 +80,6 @@ int main(int argc, char *argv[])
     // via objectName or the "MCPResourceHandlerName" property
     // The "MCPResourceHandlerName" property is already set in the MyResourceHandler constructor
     handlers.append(new MyResourceHandler(qApp));
-
-    // Load supported MCP toolset
-    LoadMcpToolset();
 
     // Use automatic startup to load and start the server from the configuration file
     // The configuration file is located in the MCPServerConfig folder within the application directory

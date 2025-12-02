@@ -105,7 +105,6 @@ bool MCPResourceService::addFromJson(const QJsonObject &jsonResource, QObject *p
     return MCPInvokeHelper::syncInvokeReturn(this, [this, jsonResource, pSearchRoot]() {
         // Convert JSON object to MCPResourceConfig
         MCPResourceConfig resourceConfig = MCPResourceConfig::fromJson(jsonResource);
-
         return addFromConfig(resourceConfig, MCPHandlerResolver::resolveResourceHandlers(pSearchRoot));
     });
 }
