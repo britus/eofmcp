@@ -251,23 +251,14 @@ QJsonObject MCPTool::execute(const QJsonObject &jsonCallArguments)
                          m_strExecMethodName, //
                          jsonCallArguments.toVariantMap())
                          .toJsonObject();
+        validateOutput(jsonObject);
     } else if (m_execFun != nullptr) {
         jsonObject = m_execFun();
+        validateOutput(jsonObject);
     } else {
-        QJsonObject output = QJsonObject({
-            QPair<QString, QJsonValue>("operands", QJsonArray({0xbe, 0x66, 0x05, 0x25})),
-            QPair<QString, QJsonValue>("operation", QJsonValue("error")),
-            QPair<QString, QJsonValue>("result", QJsonValue(0xbe6605)),
-            QPair<QString, QJsonValue>("success", QJsonValue(false)),
-            QPair<QString, QJsonValue>("timestamp", QJsonValue("0")),
-        });
-        jsonObject = QJsonObject({
-            QPair<QString, QJsonValue>("structuredContent", output), //
-            QPair<QString, QJsonValue>("content", QJsonArray({})),   //
-        });
+        jsonObject["success"] = false;
+        jsonObject["error"] = "Execution handler not found or NULL.";
     }
-
-    validateOutput(jsonObject);
 
     return jsonObject;
 }

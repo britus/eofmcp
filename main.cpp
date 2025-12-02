@@ -30,8 +30,6 @@ static MCPAutoServer autoServer;
 void StartAutoMCPServer()
 {
     autoServer.performStart();
-    autoServer.generateResources("/Users/eofmc/EoF/eofmcp");
-    autoServer.loadMcpToolset();
 }
 
 void StopAutoMCPServer()

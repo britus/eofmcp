@@ -1,0 +1,4 @@
+{
+    "extensions": [".cpp", ".h", ".hpp", ".c", ".cc", ".cxx", ".hxx", ".java"],
+    "pathNames": ["/Users/eofmc/EoF/qtmcp"]
+}

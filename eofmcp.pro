@@ -364,6 +364,7 @@ TRANSLATIONS += \
 #!isEmpty(target.path): INSTALLS += target
 
 DISTFILES += \
+    cfg/Projects/projects.json \
     cfg/Prompts/code_review.json \
     cfg/Prompts/generate_api_doc.json \
     cfg/Resources/config_file.json \
@@ -375,7 +376,6 @@ DISTFILES += \
     cfg/Tools/source-file-list.json \
     cfg/Tools/source-file-read.json \
     cfg/Tools/source-file-write.json \
-    cfg/Tools/src-scraper.json \
     cfg/eofmcp.config \
     LICENSE \
     README.md \

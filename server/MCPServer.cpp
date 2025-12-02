@@ -50,17 +50,17 @@ MCPServer::MCPServer(QObject *pParent)
     , m_pHandler(nullptr)
     , m_pThread(new QThread(this))
 {
-    QFile::Permissions permissions;
-    permissions.setFlag(QFile::Permission::ReadOwner, true);
-    permissions.setFlag(QFile::Permission::ReadGroup, true);
-    permissions.setFlag(QFile::Permission::WriteOwner, true);
-    permissions.setFlag(QFile::Permission::WriteGroup, true);
-    permissions.setFlag(QFile::Permission::ExeOwner, true);
-    permissions.setFlag(QFile::Permission::ExeGroup, true);
-
     QString logDir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+
     QDir dir(logDir);
     if (!dir.exists()) {
+        QFile::Permissions permissions;
+        permissions.setFlag(QFile::Permission::ReadOwner, true);
+        permissions.setFlag(QFile::Permission::ReadGroup, true);
+        permissions.setFlag(QFile::Permission::WriteOwner, true);
+        permissions.setFlag(QFile::Permission::WriteGroup, true);
+        permissions.setFlag(QFile::Permission::ExeOwner, true);
+        permissions.setFlag(QFile::Permission::ExeGroup, true);
         dir.mkpath(logDir, permissions);
     }
 
@@ -206,6 +206,7 @@ bool MCPServer::initServer(QSharedPointer<MCPToolsConfig> pToolsConfig, QSharedP
             m_pPromptService->addFromConfig(config);
         }
     }
+
     return true;
 }
 

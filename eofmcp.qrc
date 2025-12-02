@@ -12,6 +12,5 @@
         <file>cfg/Tools/source-file-list.json</file>
         <file>cfg/Tools/source-file-read.json</file>
         <file>cfg/Tools/source-file-write.json</file>
-        <file>cfg/Tools/src-scraper.json</file>
     </qresource>
 </RCC>

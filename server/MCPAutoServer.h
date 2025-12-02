@@ -1,4 +1,5 @@
 #pragma once
+#include <QDir>
 #include <QObject>
 #include <QThread>
 
@@ -67,17 +68,11 @@ public:
     void performStop();
 
     /**
-     * @brief Load tool configuration file
-     * @param strToolConfigFile Tool configuration file path
-     */
-    void loadTool(const QString &strToolConfigFile);
-
-    /**
      * @brief Generate resources configuration for files in given directory
      * @param basePath The root directory of file resources
      * @param bRecursive True to walk into sub directories or false
      */
-    void generateResources(const QString basePath, bool bRecursive = true);
+    void generateResources(const QDir basePath, bool bRecursive = true);
 
     /**
      * @brief Load all MCP toolset configurations
@@ -92,4 +87,10 @@ public:
 
 private:
     IMCPServer *m_pServer; // Server instance
+
+    /**
+     * @brief Load tool configuration file
+     * @param strToolConfigFile Tool configuration file path
+     */
+    void loadToolConfig(const QString &strToolConfigFile);
 };
