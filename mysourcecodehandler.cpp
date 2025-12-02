@@ -33,7 +33,7 @@ QJsonObject SourceCodeHandler::displayProjectFiles(const QVariant &project_path,
     }
 
     MCP_TOOLS_LOG_DEBUG().noquote()                                    //
-        << "TOOL-SRCH:displayProjectFiles:" << project_path.toString() //
+        << "TOOL-SRCT:displayProjectFiles:" << project_path.toString() //
         << "extensions:" << sort_by << "recusive:" << recursive;
 
     QString strProjectPath = project_path.toString();
@@ -120,7 +120,7 @@ QJsonObject SourceCodeHandler::listSourceFiles(const QVariant &project_path, con
     }
 
     MCP_TOOLS_LOG_DEBUG().noquote()     //
-        << "TOOL-SRCH:listSourceFiles:" //
+        << "TOOL-SRCT:listSourceFiles:" //
         << project_path.toString() << "extensions:" << extensions;
 
     QString strProjectPath = project_path.toString();
@@ -178,7 +178,7 @@ QJsonObject SourceCodeHandler::readSourceFile(const QVariant &file_path)
         return createErrorResponse("Parameter 'file_path' required");
     }
 
-    MCP_TOOLS_LOG_DEBUG() << "TOOL-SRCH:readSourceFile:" << file_path;
+    MCP_TOOLS_LOG_DEBUG() << "TOOL-SRCT:readSourceFile:" << file_path;
 
     QString strFilePath = file_path.toString();
 
@@ -237,50 +237,52 @@ QJsonObject SourceCodeHandler::writeSourceFile(const QVariant &file_path, const 
     }
 
     MCP_TOOLS_LOG_DEBUG().noquote()     //
-        << "TOOL-SRCH:writeSourceFile:" //
+        << "TOOL-SRCT:writeSourceFile:" //
         << file_path.toString() << "backup:" << create_backup;
 
     QString strFilePath = file_path.toString();
     QString strContent = content.toString();
-    bool bCreateBackup = create_backup.toBool();
+    bool bCreateBackup = create_backup.isValid() ? create_backup.toBool() : true;
 
     if (!isValidPath(strFilePath)) {
         return createErrorResponse(QString("Invalid file path: %1").arg(strFilePath));
     }
-
-    QFile::Permissions permissions;
-    permissions.setFlag(QFile::Permission::ReadOwner, true);
-    permissions.setFlag(QFile::Permission::ReadGroup, true);
-    permissions.setFlag(QFile::Permission::WriteOwner, true);
-    permissions.setFlag(QFile::Permission::WriteGroup, true);
-    permissions.setFlag(QFile::Permission::ExeOwner, true);
-    permissions.setFlag(QFile::Permission::ExeGroup, true);
+    if (strContent.isEmpty()) {
+        return createErrorResponse(QString("No content in file: %1").arg(strFilePath));
+    }
 
     QFileInfo fi(strFilePath);
     QDir tdir(fi.path());
     if (!tdir.exists()) {
+        QFile::Permissions permissions;
+        permissions.setFlag(QFile::Permission::ReadOwner, true);
+        permissions.setFlag(QFile::Permission::ReadGroup, true);
+        permissions.setFlag(QFile::Permission::WriteOwner, true);
+        permissions.setFlag(QFile::Permission::WriteGroup, true);
+        permissions.setFlag(QFile::Permission::ExeOwner, true);
+        permissions.setFlag(QFile::Permission::ExeGroup, true);
         tdir.mkpath(fi.path(), permissions);
     }
 
-    QJsonObject info;
-    info["file_path"] = strFilePath;
-    info["success"] = false;
+    QJsonObject result;
+    result["file_path"] = strFilePath;
+    result["success"] = false;
 
     QString strBackupPath;
     if (bCreateBackup && QFile::exists(strFilePath)) {
         strBackupPath = createBackup(strFilePath);
         if (!strBackupPath.isEmpty()) {
-            info["backup_path"] = strBackupPath;
+            result["backup_path"] = strBackupPath;
         }
     }
 
     QFile file(strFilePath);
 
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-        info["message"] = QString( //
-                              "Error: File could not be written - %1")
-                              .arg(file.errorString());
-        return info;
+        result["message"] = QString( //
+                                "Error: File could not be written - %1")
+                                .arg(file.errorString());
+        return result;
     }
 
     QByteArray byteContent = strContent.toUtf8();
@@ -288,27 +290,27 @@ QJsonObject SourceCodeHandler::writeSourceFile(const QVariant &file_path, const 
     file.close();
 
     if (iBytesWritten == -1) {
-        info["message"] = "Error writing the file";
-        return info;
+        result["message"] = "Error writing the file";
+        return result;
     }
 
-    info["success"] = true;
-    info["bytes_written"] = static_cast<int>(iBytesWritten);
-    info["message"] = QString( //
-                          "File successfully saved - %1 Bytes written")
-                          .arg(iBytesWritten);
+    result["success"] = true;
+    result["bytes_written"] = static_cast<int>(iBytesWritten);
+    result["message"] = QString( //
+                            "File successfully saved - %1 Bytes written")
+                            .arg(iBytesWritten);
 
     // result
     auto timestamp = QDateTime::currentDateTime().toString(Qt::ISODate) + "Z";
 
-    QJsonDocument doc = QJsonDocument(info);
+    QJsonDocument doc = QJsonDocument(result);
     QJsonArray resp_content = QJsonArray({QJsonObject({
         QPair<QString, QString>("type", "text"), //
         QPair<QString, QString>("text", doc.toJson()),
     })});
 
     QJsonObject response = QJsonObject({
-        QPair<QString, QJsonValue>("structuredContent", info),
+        QPair<QString, QJsonValue>("structuredContent", result),
         QPair<QString, QJsonValue>("content", resp_content),
     });
 
@@ -378,7 +380,7 @@ QString SourceCodeHandler::createBackup(const QString &strOriginalPath)
 {
     QFileInfo fileInfo(strOriginalPath);
     QString strBackupDir = fileInfo.absolutePath();
-    QString strBackupName = fileInfo.baseName() + "_backup_" + QDateTime::currentDateTime().toString("yyyyMMdd_hhmmss") + "." + fileInfo.suffix();
+    QString strBackupName = "_backup_" + QDateTime::currentDateTime().toString("yyyyMMdd_hhmmss") + "_" + fileInfo.baseName() + "." + fileInfo.suffix();
     QString strBackupPath = strBackupDir + "/" + strBackupName;
 
     if (QFile::copy(strOriginalPath, strBackupPath)) {

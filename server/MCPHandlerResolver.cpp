@@ -1,6 +1,6 @@
 /**
  * @file MCPHandlerResolver.cpp
- * @brief MCP Handler解析器实现
+ * @brief MCP Handler Resolver implementation
  * @author zhangheng
  * @date 2025-01-09
  * @copyright Copyright (c) 2025 zhangheng. All rights reserved.
@@ -13,7 +13,7 @@
 #include <QWidget>
 
 namespace {
-// 添加对象的Handler到映射表
+// Add object's Handler to the mapping table
 void addHandlers(QObject *pObj, QMap<QString, QObject *> &handlers, bool resourceOnly)
 {
     QString strObjectName = pObj->objectName();
@@ -34,7 +34,7 @@ void addHandlers(QObject *pObj, QMap<QString, QObject *> &handlers, bool resourc
     }
 }
 
-// 遍历对象列表并添加Handler
+// Traverse object list and add Handlers
 void processObjects(const QList<QObject *> &objects, QMap<QString, QObject *> &handlers, bool resourceOnly)
 {
     for (QObject *pObj : objects) {
@@ -42,7 +42,7 @@ void processObjects(const QList<QObject *> &objects, QMap<QString, QObject *> &h
     }
 }
 
-// 遍历默认范围（qApp子对象和所有QWidget）
+// Traverse default scope (qApp child objects and all QWidget)
 void processDefaultScope(QMap<QString, QObject *> &handlers, bool resourceOnly)
 {
     QCoreApplication *pApp = QCoreApplication::instance();

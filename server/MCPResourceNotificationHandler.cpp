@@ -20,13 +20,13 @@ MCPResourceNotificationHandler::~MCPResourceNotificationHandler() {}
 
 void MCPResourceNotificationHandler::onResourceContentChanged(const QString &strUri)
 {
-    MCP_CORE_LOG_INFO() << "MCPResourceNotificationHandler: Resource content changed, notify subscribers:" << strUri;
+    //MCP_CORE_LOG_INFO() << "onResourceContentChanged: Resource content changed, notify subscribers:" << strUri;
 
     // Get all session IDs subscribed to this URI
     auto pResourceService = m_pServer->getResourceService();
     QSet<QString> lstSubscribedSessionIds = pResourceService->getSubscribedSessionIds(strUri);
     if (lstSubscribedSessionIds.isEmpty()) {
-        MCP_CORE_LOG_DEBUG() << "MCPResourceNotificationHandler: URI has no subscribers:" << strUri;
+        MCP_CORE_LOG_WARNING() << "onResourceContentChanged: URI has no subscribers yet:" << strUri;
         return;
     }
 
@@ -50,7 +50,7 @@ void MCPResourceNotificationHandler::onResourceContentChanged(const QString &str
     // According to MCP protocol specification, the method name for resource update notifications is "notifications/resources/updated"
     sendNotificationToSubscribers("notifications/resources/updated", params, lstSubscribedSessionIds);
 
-    MCP_CORE_LOG_INFO() << "MCPResourceNotificationHandler: URI" << strUri << "'s content change notification has been processed, total" << lstSubscribedSessionIds.size() << "subscribers";
+    //MCP_CORE_LOG_INFO() << "onResourceContentChanged: URI" << strUri << "'s content change notification has been processed, total" << lstSubscribedSessionIds.size() << "subscribers";
 }
 
 void MCPResourceNotificationHandler::onResourceDeleted(const QString &strUri)
@@ -61,12 +61,12 @@ void MCPResourceNotificationHandler::onResourceDeleted(const QString &strUri)
 
     auto pResourceService = m_pServer->getResourceService();
 
-    MCP_CORE_LOG_INFO() << "MCPResourceNotificationHandler: Resource deleted, notify subscribers:" << strUri;
+    //MCP_CORE_LOG_INFO() << "onResourceDeleted: Resource deleted, notify subscribers:" << strUri;
 
     // Get all session IDs subscribed to this URI
     QSet<QString> subscribedSessionIds = pResourceService->getSubscribedSessionIds(strUri);
     if (subscribedSessionIds.isEmpty()) {
-        MCP_CORE_LOG_DEBUG() << "MCPResourceNotificationHandler: URI has no subscribers:" << strUri;
+        MCP_CORE_LOG_WARNING() << "onResourceDeleted: URI has no subscribers yet:" << strUri;
         return;
     }
 
@@ -81,14 +81,14 @@ void MCPResourceNotificationHandler::onResourceDeleted(const QString &strUri)
     // According to MCP protocol specification, the method name for resource update notifications is "notifications/resources/updated"
     sendNotificationToSubscribers("notifications/resources/updated", params, subscribedSessionIds);
 
-    MCP_CORE_LOG_INFO() << "MCPResourceNotificationHandler: URI" << strUri << "'s deletion notification has been processed, total" << subscribedSessionIds.size() << "subscribers";
+    //MCP_CORE_LOG_INFO() << "onResourceDeleted: URI" << strUri << "'s deletion notification has been processed, total" << subscribedSessionIds.size() << "subscribers";
 }
 
 void MCPResourceNotificationHandler::onResourcesListChanged()
 {
     auto pResourceService = m_pServer->getResourceService();
 
-    MCP_CORE_LOG_INFO() << "MCPResourceNotificationHandler: Resource list changed, send notification to all clients";
+    //MCP_CORE_LOG_INFO() << "onResourcesListChanged: Resource list changed, send notification to all clients";
 
     // Get the latest resource list
     QJsonArray arrResources = pResourceService->list();
@@ -100,5 +100,5 @@ void MCPResourceNotificationHandler::onResourcesListChanged()
     // Broadcast notification
     broadcastNotification("notifications/resources/list_changed", params);
 
-    MCP_CORE_LOG_INFO() << "MCPResourceNotificationHandler: Resource list change notification processing completed";
+    //MCP_CORE_LOG_INFO() << "onResourcesListChanged: Resource list change notification processing completed";
 }

@@ -58,7 +58,7 @@ bool MCPResourceService::registerResource(const QString &strUri, MCPResource *pR
     }
 
     m_dictResources[strUri] = pResource;
-    MCP_CORE_LOG_INFO() << "MCPResourceService: Resource registered:" << strUri;
+    //MCP_CORE_LOG_INFO() << "MCPResourceService: Resource registered:" << strUri;
 
     // Connect resource's changed signal to resourceContentChanged(QString) signal
     // This notifies subscribers when resource metadata (name, description, mimeType) or content changes

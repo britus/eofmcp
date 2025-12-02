@@ -74,7 +74,7 @@ QVariant MCPMethodHelper::call(QObject *pHandler, const QSharedPointer<QMetaMeth
     }
 
     MCP_CORE_LOG_DEBUG().noquote() << "TOOL-CALL(" << pHandler->objectName() << "):" //
-                                   << pMetaMethod->name() << ":" << parameterTypes;
+                                   << pMetaMethod->name() << ": parameterTypes:" << parameterTypes;
 
     // Storage for converted arguments - must stay alive until after invoke()
     QVariant storage[10];      // Qt supports up to 10 args for invoke
@@ -130,7 +130,7 @@ QVariant MCPMethodHelper::call(QObject *pHandler, const QSharedPointer<QMetaMeth
         _args += QStringLiteral("%1 @%2").arg(parameterTypes[i].constData()).arg((qulonglong) args[i].data(), 8, 16, QChar('0'));
     }
     MCP_CORE_LOG_DEBUG().noquote() << "TOOL-CALL(" << pHandler->objectName() << "):" //
-                                   << pMetaMethod->name() << "args:" << _args;
+                                   << pMetaMethod->name() << ": args:" << _args;
     MCP_CORE_LOG_DEBUG().noquote() << "TOOL-CALL(" << pHandler->objectName() //
                                    << "): MainThread(" << (QThread::currentThread() == QCoreApplication::instance()->thread()) << ")";
 
@@ -151,9 +151,9 @@ QVariant MCPMethodHelper::call(QObject *pHandler, const QSharedPointer<QMetaMeth
     if (returnValue.isValid()) {
         QJsonDocument doc = QJsonDocument(returnValue.toJsonObject());
         MCP_CORE_LOG_DEBUG().noquote() << "TOOL-CALL(" << pHandler->objectName() << "):" //
-                                       << pMetaMethod->name() << "" << doc.toJson();
+                                       << pMetaMethod->name() << "completed.";           // << doc.toJson();
     } else {
-        MCP_CORE_LOG_WARNING().noquote() << "TOOL-CALL:" << pMetaMethod->name() << ":" << returnValue;
+        MCP_CORE_LOG_WARNING().noquote() << "TOOL-CALL:" << pMetaMethod->name() << "failed.";
     }
     return returnValue;
 }
@@ -162,8 +162,8 @@ QVariant MCPMethodHelper::call(QObject *pHandler, const QSharedPointer<QMetaMeth
 {
     auto lstMethodParameterNames = pMetaMethod->parameterNames();
 
-    MCP_CORE_LOG_DEBUG().noquote() << "TOOL-CALL(" << pHandler->objectName() << "):" //
-                                   << pMetaMethod->name() << ": dictArguments:" << dictArguments;
+    //MCP_CORE_LOG_DEBUG().noquote() << "TOOL-CALL(" << pHandler->objectName() << "):" //
+    //                               << pMetaMethod->name() << ": dictArguments:" << dictArguments;
     MCP_CORE_LOG_DEBUG().noquote() << "TOOL-CALL(" << pHandler->objectName() << "):" //
                                    << pMetaMethod->name() << ": lstMethodParameterNames:" << lstMethodParameterNames;
 #if 0

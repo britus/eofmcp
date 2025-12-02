@@ -1,6 +1,6 @@
 /**
  * @file MCPRequestDispatcher.cpp
- * @brief MCP请求调度器实现
+ * @brief MCP request dispatcher implementation
  * @author zhangheng
  * @date 2025-01-09
  * @copyright Copyright (c) 2025 zhangheng. All rights reserved.
@@ -29,20 +29,21 @@ MCPRequestDispatcher::MCPRequestDispatcher(MCPServer *pServer, QObject *pParent)
     , m_pInitializeHandler(new MCPInitializeHandler(m_pServer->getConfig(), this))
     , m_pSubscriptionHandler(new MCPSubscriptionHandler(m_pServer->getResourceService(), this))
 {
-    // 初始化路由表
+    // Initialize routing table
     initializeRoutes();
 }
+
 
 MCPRequestDispatcher::~MCPRequestDispatcher() {}
 
 void MCPRequestDispatcher::initializeRoutes()
 {
-    // 注册中间件（按执行顺序）
+    // Register middlewares (in execution order)
     m_pRouter->use(QSharedPointer<MCPLoggingMiddleware>::create());
-    m_pRouter->use(QSharedPointer<MCPPerformanceMiddleware>::create(500)); // 500ms慢请求阈值
+    m_pRouter->use(QSharedPointer<MCPPerformanceMiddleware>::create(500)); // 500ms slow request threshold
     m_pRouter->use(QSharedPointer<MCPSessionValidationMiddleware>::create());
 
-    // 注册所有路由（使用Lambda绑定成员函数）
+    // Register all routes (using Lambda to bind member functions)
     m_pRouter->registerRoute("ping", [this](const QSharedPointer<MCPContext> &pContext) { return handlePing(pContext); });
 
     m_pRouter->registerRoute("connect", [this](const QSharedPointer<MCPContext> &pContext) { return handleConnect(pContext); });
@@ -107,9 +108,9 @@ QSharedPointer<MCPServerMessage> MCPRequestDispatcher::syncHandleToolsCall(const
     QString strToolName = jsonCall.value("name").toString();
     QJsonObject jsonCallArguments = jsonCall.value("arguments").toObject();
 
-    // 验证必需参数
+    // Validate required parameters
     if (strToolName.isEmpty()) {
-        // 根据 JSON-RPC 2.0 和 MCP 协议规范，错误消息应该使用英文
+        // According to JSON-RPC 2.0 and MCP protocol specification, error messages should be in English
         return QSharedPointer<MCPServerErrorResponse>::create(pContext, MCPError::invalidParams("Missing required parameter: name"));
     }
 
@@ -124,8 +125,8 @@ QSharedPointer<MCPServerMessage> MCPRequestDispatcher::syncHandleToolsCall(const
     } catch (const MCPError &error) {
         return QSharedPointer<MCPServerErrorResponse>::create(pContext, error);
     } catch (const std::exception &e) {
-        MCP_CORE_LOG_WARNING() << "工具调用时发生未知异常:" << e.what();
-        // 根据 MCP 协议规范，内部错误的错误消息应该是英文
+        MCP_CORE_LOG_WARNING() << "Unknown exception occurred during tool call:";
+        // According to MCP protocol specification, internal error messages should be in English
         MCPError error = MCPError::internalError(QString("Tool execution failed: %1").arg(e.what()));
         return QSharedPointer<MCPServerErrorResponse>::create(pContext, error);
     }
@@ -141,8 +142,8 @@ QSharedPointer<MCPServerMessage> MCPRequestDispatcher::handleListResources(const
 
 QSharedPointer<MCPServerMessage> MCPRequestDispatcher::handleListResourceTemplates(const QSharedPointer<MCPContext> &pContext)
 {
-    // 当前实现不支持资源模板，返回空列表
-    // 根据MCP规范，resources/templates/list应该返回资源模板列表
+    // Current implementation does not support resource templates, return empty list
+    // According to MCP specification, resources/templates/list should return a list of resource templates
     QJsonObject result;
     result["resourceTemplates"] = QJsonArray();
     return QSharedPointer<MCPServerMessage>::create(pContext, result);
@@ -155,14 +156,14 @@ QSharedPointer<MCPServerMessage> MCPRequestDispatcher::handleReadResource(const 
     QString strUri = jsonParams.value("uri").toString();
 
     if (strUri.isEmpty()) {
-        // 根据 JSON-RPC 2.0 和 MCP 协议规范，错误消息应该使用英文
+        // According to JSON-RPC 2.0 and MCP protocol specification, error messages should be in English
         return QSharedPointer<MCPServerErrorResponse>::create(pContext, MCPError::invalidParams("Missing required parameter: uri"));
     }
 
     QJsonObject result = m_pServer->getResourceService()->readResource(strUri);
 
     if (result.isEmpty()) {
-        // 根据 MCP 协议规范，资源不存在应返回 -32002 错误码，包含 uri 在 data 字段中
+        // According to MCP protocol specification, when resource does not exist, return error code -32002 with uri in data field
         return QSharedPointer<MCPServerErrorResponse>::create(pContext, MCPError::resourceNotFound(strUri));
     }
 
@@ -184,10 +185,10 @@ QSharedPointer<MCPServerMessage> MCPRequestDispatcher::handleGetPrompt(const QSh
     QString strName = jsonParams.value("name").toString();
 
     if (strName.isEmpty()) {
-        return QSharedPointer<MCPServerErrorResponse>::create(pContext, MCPError::invalidParams("缺少name参数"));
+        return QSharedPointer<MCPServerErrorResponse>::create(pContext, MCPError::invalidParams("Missing name parameter"));
     }
 
-    // 解析参数
+    // Parse parameters
     QMap<QString, QString> arguments;
     QJsonObject jsonArguments = jsonParams.value("arguments").toObject();
     for (auto it = jsonArguments.begin(); it != jsonArguments.end(); ++it) {
@@ -197,7 +198,7 @@ QSharedPointer<MCPServerMessage> MCPRequestDispatcher::handleGetPrompt(const QSh
     QJsonObject result = m_pServer->getPromptService()->getPrompt(strName, arguments);
 
     if (result.isEmpty()) {
-        return QSharedPointer<MCPServerErrorResponse>::create(pContext, MCPError::invalidRequest(QString("提示词不存在: %1").arg(strName)));
+        return QSharedPointer<MCPServerErrorResponse>::create(pContext, MCPError::invalidRequest(QString("Prompt does not exist: %1").arg(strName)));
     }
 
     return QSharedPointer<MCPServerMessage>::create(pContext, result);

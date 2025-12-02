@@ -204,7 +204,7 @@ void MCPAutoServer::generateResources(const QDir basePath, bool bRecursive)
                     QPair<QString, QString>("filePath", res.absoluteFilePath()),
                 });
                 MCPInvokeHelper::asynInvoke(m_pServer, [this, entry]() { //
-                    if (!m_pServer->getResourceService()->addFromJson(entry)) {
+                    if (!m_pServer->getResourceService()->addFromJson(entry, qApp)) {
                         MCP_CORE_LOG_WARNING() << "MCPAutoServer: Failed to add resource: " //
                                                << entry;
                     }

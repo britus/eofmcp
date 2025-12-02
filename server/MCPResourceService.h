@@ -1,6 +1,6 @@
 /**
  * @file MCPResourceService.h
- * @brief MCP资源服务（内部实现）
+ * @brief MCP resource service (internal implementation)
  * @author zhangheng
  * @date 2025-01-09
  * @copyright Copyright (c) 2025 zhangheng. All rights reserved.
@@ -18,13 +18,13 @@ class MCPResource;
 struct MCPResourceConfig;
 
 /**
- * @brief MCP 资源服务实现类
+ * @brief MCP resource service implementation class
  * 
- * 职责：
- * - 资源注册和管理
- * - 资源读取操作
- * - 资源列表提供
- * - 资源订阅管理（只有资源支持订阅）
+ * Responsibilities:
+ * - Resource registration and management
+ * - Resource reading operations
+ * - Resource list provision
+ * - Resource subscription management (only resources that support subscription)
  */
 class MCPResourceService : public IMCPResourceService
 {
@@ -34,7 +34,7 @@ public:
     explicit MCPResourceService(QObject* pParent = nullptr);
     virtual ~MCPResourceService();
 
-    // 实现 IMCPResourceService 接口
+    // Implementation of IMCPResourceService interface
     bool add(const QString& strUri,
              const QString& strName,
              const QString& strDescription,
@@ -55,79 +55,79 @@ public:
     bool addFromJson(const QJsonObject& jsonResource, QObject* pSearchRoot = nullptr) override;
     
 public:
-    // 内部方法（供内部使用）
+    // Internal methods (for internal use)
     bool registerResource(const QString& strUri, MCPResource* pResource);
     
     /**
-     * @brief 订阅资源变化
-     * @param strUri 资源URI
-     * @param strSessionId 会话ID
-     * @return 是否订阅成功
+     * @brief Subscribe to resource changes
+     * @param strUri Resource URI
+     * @param strSessionId Session ID
+     * @return Whether subscription was successful
      */
     bool subscribe(const QString& strUri, const QString& strSessionId);
     
     /**
-     * @brief 取消订阅资源变化
-     * @param strUri 资源URI
-     * @param strSessionId 会话ID
-     * @return 是否取消订阅成功
+     * @brief Unsubscribe from resource changes
+     * @param strUri Resource URI
+     * @param strSessionId Session ID
+     * @return Whether unsubscription was successful
      */
     bool unsubscribe(const QString& strUri, const QString& strSessionId);
     
     /**
-     * @brief 取消会话的所有订阅
-     * @param strSessionId 会话ID
+     * @brief Unsubscribe all subscriptions for a session
+     * @param strSessionId Session ID
      */
     void unsubscribeAll(const QString& strSessionId);
     
     /**
-     * @brief 获取订阅指定URI的所有会话ID
-     * @param strUri 资源URI
-     * @return 订阅该URI的会话ID集合
+     * @brief Get all session IDs subscribed to a specific URI
+     * @param strUri Resource URI
+     * @return Set of session IDs subscribed to this URI
      */
     QSet<QString> getSubscribedSessionIds(const QString& strUri) const;
     
     /**
-     * @brief 获取资源对象（内部方法，供内部使用）
-     * @param strUri 资源URI
-     * @return 资源对象指针，如果不存在返回nullptr
+     * @brief Get resource object (internal method, for internal use)
+     * @param strUri Resource URI
+     * @return Pointer to resource object, returns nullptr if not found
      */
     MCPResource* getResource(const QString& strUri) const;
 
 signals:
     /**
-     * @brief 资源内容变化信号（用于订阅机制）
-     * 当以下情况发生时发出此信号：
-     * - 资源注册时
-     * - 资源元数据变化时（name、description、mimeType）
-     * - 资源内容变化时（通过 notifyChanged()）
+     * @brief Resource content changed signal (for subscription mechanism)
+     * This signal is emitted when the following occurs:
+     * - Resource registration
+     * - Resource metadata changes (name, description, mimeType)
+     * - Resource content changes (through notifyChanged())
      * 
-     * 由ServerHandler处理订阅通知，向订阅该URI的客户端发送通知
+     * Handled by ServerHandler to send notifications to clients subscribed to this URI
      */
     void resourceContentChanged(const QString& strUri);
     
     /**
-     * @brief 资源删除信号（用于订阅机制）
-     * 当以下情况发生时发出此信号：
-     * - 资源注销时
-     * - 资源失效时（通过 notifyInvalidated()）
+     * @brief Resource deleted signal (for subscription mechanism)
+     * This signal is emitted when the following occurs:
+     * - Resource unregistration
+     * - Resource invalidation (through notifyInvalidated())
      * 
-     * 由ServerHandler处理订阅通知，向订阅该URI的客户端发送删除通知
+     * Handled by ServerHandler to send deletion notifications to clients subscribed to this URI
      */
     void resourceDeleted(const QString& strUri);
     
     /**
-     * @brief 资源列表变化信号（用于广播通知）
-     * 当资源注册或注销时发出此信号，向所有客户端广播
+     * @brief Resource list changed signal (for broadcast notifications)
+     * This signal is emitted when resources are registered or unregistered, broadcasting to all clients
      * 
-     * 注意：元数据变化不会触发此信号，只有资源的添加和删除会触发
+     * Note: Metadata changes do not trigger this signal, only resource additions and deletions trigger it
      */
     void resourcesListChanged();
 
 private:
     /**
-     * @brief 内部方法：实际执行添加资源操作
-     * @return 成功返回资源对象指针，失败返回nullptr
+     * @brief Internal method: actually perform the add resource operation
+     * @return Returns pointer to resource object on success, nullptr on failure
      */
     MCPResource* doAddImpl(const QString& strUri,
                            const QString& strName,
@@ -136,8 +136,8 @@ private:
                            std::function<QString()> contentProvider);
     
     /**
-     * @brief 内部方法：实际执行添加资源操作（从文件路径）
-     * @return 成功返回资源对象指针，失败返回nullptr
+     * @brief Internal method: actually perform the add resource operation (from file path)
+     * @return Returns pointer to resource object on success, nullptr on failure
      */
     MCPResource* doAddImpl(const QString& strUri,
                            const QString& strName,
@@ -146,77 +146,77 @@ private:
                            const QString& strMimeType);
     
     /**
-     * @brief 内部方法：实际执行删除资源操作
-     * @param strUri 资源URI
-     * @param bEmitSignal 是否发送信号，默认为true
+     * @brief Internal method: actually perform the remove resource operation
+     * @param strUri Resource URI
+     * @param bEmitSignal Whether to emit signal, default is true
      */
     bool doRemoveImpl(const QString& strUri, bool bEmitSignal = true);
     
     /**
-     * @brief 内部方法：实际执行检查资源是否存在操作
+     * @brief Internal method: actually perform the check if resource exists operation
      */
     bool doHasImpl(const QString& strUri) const;
     
     /**
-     * @brief 内部方法：实际执行获取资源列表操作
+     * @brief Internal method: actually perform the get resource list operation
      */
     QJsonArray doListImpl(const QString& strUriPrefix) const;
     
     /**
-     * @brief 内部方法：实际执行读取资源内容操作
+     * @brief Internal method: actually perform the read resource content operation
      */
     QJsonObject doReadResourceImpl(const QString& strUri);
     
     /**
-     * @brief 从配置添加文件资源
-     * @param resourceConfig 资源配置对象
-     * @return true表示注册成功，false表示失败
+     * @brief Add file resource from configuration
+     * @param resourceConfig Resource configuration object
+     * @return true if registration successful, false if failed
      */
     bool addFileResourceFromConfig(const MCPResourceConfig& resourceConfig);
     
     /**
-     * @brief 从配置添加包装资源
-     * @param resourceConfig 资源配置对象
-     * @param dictHandlers Handler名称到对象的映射表，如果为空则从qApp搜索
-     * @return true表示注册成功，false表示失败
+     * @brief Add wrapper resource from configuration
+     * @param resourceConfig Resource configuration object
+     * @param dictHandlers Mapping of handler names to objects, if empty search from qApp
+     * @return true if registration successful, false if failed
      */
     bool addWrapperResourceFromConfig(const MCPResourceConfig& resourceConfig, const QMap<QString, QObject*>& dictHandlers = QMap<QString, QObject*>());
     
     /**
-     * @brief 从配置添加内容资源
-     * @param resourceConfig 资源配置对象
-     * @return true表示注册成功，false表示失败
+     * @brief Add content resource from configuration
+     * @param resourceConfig Resource configuration object
+     * @return true if registration successful, false if failed
      */
     bool addContentResourceFromConfig(const MCPResourceConfig& resourceConfig);
     
     /**
-     * @brief 如果配置中包含annotations，则应用到资源
-     * @param pResource 资源对象指针
-     * @param annotations 注解对象
-     * @return true表示成功，false表示失败
+     * @brief Apply annotations to resource if configuration contains annotations
+     * @param pResource Pointer to resource object
+     * @param annotations Annotation object
+     * @return true if successful, false if failed
      */
     bool applyAnnotationsIfNeeded(MCPResource* pResource, const QJsonObject& annotations);
     
     /**
-     * @brief 从配置对象添加资源（内部方法，供MCPServer使用）
-     * @param resourceConfig 资源配置对象
-     * @param dictHandlers Handler名称到对象的映射表，如果为空则从qApp搜索
-     * @return true表示注册成功，false表示失败
+     * @brief Add resource from configuration object (internal method, for MCPServer use)
+     * @param resourceConfig Resource configuration object
+     * @param dictHandlers Mapping of handler names to objects, if empty search from qApp
+     * @return true if registration successful, false if failed
      * 
-     * @warning 死锁风险：在服务运行过程中调用此方法添加资源时，如果添加的是wrapper类型资源，
-     *          且调用方与包装对象（pWrappedObject）在同一线程，可能导致死锁。
-     *          这是因为创建MCPResourceWrapper时会在构造函数中调用updatePropertiesFromWrappedObject()，
-     *          进而调用包装对象的getMetadata()方法，如果此时包装对象正在等待某些操作完成，
-     *          就会发生死锁。建议在服务初始化阶段调用此方法，避免在运行过程中动态添加wrapper类型资源。
+     * @warning Deadlock risk: When calling this method to add resources during service operation, if the added resource is of wrapper type,
+     *          and the caller and wrapped object are in the same thread, deadlock may occur.
+     *          This is because creating MCPResourceWrapper calls updatePropertiesFromWrappedObject() in the constructor,
+     *          which in turn calls getMetadata() on the wrapped object. If the wrapped object is waiting for some operation to complete,
+     *          a deadlock will occur. It's recommended to call this method during service initialization, avoiding dynamic addition of wrapper-type resources during runtime.
      */
     bool addFromConfig(const MCPResourceConfig& resourceConfig, const QMap<QString, QObject*>& dictHandlers = QMap<QString, QObject*>());
 
 private:
     QMap<QString, MCPResource*> m_dictResources;
     
-    // 订阅管理（基于sessionId）
-    QMap<QString, QSet<QString>> m_subscriptions;  // URI -> 会话ID集合
-    QMap<QString, QSet<QString>> m_sessionSubscriptions;  // 会话ID -> URI集合
+    // Subscription management (based on sessionId)
+    QMap<QString, QSet<QString>> m_subscriptions;  // URI -> Set of session IDs
+    QMap<QString, QSet<QString>> m_sessionSubscriptions;  // Session ID -> Set of URIs
 private:
     friend class MCPServer;
 };

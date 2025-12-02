@@ -19,37 +19,39 @@ public:
     QString getClientTitle();
     QString getClientVersion();
     //
+
     QString getClientProtocolVersion();
 
     /**
-     * @brief 检查是否有protocolVersion参数
-     * @return true表示存在，false表示不存在
+     * @brief Check if protocolVersion parameter exists
+     * @return true if exists, false if not exists
      */
     bool hasProtocolVersion() const;
 
     /**
-     * @brief 检查protocolVersion格式是否有效（YYYY-MM-DD格式）
-     * @return true表示格式有效，false表示格式无效
+     * @brief Check if protocolVersion format is valid (YYYY-MM-DD format)
+     * @return true if format is valid, false if format is invalid
      */
     bool isProtocolVersionFormatValid() const;
 
     /**
-     * @brief 检查协议版本是否在支持列表中
-     * @param supportedVersions 支持的协议版本列表
-     * @return true表示支持，false表示不支持
+     * @brief Check if protocol version is in supported list
+     * @param supportedVersions List of supported protocol versions
+     * @return true if supported, false if not supported
      */
     bool isProtocolVersionSupported(const QStringList& supportedVersions) const;
 
 
+
     /**
-     * @brief 检查capabilities参数是否有效（如果提供，必须是对象）
-     * @return true表示有效，false表示无效
+     * @brief Check if capabilities parameter is valid (if provided, must be an object)
+     * @return true if valid, false if invalid
      */
     bool isCapabilitiesValid() const;
 
     /**
-     * @brief 检查clientInfo参数是否有效（如果提供，必须是对象）
-     * @return true表示有效，false表示无效
+     * @brief Check if clientInfo parameter is valid (if provided, must be an object)
+     * @return true if valid, false if invalid
      */
     bool isClientInfoValid() const;
 

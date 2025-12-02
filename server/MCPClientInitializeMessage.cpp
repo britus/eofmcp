@@ -1,6 +1,6 @@
 /**
- * @file MCPClientinitializeMessage.cpp
- * @brief MCP客户端初始化消息实现
+ * @file MCPClientInitializeMessage.cpp
+ * @brief MCP client initialization message implementation
  * @author zhangheng
  * @date 2025-01-01
  * @copyright Copyright (c) 2025 zhangheng. All rights reserved.
@@ -10,7 +10,7 @@
 #include <QJsonDocument>
 #include <QRegExp>
 
-// mcpMessage 基类实现
+// mcpMessage base class implementation
 MCPClientInitializeMessage::MCPClientInitializeMessage(const MCPClientMessage &clientMessage)
     : MCPClientMessage(clientMessage)
 {
@@ -49,12 +49,12 @@ bool MCPClientInitializeMessage::hasProtocolVersion() const
 
 bool MCPClientInitializeMessage::isProtocolVersionFormatValid() const
 {
-    // 如果为空，格式无效
+    // If empty, format is invalid
     if (m_strClientProtocolVersion.isEmpty()) {
         return false;
     }
 
-    // 验证格式（应该是YYYY-MM-DD格式）
+    // Validate format (should be YYYY-MM-DD format)
     QRegExp versionRegex("^\\d{4}-\\d{2}-\\d{2}$");
     return versionRegex.exactMatch(m_strClientProtocolVersion);
 }
@@ -67,21 +67,21 @@ bool MCPClientInitializeMessage::isProtocolVersionSupported(const QStringList &s
 bool MCPClientInitializeMessage::isCapabilitiesValid() const
 {
     auto params = m_jsonRpc.value("params").toObject();
-    // 如果提供了capabilities，必须是对象
+    // If capabilities is provided, it must be an object
     if (params.contains("capabilities")) {
         return params.value("capabilities").isObject();
     }
-    // 如果没有提供，也是有效的（可选参数）
+    // If not provided, it's also valid (optional parameter)
     return true;
 }
 
 bool MCPClientInitializeMessage::isClientInfoValid() const
 {
     auto params = m_jsonRpc.value("params").toObject();
-    // 如果提供了clientInfo，必须是对象
+    // If clientInfo is provided, it must be an object
     if (params.contains("clientInfo")) {
         return params.value("clientInfo").isObject();
     }
-    // 如果没有提供，也是有效的（可选参数）
+    // If not provided, it's also valid (optional parameter)
     return true;
 }

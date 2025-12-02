@@ -1,6 +1,6 @@
 /**
  * @file MCPHandlerResolver.h
- * @brief MCP Handler解析器
+ * @brief MCP Handler Resolver
  * @author zhangheng
  * @date 2025-01-09
  * @copyright Copyright (c) 2025 zhangheng. All rights reserved.
@@ -12,72 +12,71 @@
 #include <QMap>
 
 /**
- * @brief MCP Handler解析器
+ * @brief MCP Handler Resolver
  * 
- * 职责：
- * - 从应用程序中查找Handler对象
- * - 构建Handler名称到对象的映射表
- * - 支持多种Handler标识方式
+ * Responsibilities:
+ * - Find Handler objects from the application
+ * - Build a mapping table from Handler name to object
+ * - Support multiple Handler identification methods
  * 
- * 使用示例：
+ * Usage example:
  * @code
  * QMap<QString, QObject*> handlers = MCPHandlerResolver::resolveHandlers();
  * QObject* pHandler = handlers.value("MyHandler");
  * @endcode
  * 
- * 编码规范：
- * - 静态工具类
- * - 字符串类型添加 str 前缀
- * - 指针类型添加 p 前缀
- * - { 和 } 要单独一行
+ * Coding conventions:
+ * - Static utility class
+ * - String types add str prefix
+ * - Pointer types add p prefix
+ * - { and } should be on separate lines
  */
 class MCPHandlerResolver
 {
 public:
     /**
-     * @brief 从应用程序中查找所有Handler对象
-     * @param pSearchRoot 搜索根对象，默认为qApp
-     * @return Handler名称到对象的映射表
+     * @brief Find all Handler objects from the application
+     * @param pSearchRoot Search root object, default is qApp
+     * @return Mapping table from Handler name to object
      * 
-     * 支持的标识方式：
-     * 1. 对象的objectName
-     * 2. 对象的"MPCToolHandlerName"属性（用于工具Handler）
-     * 3. 对象的"MCPResourceHandlerName"属性（用于资源Handler）
+     * Supported identification methods:
+     * 1. Object's objectName
+     * 2. Object's "MPCToolHandlerName" property (for tool Handlers)
+     * 3. Object's "MCPResourceHandlerName" property (for resource Handlers)
      */
     static QMap<QString, QObject*> resolveHandlers(QObject* pSearchRoot = nullptr);
     
     /**
-     * @brief 从应用程序中查找所有资源Handler对象
-     * @param pSearchRoot 搜索根对象，默认为qApp
-     * @return 资源Handler名称到对象的映射表
+     * @brief Find all resource Handler objects from the application
+     * @param pSearchRoot Search root object, default is qApp
+     * @return Mapping table from resource Handler name to object
      * 
-     * 支持的标识方式：
-     * 1. 对象的objectName
-     * 2. 对象的"MCPResourceHandlerName"属性
+     * Supported identification methods:
+     * 1. Object's objectName
+     * 2. Object's "MCPResourceHandlerName" property
      */
     static QMap<QString, QObject*> resolveResourceHandlers(QObject* pSearchRoot = nullptr);
     
     /**
-     * @brief 查找指定名称的Handler
-     * @param strHandlerName Handler名称
-     * @param pSearchRoot 搜索根对象，默认为qApp
-     * @return Handler对象指针，未找到返回nullptr
+     * @brief Find Handler with specified name
+     * @param strHandlerName Handler name
+     * @param pSearchRoot Search root object, default is qApp
+     * @return Handler object pointer, return nullptr if not found
      */
     static QObject* findHandler(const QString& strHandlerName, QObject* pSearchRoot = nullptr);
     
     /**
-     * @brief 从应用程序中查找所有默认Handler对象
-     * @return Handler名称到对象的映射表
+     * @brief Find all default Handler objects from the application
+     * @return Mapping table from Handler name to object
      * 
-     * 遍历范围：
-     * 1. qApp的所有子对象
-     * 2. 所有的QWidget对象
+     * Scope for traversal:
+     * 1. All child objects of qApp
+     * 2. All QWidget objects
      * 
-     * 支持的标识方式：
-     * 1. 对象的objectName
-     * 2. 对象的"MPCToolHandlerName"属性（用于工具Handler）
-     * 3. 对象的"MCPResourceHandlerName"属性（用于资源Handler）
+     * Supported identification methods:
+     * 1. Object's objectName
+     * 2. Object's "MPCToolHandlerName" property (for tool Handlers)
+     * 3. Object's "MCPResourceHandlerName" property (for resource Handlers)
      */
     static QMap<QString, QObject*> resolveDefaultHandlers();
 };
-
