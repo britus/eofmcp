@@ -6,8 +6,10 @@
 #include <QByteArray>
 #include <QObject>
 #include <QSharedPointer>
+
 class QTcpSocket;
 class MCPHttpRequestParser;
+
 class MCPHttpConnection : public QObject
 {
     Q_OBJECT
@@ -16,7 +18,7 @@ public:
     ~MCPHttpConnection();
 
 signals:
-    // HTTP请求接收信号
+    // HTTP request received signal
     void messageReceived(quint64 nConnectionId, const QSharedPointer<MCPMessage> &pMessage);
 
     void disconnected();
@@ -26,13 +28,13 @@ public:
     quint64 getConnectionId();
     //
 public slots:
-    // 发送数据
+    // Send data
     void sendMessage(QSharedPointer<MCPMessage> pResponse);
     void disconnectFromHost();
 private slots:
-    // 处理就绪读取
+    // Handle ready read
     void onReadyRead();
-    // 处理错误
+    // Handle error
     void onError(QAbstractSocket::SocketError error);
     void onDisconnected();
 private slots:

@@ -1,6 +1,6 @@
 /**
  * @file IMCPToolService.h
- * @brief MCP工具服务接口
+ * @brief MCP tool service interface
  * @author zhangheng
  * @date 2025-01-09
  * @copyright Copyright (c) 2025 zhangheng. All rights reserved.
@@ -14,20 +14,20 @@
 #include <functional>
 
 /**
- * @brief MCP工具服务接口
+ * @brief MCP tool service interface
  *
- * 职责：
- * - 定义工具服务的公开接口
- * - 提供工具注册和管理功能
- * - 隐藏具体实现细节
+ * Responsibilities:
+ * - Define public interfaces for tool services
+ * - Provide tool registration and management functions
+ * - Hide specific implementation details
  *
- * 编码规范：
- * - 接口方法使用纯虚函数
- * - { 和 } 要单独一行
+ * Coding standards:
+ * - Interface methods use pure virtual functions
+ * - { and } should be on separate lines
  *
- * @note 死锁风险说明：在服务运行过程中调用addFromJson等方法添加工具时，
- *       如果调用方与Handler对象在同一线程，可能导致死锁。此问题目前暂时不处理，
- *       建议在服务初始化阶段完成工具添加操作。
+ * @note Deadlock risk explanation: When calling addFromJson and other methods to add tools during service operation,
+ *       if the caller and Handler object are in the same thread, it may cause a deadlock. This issue is currently not addressed,
+ *       and it is recommended to complete tool addition operations during service initialization.
  */
 class MCPCORE_EXPORT IMCPToolService : public QObject
 {
@@ -38,21 +38,21 @@ public:
 
 protected:
     /**
-     * @brief 析构函数（protected，Service 对象由 Server 管理，不要直接删除）
+     * @brief Destructor (protected, Service objects are managed by Server, do not delete directly)
      */
     virtual ~IMCPToolService() {}
 
 public:
     /**
-     * @brief 注册工具
-     * @param strName 工具名称
-     * @param strTitle 工具标题
-     * @param strDescription 工具描述
-     * @param jsonInputSchema 输入Schema（JSON格式）
-     * @param jsonOutputSchema 输出Schema（JSON格式）
-     * @param pHandler 处理器对象
-     * @param strMethodName 处理方法名
-     * @return true表示注册成功，false表示失败
+     * @brief Register tool
+     * @param strName Tool name
+     * @param strTitle Tool title
+     * @param strDescription Tool description
+     * @param jsonInputSchema Input Schema (JSON format)
+     * @param jsonOutputSchema Output Schema (JSON format)
+     * @param pHandler Handler object
+     * @param strMethodName Method name for processing
+     * @return true if registration is successful, false if it fails
      */
     virtual bool add(const QString& strName,
                      const QString& strTitle,
@@ -63,16 +63,16 @@ public:
                      const QString& strMethodName) = 0;
 
     /**
-     * @brief 注册工具（使用函数）
-     * @param strName 工具名称
-     * @param strTitle 工具标题
-     * @param strDescription 工具描述
-     * @param jsonInputSchema 输入Schema（JSON格式）
-     * @param jsonOutputSchema 输出Schema（JSON格式）
-     * @param execFun 执行函数
-     * @return true表示注册成功，false表示失败
+     * @brief Register tool (using function)
+     * @param strName Tool name
+     * @param strTitle Tool title
+     * @param strDescription Tool description
+     * @param jsonInputSchema Input Schema (JSON format)
+     * @param jsonOutputSchema Output Schema (JSON format)
+     * @param execFun Execution function
+     * @return true if registration is successful, false if it fails
      *
-     * 使用示例：
+     * Usage example:
      * @code
      * auto pToolService = pServer->getToolService();
      * pToolService->add("myTool", "My Tool", "Tool description",
@@ -93,37 +93,37 @@ public:
                      std::function<QJsonObject()> execFun) = 0;
 
     /**
-     * @brief 注销工具
-     * @param strName 工具名称
-     * @return true表示注销成功，false表示失败
+     * @brief Unregister tool
+     * @param strName Tool name
+     * @return true if unregistration is successful, false if it fails
      */
     virtual bool remove(const QString& strName) = 0;
 
     /**
-     * @brief 获取工具列表
-     * @return 工具列表（JSON数组格式）
+     * @brief Get tool list
+     * @return Tool list (JSON array format)
      */
     virtual QJsonArray list() const = 0;
 
     /**
-     * @brief 从JSON对象添加工具
-     * @param jsonTool JSON对象，包含工具的配置信息
-     * @param pSearchRoot 搜索Handler的根对象，默认为nullptr（使用qApp）
-     * @return true表示注册成功，false表示失败
+     * @brief Add tool from JSON object
+     * @param jsonTool JSON object containing tool configuration information
+     * @param pSearchRoot Root object for searching Handler, default is nullptr (use qApp)
+     * @return true if registration is successful, false if it fails
      *
-     * JSON对象格式：
+     * JSON object format:
      * {
-     *   "name": "工具名称",
-     *   "title": "工具标题",
-     *   "description": "工具描述",
+     *   "name": "Tool name",
+     *   "title": "Tool title",
+     *   "description": "Tool description",
      *   "inputSchema": { ... },
      *   "outputSchema": { ... },
-     *   "execHandler": "Handler名称",
-     *   "execMethod": "处理方法名",
-     *   "annotations": { ... }（可选）
+     *   "execHandler": "Handler name",
+     *   "execMethod": "Method name for processing",
+     *   "annotations": { ... } (optional)
      * }
      *
-     * 使用示例：
+     * Usage example:
      * @code
      * QJsonObject json;
      * json["name"] = "myTool";
@@ -137,8 +137,8 @@ public:
 
 signals:
     /**
-     * @brief 工具列表变化信号
-     * 当工具注册或注销时发出此信号
+     * @brief Tool list change signal
+     * Emitted when tools are registered or unregistered
      */
     void toolsListChanged();
 };

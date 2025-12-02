@@ -1,6 +1,6 @@
 /**
  * @file MCPHttpConnection.cpp
- * @brief MCP HTTP连接实现
+ * @brief MCP HTTP connection implementation
  * @author zhangheng
  * @date 2025-01-01
  * @copyright Copyright (c) 2025 zhangheng. All rights reserved.
@@ -43,8 +43,8 @@ void MCPHttpConnection::sendMessage(QSharedPointer<MCPMessage> pMessage)
 {
     auto data = pMessage->toData();
 
-    MCP_TRANSPORT_LOG_INFO() << "HTTP-RESP:" << m_pSocket->peerAddress().toString() << ":" << m_pSocket->peerPort() << "size:" << data.size();
 #if 0
+    MCP_TRANSPORT_LOG_INFO() << "HTTP-RESP:" << m_pSocket->peerAddress().toString() << ":" << m_pSocket->peerPort() << "size:" << data.size();
     if (data.indexOf("\n{") > -1) {
         QByteArray payload = data.mid(data.indexOf("{"));
         QJsonDocument doc = QJsonDocument::fromJson(payload);
@@ -55,7 +55,7 @@ void MCPHttpConnection::sendMessage(QSharedPointer<MCPMessage> pMessage)
 }
 
 void MCPHttpConnection::disconnectFromHost()
-{
+    {
     MCP_TRANSPORT_LOG_INFO() << "disconnectFromHost:" << m_pSocket->peerAddress().toString() << ":" << m_pSocket->peerPort();
     m_pSocket->disconnectFromHost();
 }

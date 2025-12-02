@@ -1,6 +1,6 @@
 /**
  * @file MCPHttpTransport.cpp
- * @brief MCP HTTP传输实现
+ * @brief MCP HTTP transport implementation
  * @author zhangheng
  * @date 2025-01-01
  * @copyright Copyright (c) 2025 zhangheng. All rights reserved.
@@ -36,7 +36,7 @@ MCPHttpTransport::~MCPHttpTransport() {}
 bool MCPHttpTransport::start(quint16 nPort)
 {
     if (isListening()) {
-        return true; // 已经启动
+        return true; // Already started
     }
 
     //if (!listen(QHostAddress::Any, nPort))
@@ -98,7 +98,7 @@ void MCPHttpTransport::onDisconnected()
         m_pThreadPool->removeWorker(pConnection);
         pConnection->deleteLater();
 
-        // 发送连接断开信号
+        // Send connection disconnected signal
         emit connectionDisconnected(nConnectionId);
     }
 }

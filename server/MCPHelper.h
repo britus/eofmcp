@@ -1,6 +1,6 @@
 /**
  * @file MCPHelper.h
- * @brief MCP统一辅助工具类
+ * @brief MCP Unified Helper Class
  * @author zhangheng
  * @date 2025-01-09
  * @copyright Copyright (c) 2025 zhangheng. All rights reserved.
@@ -16,68 +16,67 @@
 #include <functional>
 
 /**
- * @brief MCP统一辅助工具类
+ * @brief MCP Unified Helper Class
  * 
- * 职责：
- * - 提供线程安全的方法调用
- * - 提供反射调用辅助
- * - 封装内部实现细节
+ * Responsibilities:
+ * - Provide thread-safe method invocation
+ * - Provide reflection-based method invocation assistance
+ * - Encapsulate internal implementation details
  * 
- * 编码规范：
- * - 静态方法，无需实例化
- * - 参数命名遵循项目规范
- * - { 和 } 要单独一行
+ * Coding conventions:
+ * - Static methods, no instantiation required
+ * - Parameter naming follows project conventions
+ * - { and } should be on separate lines
  */
 class MCPCORE_EXPORT MCPHelper
 {
 public:
     /**
-     * @brief 同步调用目标对象的方法（线程安全）
-     * @param pTargetObj 目标对象
-     * @param fun 要执行的函数
-     * @return true表示成功，false表示失败
+     * @brief Synchronously invoke a method on the target object (thread-safe)
+     * @param pTargetObj Target object
+     * @param fun Function to execute
+     * @return true on success, false on failure
      */
     static void syncInvoke(QObject* pTargetObj, const std::function<void()>& fun);
     
     /**
-     * @brief 异步调用目标对象的方法（线程安全）
-     * @param pTargetObj 目标对象
-     * @param fun 要执行的函数
-     * @return true表示成功，false表示失败
+     * @brief Asynchronously invoke a method on the target object (thread-safe)
+     * @param pTargetObj Target object
+     * @param fun Function to execute
+     * @return true on success, false on failure
      */
     static void asyncInvoke(QObject* pTargetObj, const std::function<void()>& fun);
     
     /**
-     * @brief 同步调用对象的方法（通过反射）
-     * @param pHandler 处理器对象
-     * @param strMethodName 方法名
-     * @param lstArguments 参数列表
-     * @return 方法返回值
+     * @brief Synchronously invoke an object's method (via reflection)
+     * @param pHandler Handler object
+     * @param strMethodName Method name
+     * @param lstArguments Argument list
+     * @return Method return value
      */
     static QVariant callMethod(QObject* pHandler, const QString& strMethodName, const QVariantList& lstArguments);
     
     /**
-     * @brief 同步调用对象的方法（通过反射，使用Map参数）
-     * @param pHandler 处理器对象
-     * @param strMethodName 方法名
-     * @param dictArguments 参数字典
-     * @return 方法返回值
+     * @brief Synchronously invoke an object's method (via reflection, using Map parameters)
+     * @param pHandler Handler object
+     * @param strMethodName Method name
+     * @param dictArguments Parameter dictionary
+     * @return Method return value
      */
     static QVariant callMethod(QObject* pHandler, const QString& strMethodName, const QVariantMap& dictArguments);
     
     /**
-     * @brief 设置线程名称
-     * @param dwThreadID 线程ID
-     * @param strThreadName 线程名称
-     * @return true表示成功，false表示失败
+     * @brief Set thread name
+     * @param dwThreadID Thread ID
+     * @param strThreadName Thread name
+     * @return true on success, false on failure
      */
     static void setThreadName(unsigned long dwThreadID, const QString& strThreadName);
     
     /**
-     * @brief 设置当前线程名称
-     * @param strThreadName 线程名称
-     * @return true表示成功，false表示失败
+     * @brief Set current thread name
+     * @param strThreadName Thread name
+     * @return true on success, false on failure
      */
     static void setCurrentThreadName(const QString& strThreadName);
 };
-

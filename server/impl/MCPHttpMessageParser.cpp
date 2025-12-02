@@ -1,6 +1,6 @@
 /**
- * @file MCPMessageParser.cpp
- * @brief MCP消息解析器实现
+ * @file MCPHttpMessageParser.cpp
+ * @brief MCP message parser implementation
  * @author zhangheng
  * @date 2025-01-01
  * @copyright Copyright (c) 2025 zhangheng. All rights reserved.
@@ -13,7 +13,7 @@
 #include <QList>
 #include <QString>
 
-//这里为子线程操作，虽然不太符合层次，但还是尽量把能处理都在这里处理了
+// Here is sub-thread operation, although it doesn't quite conform to the hierarchy, we still try to process everything here
 QSharedPointer<MCPClientMessage> MCPHttpMessageParser::genClientMessageFromHttp(const QSharedPointer<MCPHttpRequestData> &pHttpRequestData)
 {
     /*
@@ -49,12 +49,13 @@ QSharedPointer<MCPClientMessage> MCPHttpMessageParser::genClientMessageFromHttp(
         If the server cannot accept the input, it MUST return an HTTP error status code (e.g., 400 Bad Request).
             The HTTP response body MAY comprise a JSON-RPC error response that has no id.
             ......
-
+    
     //GET
-    //DELETE 关闭 2025-06-18
+    //DELETE close 2025-06-18
     */
     //
-    /*2024-11-15：
+    /*
+    2024-11-15：
         two endpoints:SSE or Regular HTTP POST
         Open SSE connection GET {Accept: text/event-stream}
 
@@ -68,7 +69,7 @@ QSharedPointer<MCPClientMessage> MCPHttpMessageParser::genClientMessageFromHttp(
     //application/json,text/event-stream
     auto strAcceptHeader = pHttpRequestData->getHeader("Accept");
     auto setAcceptTypes = strAcceptHeader.split(",").toList(); //Set();
-    // 清理空格
+    // Clean spaces
     QList<QString> cleanedAcceptTypes;
     foreach (const QString &type, setAcceptTypes) {
         cleanedAcceptTypes.append(type.trimmed());
@@ -77,40 +78,40 @@ QSharedPointer<MCPClientMessage> MCPHttpMessageParser::genClientMessageFromHttp(
     //application/json,text/event-stream
     auto strContentType = pHttpRequestData->getHeader("content-type");
 
-    //sse?Mcp-Session-Id=123456789 NOT 2025-06-18
+    //sse?Mcp-Session-Id=123 NOT 2025-06-18
     auto strQuerySessionId = pHttpRequestData->getQueryParameter("Mcp-Session-Id");
     auto strMcpSessionId = pHttpRequestData->getHeader("Mcp-Session-Id");
     auto strProtocolVersion = pHttpRequestData->getHeader("MCP-Protocol-Version");
 
-    //1、先把偷摸进来的http干掉 - 这里先固定，不支持设置了
+    //1、First, remove the HTTP that sneakily comes in - here we fix it and don't support setting
     auto strPath = pHttpRequestData->getPath();
     if (strPath != "/sse" && strPath != "/mcp") {
         return QSharedPointer<MCPClientMessage>();
     }
 
-    // 验证Accept头（对于POST请求，必须包含application/json和text/event-stream）
+    // Validate Accept header (for POST requests, must include application/json and text/event-stream)
     if (strHttpMethod == "POST") {
         static QList<QString> setRequiredTypes = {"application/json", "text/event-stream"};
         if (!setAcceptTypes.contains(setRequiredTypes.at(0))    //2015-06-18
             && !setAcceptTypes.contains(setRequiredTypes.at(1)) //
             && !setAcceptTypes.contains("*/*")) {
-            // Accept头不符合MCP规范要求
+            // Accept header does not meet MCP specification requirements
             return QSharedPointer<MCPClientMessage>();
         }
     }
 
-    //2、再把协议暂时不支持的干掉
-    /* 断流恢复 - 2025-03-26
+    //2、Then remove unsupported protocols
+    /* Stream resumption - 2025-03-26
     https://modelcontextprotocol.io/specification/2025-03-26/basic/transports#resumability-and-redelivery
-    设计Last-Event-ID = SessionId + EventId-123，从这个里面解析出 SessionId和EventId 一点都支持不了 太麻烦了乱糟糟的 还没有啥用
+    Designing Last-Event-ID = SessionId + EventId-123, parsing SessionId and EventId from this is not supported at all - too complicated and messy with no real use
     */
     auto strLastEventId = pHttpRequestData->getHeader("Last-Event-ID"); //Last-Event-ID
     if (strHttpMethod == "GET" && !strLastEventId.isEmpty()) {
         return QSharedPointer<MCPClientMessage>();
     }
-    /* 客户端关闭 - 2025-03-26
+    /* Client close - 2025-03-26
     https://modelcontextprotocol.io/specification/2025-03-26/basic/transports#streamable-http
-    没太明白意义，关就关吧，感觉也没啥用
+    Don't quite understand the meaning, close it if it's closed, feels like it has no real use
     */
     if (strHttpMethod == "DELETE") {
         return QSharedPointer<MCPClientMessage>();
@@ -120,28 +121,29 @@ QSharedPointer<MCPClientMessage> MCPHttpMessageParser::genClientMessageFromHttp(
 
     pClientMessage->m_strMcpSessionId = strQuerySessionId.isEmpty() ? strMcpSessionId : strQuerySessionId;
     //
-    //为了兼容[2024-11-15]先判断是否是SSE的连上来了 - 只有使用SSE链接的才会这么干
+    //
+    //To be compatible with [2024-11-15], first check if it's an SSE connection coming in - only SSE connections will do this
     //https://modelcontextprotocol.io/specification/2024-11-05/basic/transports
     if (strHttpMethod == "GET" && strQuerySessionId.isEmpty()                         // no sse sessionid
         && strMcpSessionId.isEmpty()                                                  //no mcp sessionid
-        && strLastEventId.isEmpty()                                                   // 不是重连
+        && strLastEventId.isEmpty()                                                   // not reconnecting
         && setAcceptTypes.size() == 1 && setAcceptTypes.contains("text/event-stream") //only sse
         && strConnection == "keep-alive")                                             //sse keep-alive
     {
-        //这个connect 让也模拟 模拟下rpc调用
+        //This connect simulates an RPC call
         pClientMessage->m_jsonRpc.insert("method", "connect");
         pClientMessage->appendType(MCPMessageType::SseTransport | MCPMessageType::Connect);
         return pClientMessage;
     }
-    //批量操作放弃支持 - 2025-06-18已经明确放弃了
+    //Batch operations abandon support - 2025-06-18 has clearly abandoned
     //https://modelcontextprotocol.io/specification/2025-03-26/basic/transports#streamable-http
     if (strHttpMethod == "POST" && strContentType == "application/json") {
         auto jsonRpc = QJsonDocument::fromJson(pHttpRequestData->getBody()).object();
 
-        // 验证JSON-RPC版本字段（必须是字符串"2.0"）
+        // Validate JSON-RPC version field (must be string "2.0")
         QJsonValue jsonrpcValue = jsonRpc.value("jsonrpc");
         if (!jsonrpcValue.isString() || jsonrpcValue.toString() != "2.0") {
-            // JSON-RPC版本字段缺失或格式错误
+            // JSON-RPC version field missing or malformed
             return QSharedPointer<MCPClientMessage>();
         }
 
@@ -157,7 +159,7 @@ QSharedPointer<MCPClientMessage> MCPHttpMessageParser::genClientMessageFromHttp(
             bNotification && pClientMessage->appendType(MCPMessageType::Notification);
             //
             pClientMessage->appendType(strQuerySessionId.isEmpty() ? MCPMessageType::StreamableTransport : MCPMessageType::SseTransport);
-            //这个先放在这里吧
+            //Put this here for now
             return genXXClientMessage(pClientMessage);
         }
     }

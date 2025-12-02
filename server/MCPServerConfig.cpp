@@ -16,7 +16,7 @@
 #include <QFile>
 #include <QJsonDocument>
 
-// ============================================================================
+// ============================================================================ 
 // MCPServerConfig implementation
 // ============================================================================
 
@@ -35,7 +35,7 @@ bool MCPServerConfig::loadFromDirectory(const QString &strConfigDir)
 {
     QDir configDir(strConfigDir);
     if (!configDir.exists()) {
-        MCP_CORE_LOG_WARNING() << "MCPServerConfig: directory missing: " << strConfigDir;
+        MCP_CORE_LOG_WARNING() << "MCPServerConfig: directory missing:" << strConfigDir;
         return false;
     }
 
@@ -71,9 +71,9 @@ bool MCPServerConfig::loadFromDirectory(const QString &strConfigDir)
         pPromptsConfig->loadFromDirectory(strPromptsDir);
     }
 
-    MCP_CORE_LOG_INFO() << "MCPServerConfig: port:" << m_nPort << ", name:" << m_strServerName //
-                        << "tools:" << pToolsConfig->getToolCount()                            //
-                        << "resources:" << pResourcesConfig->getResourceCount()                //
+    MCP_CORE_LOG_INFO() << "MCPServerConfig: port:" << m_nPort << ", name:" << m_strServerName // 
+                        << "tools:" << pToolsConfig->getToolCount()                            // 
+                        << "resources:" << pResourcesConfig->getResourceCount()                // 
                         << "prompts:" << pPromptsConfig->getPromptCount();
 
     // Send configuration loaded signal, passing configuration objects

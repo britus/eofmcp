@@ -1,6 +1,6 @@
 /**
  * @file MCPHelper.cpp
- * @brief MCP统一辅助工具类实现
+ * @brief MCP Unified Helper Class Implementation
  * @author zhangheng
  * @date 2025-01-09
  * @copyright Copyright (c) 2025 zhangheng. All rights reserved.
@@ -39,4 +39,3 @@ void MCPHelper::setCurrentThreadName(const QString& strThreadName)
 {
     MCPInvokeHelper::setCurrentThreadName(strThreadName);
 }
-

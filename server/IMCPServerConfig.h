@@ -1,6 +1,6 @@
 /**
  * @file MCPServerConfig.h
- * @brief MCP服务器配置接口类（抽象基类）
+ * @brief MCP server configuration interface class (abstract base class)
  * @author zhangheng
  * @date 2025-01-09
  * @copyright Copyright (c) 2025 zhangheng. All rights reserved.
@@ -17,24 +17,24 @@ class MCPResourcesConfig;
 class MCPPromptsConfig;
 
 /**
- * @brief MCP服务器配置接口类（抽象基类）
+ * @brief MCP server configuration interface class (abstract base class)
  *
- * 职责：
- * - 定义服务器配置的公共接口
- * - 不包含具体实现和数据
+ * Responsibilities:
+ * - Define public interfaces for server configuration
+ * - Does not contain specific implementation and data
  *
- * 使用示例：
+ * Usage example:
  * @code
- * // 从目录加载
+ * // Load from directory
  * MCPXServerConfig config;
  * config.loadFromDirectory("MCPServerConfig");
  * pServer->start(config.getPort(), &config);
  * @endcode
  *
- * 编码规范：
- * - 类成员添加 m_ 前缀
- * - 数值类型添加 n 前缀
- * - { 和 } 要单独一行
+ * Coding standards:
+ * - Add m_ prefix to class members
+ * - Add n prefix to numeric types
+ * - { and } should be on separate lines
  */
 class MCPCORE_EXPORT IMCPServerConfig : public QObject
 {
@@ -45,28 +45,28 @@ public:
     virtual ~IMCPServerConfig();
 
 public:
-    // ============ 配置加载/保存 ============
+    // ============ Configuration Loading/Saving ============
 
     /**
-     * @brief 从配置目录加载所有配置
-     * @param strConfigDir 配置根目录（包含ServerConfig.json和子目录）
-     * @return true表示加载成功，false表示失败
+     * @brief Load all configurations from configuration directory
+     * @param strConfigDir Configuration root directory (contains ServerConfig.json and subdirectories)
+     * @return true if loading is successful, false if it fails
      *
-     * 目录结构：
+     * Directory structure:
      * MCPServerConfig/
-     *   ├── ServerConfig.json      # 主配置
-     *   ├── Tools/                 # 工具目录
+     *   ├── ServerConfig.json      # Main configuration
+     *   ├── Tools/                 # Tools directory
      *   │   ├── calculator.json
      *   │   └── ...
-     *   ├── Resources/             # 资源目录
+     *   ├── Resources/             # Resources directory
      *   │   └── ...
-     *   └── Prompts/               # 提示词目录
+     *   └── Prompts/               # Prompts directory
      *       └── ...
      */
     virtual bool loadFromDirectory(const QString& strConfigDir) = 0;
 
 public:
-    // ============ 配置访问 ============
+    // ============ Configuration Access ============
 
     virtual void setPort(quint16 nPort) = 0;
     virtual quint16 getPort() const = 0;
@@ -85,12 +85,12 @@ public:
 
 signals:
     /**
-     * @brief 配置加载完成信号
-     * 当配置从目录或文件加载完成后发出此信号
-     * @param pToolsConfig 工具配置对象（使用QSharedPointer管理生命周期）
-     * @param pResourcesConfig 资源配置对象（使用QSharedPointer管理生命周期）
-     * @param pPromptsConfig 提示词配置对象（使用QSharedPointer管理生命周期）
-     * MCPServer 会监听此信号并自动应用配置
+     * @brief Configuration loaded signal
+     * Emitted when configuration is loaded from directory or file
+     * @param pToolsConfig Tool configuration object (lifecycle managed by QSharedPointer)
+     * @param pResourcesConfig Resource configuration object (lifecycle managed by QSharedPointer)
+     * @param pPromptsConfig Prompt configuration object (lifecycle managed by QSharedPointer)
+     * MCPServer will listen to this signal and automatically apply the configuration
      */
     void configLoaded(QSharedPointer<MCPToolsConfig> pToolsConfig,
                       QSharedPointer<MCPResourcesConfig> pResourcesConfig,

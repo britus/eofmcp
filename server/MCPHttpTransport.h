@@ -5,22 +5,23 @@
 #include <QTcpSocket>
 
 /**
- * @brief HTTP 传输层实现
+ * @brief HTTP transport layer implementation
  *
- * 职责：
- * - 基于HTTP/1.1协议实现传输层
- * - 支持POST请求
- * - 管理HTTP连接生命周期
- * - 处理HTTP协议细节
+ * Responsibilities:
+ * - Implement transport layer based on HTTP/1.1 protocol
+ * - Support POST requests
+ * - Manage HTTP connection lifecycle
+ * - Handle HTTP protocol details
  *
- * 编码规范：
- * - 类成员添加 m_ 前缀
- * - 指针类型添加 p 前缀
- * - { 和 } 要单独一行
+ * Coding standards:
+ * - Add m_ prefix to class members
+ * - Add p prefix to pointer types
+ * - { and } should be on separate lines
  */
 class MCPMessage;
 class MCPThreadPool;
 class MCPHttpConnection;
+
 class MCPHttpTransport : public QTcpServer
 {
     Q_OBJECT

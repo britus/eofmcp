@@ -114,10 +114,10 @@ int MCPHttpRequestParser::onBody(llhttp_t *parser, const char *data, size_t leng
 int MCPHttpRequestParser::onMessageComplete(llhttp_t *parser)
 {
     MCPHttpRequestParser *pInstance = static_cast<MCPHttpRequestParser *>(parser->data);
+#if 0
     MCP_TRANSPORT_LOG_INFO() << "HTTP-RECV:" << pInstance->m_pRequestData->getMethod() //
                              << "url:" << pInstance->m_pRequestData->getUrl()          //
                              << "size:" << pInstance->m_byteRawData.size();
-#if 0
     if (pInstance->m_byteRawData.indexOf("\n{") > -1) {
         QByteArray payload = pInstance->m_byteRawData.mid(pInstance->m_byteRawData.indexOf("{"));
         QJsonDocument doc = QJsonDocument::fromJson(payload);
