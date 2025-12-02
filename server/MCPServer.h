@@ -7,6 +7,7 @@
 #include <QObject>
 #include <QSharedPointer>
 #include <QString>
+
 class MCPAbstractServerTransport;
 class MCPMessage;
 class MCPSessionService;
@@ -18,6 +19,7 @@ class MCPServerHandler;
 class MCPToolsConfig;
 class MCPResourcesConfig;
 class MCPPromptsConfig;
+
 /**
  * @brief MCP Server Implementation Class
  *

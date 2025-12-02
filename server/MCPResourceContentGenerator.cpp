@@ -67,7 +67,6 @@ QJsonObject MCPResourceContentGenerator::generateResourceContent(const QString &
 
 bool MCPResourceContentGenerator::isTextMimeType(const QString &strMimeType)
 {
-
     // List of text type MIME types
     QString strLowerMimeType = strMimeType.toLower();
 
@@ -77,19 +76,30 @@ bool MCPResourceContentGenerator::isTextMimeType(const QString &strMimeType)
     }
 
     // Common text types
-    static const QStringList commonTextMimeTypes = {"application/json",         "application/xml",        "application/javascript",   "application/x-javascript", "application/ecmascript",
-                                                    "application/x-ecmascript", "application/typescript", "application/x-typescript", "application/x-sh",         "application/x-shellscript",
-                                                    "application/x-python",     "application/x-c",        "application/x-cpp",        "application/x-c++",        "application/x-csharp",
-                                                    "application/x-java",       "application/x-html",     "application/x-css",        "application/x-sql",        "application/x-yaml",
-                                                    "application/x-toml",       "application/x-markdown", "application/x-svg+xml",    "application/x-json",       "application/x-ld+json",
-                                                    "application/x-jsonld",     "application/x-rtf",      "application/x-rtfd",       "application/x-tex",        "application/x-latex",
-                                                    "application/x-postscript", "application/x-ps",       "application/x-eps"};
+    static const QStringList commonTextMimeTypes = {
+        "application/json",         "application/xml",           //
+        "application/javascript",   "application/x-javascript",  //
+        "application/ecmascript",   "application/x-ecmascript",  //
+        "application/typescript",   "application/x-typescript",  //
+        "application/x-sh",         "application/x-shellscript", //
+        "application/x-python",     "application/x-c",           //
+        "application/x-cpp",        "application/x-c++",         //
+        "application/x-csharp",     "application/x-java",        //
+        "application/x-html",       "application/x-css",         //
+        "application/x-sql",        "application/x-yaml",        //
+        "application/x-toml",       "application/x-markdown",    //
+        "application/x-svg+xml",    "application/x-json",        //
+        "application/x-ld+json",    "application/x-jsonld",      //
+        "application/x-rtf",        "application/x-rtfd",        //
+        "application/x-tex",        "application/x-latex",       //
+        "application/x-postscript", "application/x-ps",          //
+        "application/x-eps",
+    };
     return commonTextMimeTypes.contains(strLowerMimeType);
 }
 
 QString MCPResourceContentGenerator::readFileAsText(const QString &strFilePath)
 {
-
     QFile file(strFilePath);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
         MCP_CORE_LOG_WARNING() << "MCPResourceContentGenerator: Cannot open text file:" << strFilePath << ", Error:" << file.errorString();
@@ -99,7 +109,6 @@ QString MCPResourceContentGenerator::readFileAsText(const QString &strFilePath)
     // Read with UTF-8 encoding
     QTextStream textStream(&file);
     textStream.setEncoding(QStringConverter::Utf8);
-    //textStream.setCodec("UTF-8");
     QString strContent = textStream.readAll();
     file.close();
 
@@ -108,7 +117,6 @@ QString MCPResourceContentGenerator::readFileAsText(const QString &strFilePath)
 
 QString MCPResourceContentGenerator::readFileAsBase64(const QString &strFilePath)
 {
-
     QFile file(strFilePath);
     if (!file.open(QIODevice::ReadOnly)) {
         MCP_CORE_LOG_WARNING() << "MCPResourceContentGenerator: Cannot open binary file:" << strFilePath << ", Error:" << file.errorString();
@@ -128,13 +136,11 @@ QString MCPResourceContentGenerator::readFileAsBase64(const QString &strFilePath
 
 QString MCPResourceContentGenerator::base64Encode(const QByteArray &data)
 {
-
     return QString::fromLatin1(data.toBase64());
 }
 
 QString MCPResourceContentGenerator::generateUriFromFilePath(const QString &strFilePath)
 {
-
     QFileInfo fileInfo(strFilePath);
     QString strAbsolutePath = fileInfo.absoluteFilePath();
 
