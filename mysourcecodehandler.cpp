@@ -220,7 +220,7 @@ QJsonObject SourceCodeHandler::readSourceFile(const QVariant &file_path, const Q
     structContent["size"] = static_cast<int>(byteContent.size());
 
     // result
-    auto timestamp = QDateTime::currentDateTime().toString(Qt::ISODate) + "Z";
+    //auto timestamp = QDateTime::currentDateTime().toString(Qt::ISODate) + "Z";
 
     QJsonDocument doc = QJsonDocument(structContent);
     QJsonObject textResult = QJsonObject({
