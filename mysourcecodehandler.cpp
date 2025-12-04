@@ -241,7 +241,7 @@ QJsonObject SourceCodeHandler::readSourceFile(const QVariant &file_path)
     return readSourceFile(file_path, {}, {});
 }
 
-QJsonObject SourceCodeHandler::writeSourceFile(const QVariant &file_path, const QVariant &content, const QVariant &create_backup)
+QJsonObject SourceCodeHandler::writeSourceFile(const QVariant &file_path, const QVariant &create_backup, const QVariant &content)
 {
     if (!file_path.isValid()) {
         return createErrorResponse("Parameter 'file_path' required");
@@ -394,7 +394,7 @@ QString SourceCodeHandler::createBackup(const QString &strOriginalPath)
 {
     QFileInfo fileInfo(strOriginalPath);
     QString strBackupDir = fileInfo.absolutePath();
-    QString strBackupName = "_backup_" + QDateTime::currentDateTime().toString("yyyyMMdd_hhmmss") + "_" + fileInfo.baseName() + "." + fileInfo.suffix();
+    QString strBackupName = "_backup_" + QDateTime::currentDateTime().toString("yyyyMMdd_hhmmss") + "_" + fileInfo.baseName() + "." + fileInfo.suffix() + ".txt";
     QString strBackupPath = strBackupDir + "/" + strBackupName;
 
     if (QFile::copy(strOriginalPath, strBackupPath)) {

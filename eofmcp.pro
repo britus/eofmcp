@@ -59,13 +59,14 @@ unix:debug {
 }
 
 mac {
-    # define where frameworks and plugins exist
+    # Define the home directory
     HOME = $$system(echo $HOME)
-    QTDIR = $$HOME/Qt/6.10.1/macos
 
-    lessThan(QT_MAJOR_VERSION, 6) {
-        QT += macextras
-    }
+    # Define Qt directory based on version
+    QTDIR = $${HOME}/Qt/$${QT_VERSION}/macos
+
+    # Define where frameworks and plugins exist
+    #message("Using QTDIR:" $$QTDIR)
 
     CONFIG += app_bundle
     CONFIG += embed_libraries
