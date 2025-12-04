@@ -60,6 +60,13 @@ public slots:
     Q_INVOKABLE QJsonObject readSourceFile(const QVariant &file_path);
 
     /**
+     * @brief Reads the contents of a source code file
+     * @param jsonInput JSON object with file path
+     * @return JSON object with file content
+     */
+    Q_INVOKABLE QJsonObject readSourceFile(const QVariant &file_path, const QVariant length, const QVariant &offset);
+
+    /**
      * @brief Saves changes to a source code file
      * @param file_path file path
      * @param content new content

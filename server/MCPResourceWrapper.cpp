@@ -95,7 +95,7 @@ MCPResourceWrapper *MCPResourceWrapper::create(const QString &strUri, QObject *p
     QMetaMethod getAnnotationsMethodCandidate = MCPMetaObjectHelper::getMethod(pWrappedObject, "getAnnotations()");
     if (getAnnotationsMethodCandidate.isValid() && getAnnotationsMethodCandidate.returnType() == QMetaType::QJsonObject && getAnnotationsMethodCandidate.parameterCount() == 0) {
         getAnnotationsMethod = getAnnotationsMethodCandidate;
-        MCP_CORE_LOG_DEBUG() << "MCPResourceWrapper::create: Wrapped object supports getAnnotations() method";
+        //MCP_CORE_LOG_DEBUG() << "MCPResourceWrapper::create: Wrapped object supports getAnnotations() method";
     }
 
     // All validations passed, create the object
@@ -117,7 +117,11 @@ QString MCPResourceWrapper::readContent() const
     // - Same thread: use DirectConnection (direct call)
     // - Cross-thread: use QueuedConnection (asynchronous call, but here we need return value, so using BlockingQueuedConnection)
     QString strContent;
-    m_getContent.invoke(m_pWrappedObject, QThread::currentThread() == m_pWrappedObject->thread() ? Qt::DirectConnection : Qt::BlockingQueuedConnection, Q_RETURN_ARG(QString, strContent));
+    m_getContent.invoke(m_pWrappedObject,
+                        QThread::currentThread() == m_pWrappedObject->thread() //
+                            ? Qt::DirectConnection                             //
+                            : Qt::BlockingQueuedConnection,
+                        Q_RETURN_ARG(QString, strContent));
     return strContent;
 }
 

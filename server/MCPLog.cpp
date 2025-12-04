@@ -3,14 +3,14 @@
 #include <QStandardPaths>
 #include <QThread>
 
-// 定义日志类别
+// Define log categories
 Q_LOGGING_CATEGORY(mcpCore, "mcp.core")
 Q_LOGGING_CATEGORY(mcpTransport, "mcp.transport")
 Q_LOGGING_CATEGORY(mcpTools, "mcp.tools")
 Q_LOGGING_CATEGORY(mcpSession, "mcp.session")
 Q_LOGGING_CATEGORY(mcpResource, "mcp.resource")
 
-// 静态成员变量初始化
+// Static member variable initialization
 
 MCPLog::MCPLog(QObject *parent)
     : QObject(parent)
@@ -43,19 +43,18 @@ bool MCPLog::initialize(const QString &strLogFilePath, LogLevel minLevel, bool b
     m_minLogLevel = minLevel;
     m_bFileLoggingEnabled = bEnableFileLogging;
 
-    // 如果没有指定日志文件路径，使用当前目录
+    // If no log file path is specified, use the current directory
     QString cdir = QStandardPaths::writableLocation(QStandardPaths::CacheLocation);
-
-    QFile::Permissions permissions;
-    permissions.setFlag(QFile::Permission::ReadOwner, true);
-    permissions.setFlag(QFile::Permission::ReadGroup, true);
-    permissions.setFlag(QFile::Permission::WriteOwner, true);
-    permissions.setFlag(QFile::Permission::WriteGroup, true);
-    permissions.setFlag(QFile::Permission::ExeOwner, true);
-    permissions.setFlag(QFile::Permission::ExeGroup, true);
 
     QDir dir(cdir);
     if (!dir.exists()) {
+        QFile::Permissions permissions;
+        permissions.setFlag(QFile::Permission::ReadOwner, true);
+        permissions.setFlag(QFile::Permission::ReadGroup, true);
+        permissions.setFlag(QFile::Permission::WriteOwner, true);
+        permissions.setFlag(QFile::Permission::WriteGroup, true);
+        permissions.setFlag(QFile::Permission::ExeOwner, true);
+        permissions.setFlag(QFile::Permission::ExeGroup, true);
         dir.mkdir(cdir, permissions);
     }
 
@@ -63,12 +62,12 @@ bool MCPLog::initialize(const QString &strLogFilePath, LogLevel minLevel, bool b
                                    ? QDir(cdir).absoluteFilePath("eofmcp.log")
                                    : strLogFilePath;
 
-    // 设置日志文件（内部会创建目录）
+    // Set log file (will create directory if needed)
     if (!setLogFile(strActualLogPath)) {
         return false;
     }
 
-    // 安装消息处理器，用于文件输出
+    // Install message handler for file output
     qInstallMessageHandler(messageHandler);
 
     updateLogFilterRules(minLevel);
@@ -78,7 +77,7 @@ bool MCPLog::initialize(const QString &strLogFilePath, LogLevel minLevel, bool b
 
 void MCPLog::messageHandler(QtMsgType type, const QMessageLogContext &context, const QString &strMsg)
 {
-    // 处理我们模块的日志
+    // Handle our module log
     if (context.category
         && (strcmp(context.category, "mcp.core") == 0          //
             || strcmp(context.category, "mcp.transport") == 0  //
@@ -92,6 +91,8 @@ void MCPLog::messageHandler(QtMsgType type, const QMessageLogContext &context, c
             fprintf(stdout, "[D] %s\n", qPrintable(strMsg));
         } else if (type == QtInfoMsg) {
             fprintf(stdout, "[I] %s\n", qPrintable(strMsg));
+        } else if (type == QtWarningMsg) {
+            fprintf(stderr, "[W] %s\n", qPrintable(strMsg));
         } else {
             fprintf(stderr, "[E] %s\n", qPrintable(strMsg));
         }
@@ -104,7 +105,7 @@ void MCPLog::messageHandler(QtMsgType type, const QMessageLogContext &context, c
 
 void MCPLog::shutdown()
 {
-    // 移除消息处理器
+    // Remove message handler
     qInstallMessageHandler(nullptr);
 
     if (m_pLogStream) {
@@ -115,7 +116,7 @@ void MCPLog::shutdown()
         m_pLogFile->close();
     }
 
-    // QSharedPointer会自动清理内存
+    // QSharedPointer will automatically clean up memory
     m_pLogStream.reset();
     m_pLogFile.reset();
 
@@ -149,7 +150,7 @@ void MCPLog::updateLogFilterRules(LogLevel level)
 
 bool MCPLog::setLogFile(const QString &strFilePath)
 {
-    // 关闭现有文件
+    // Close existing file
     if (m_pLogStream) {
         m_pLogStream->flush();
     }
@@ -157,7 +158,7 @@ bool MCPLog::setLogFile(const QString &strFilePath)
         m_pLogFile->close();
     }
 
-    // 确保目录存在
+    // Ensure directory exists
     QFileInfo fileInfo(strFilePath);
     QDir logDir = fileInfo.absoluteDir();
     if (!logDir.exists()) {
@@ -166,7 +167,7 @@ bool MCPLog::setLogFile(const QString &strFilePath)
         }
     }
 
-    // 创建新文件
+    // Create new file
     m_pLogFile = QSharedPointer<QFile>(new QFile(strFilePath));
     if (!m_pLogFile->open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text)) {
         m_pLogFile.reset();

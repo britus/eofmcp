@@ -172,13 +172,15 @@ QJsonObject SourceCodeHandler::listSourceFiles(const QVariant &project_path, con
     return response;
 }
 
-QJsonObject SourceCodeHandler::readSourceFile(const QVariant &file_path)
+QJsonObject SourceCodeHandler::readSourceFile(const QVariant &file_path, const QVariant length, const QVariant &offset)
 {
     if (!file_path.isValid()) {
         return createErrorResponse("Parameter 'file_path' required");
     }
 
-    MCP_TOOLS_LOG_DEBUG() << "TOOL-SRCT:readSourceFile:" << file_path;
+    MCP_TOOLS_LOG_DEBUG() << "TOOL-SRCT:readSourceFile: file:" << file_path;
+    MCP_TOOLS_LOG_DEBUG() << "TOOL-SRCT:readSourceFile: offset:" << offset;
+    MCP_TOOLS_LOG_DEBUG() << "TOOL-SRCT:readSourceFile: length:" << length;
 
     QString strFilePath = file_path.toString();
 
@@ -199,7 +201,14 @@ QJsonObject SourceCodeHandler::readSourceFile(const QVariant &file_path)
     QByteArray byteContent = file.readAll();
     file.close();
 
-    QString strContent = QString::fromUtf8(byteContent);
+    QString strContent;
+    if (!length.isValid() || length.toLongLong() == 0) {
+        strContent = QString::fromUtf8(byteContent);
+    } else if (!offset.isValid() || offset.toLongLong() == 0) {
+        strContent = QString::fromUtf8(byteContent).left(length.toLongLong());
+    } else {
+        strContent = QString::fromUtf8(byteContent).mid(offset.toLongLong(), length.toLongLong());
+    }
 
     int iLineCount = strContent.count('\n') + (strContent.isEmpty() ? 0 : 1);
 
@@ -211,7 +220,7 @@ QJsonObject SourceCodeHandler::readSourceFile(const QVariant &file_path)
     structContent["size"] = static_cast<int>(byteContent.size());
 
     // result
-    auto timestamp = QDateTime::currentDateTime().toString(Qt::ISODate) + "Z";
+    //auto timestamp = QDateTime::currentDateTime().toString(Qt::ISODate) + "Z";
 
     QJsonDocument doc = QJsonDocument(structContent);
     QJsonObject textResult = QJsonObject({
@@ -225,6 +234,11 @@ QJsonObject SourceCodeHandler::readSourceFile(const QVariant &file_path)
     });
 
     return response;
+}
+
+QJsonObject SourceCodeHandler::readSourceFile(const QVariant &file_path)
+{
+    return readSourceFile(file_path, {}, {});
 }
 
 QJsonObject SourceCodeHandler::writeSourceFile(const QVariant &file_path, const QVariant &content, const QVariant &create_backup)

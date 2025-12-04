@@ -188,13 +188,14 @@ bool MCPResourceService::addWrapperResourceFromConfig(const MCPResourceConfig &r
 bool MCPResourceService::addContentResourceFromConfig(const MCPResourceConfig &resourceConfig)
 {
     // Validate content
-    if (resourceConfig.strContent.isEmpty()) {
-        MCP_CORE_LOG_WARNING() << "MCPResourceService: Content resource configuration invalid (missing content):" << resourceConfig.strUri;
+    if (resourceConfig.jsonContent.isEmpty()) {
+        MCP_CORE_LOG_WARNING() << "MCPResourceService: Content resource configuration invalid (missing content):" << resourceConfig.toJson();
         return false;
     }
 
     // Use static content method
-    QString strContent = resourceConfig.strContent;
+    QJsonDocument doc(resourceConfig.jsonContent);
+    QString strContent = doc.toJson(QJsonDocument::Compact);
     std::function<QString()> contentProvider = [strContent]() {
         return strContent;
     };

@@ -3,7 +3,6 @@
         <file>cfg/eofmcp.config</file>
         <file>cfg/Prompts/code_review.json</file>
         <file>cfg/Prompts/generate_api_doc.json</file>
-        <file>cfg/Resources/config_file.json</file>
         <file>cfg/Resources/system_info.json</file>
         <file>cfg/Resources/wrapper_dynamic.json</file>
         <file>cfg/Resources/wrapper_example.json</file>
