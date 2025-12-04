@@ -73,7 +73,7 @@ public slots:
      * @param create_backup true or false
      * @return JSON object with result status
      */
-    Q_INVOKABLE QJsonObject writeSourceFile(const QVariant &file_path, const QVariant &create_backup, const QVariant &content);
+    Q_INVOKABLE QJsonObject writeSourceFile(const QVariant &file_path, const QVariant &content, const QVariant &create_backup);
 
     /**
      * @brief Displays all source code files in the project

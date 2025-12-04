@@ -16,17 +16,17 @@
         "type": "string",
         "description": "Absolute or relative path to the file"
       },
+      "content": {
+        "type": "string",
+        "description": "The new content of the file"
+      },
       "create_backup": {
         "type": "boolean",
         "description": "Create a backup of the original file. Default is true",
         "default": true
-      },
-      "content": {
-        "type": "string",
-        "description": "The new content of the file"
       }
     },
-    "required": ["file_path", "content"]
+    "required": ["file_path", "content", "create_backup"]
   },
   "outputSchema": {
     "type": "object",

@@ -241,7 +241,7 @@ QJsonObject SourceCodeHandler::readSourceFile(const QVariant &file_path)
     return readSourceFile(file_path, {}, {});
 }
 
-QJsonObject SourceCodeHandler::writeSourceFile(const QVariant &file_path, const QVariant &create_backup, const QVariant &content)
+QJsonObject SourceCodeHandler::writeSourceFile(const QVariant &file_path, const QVariant &content, const QVariant &create_backup)
 {
     if (!file_path.isValid()) {
         return createErrorResponse("Parameter 'file_path' required");
