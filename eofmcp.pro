@@ -61,7 +61,7 @@ unix:debug {
 mac {
     # define where frameworks and plugins exist
     HOME = $$system(echo $HOME)
-    QTDIR = $$HOME/Qt/6.10.0/macos
+    QTDIR = $$HOME/Qt/6.10.1/macos
 
     lessThan(QT_MAJOR_VERSION, 6) {
         QT += macextras
