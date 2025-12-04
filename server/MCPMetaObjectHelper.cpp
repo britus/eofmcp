@@ -47,7 +47,7 @@ QMetaMethod MCPMetaObjectHelper::getMethod(QObject *pObject, const QString &strM
 
     int nMethodIndex = pMetaObject->indexOfMethod(strMethodSignature.toUtf8().constData());
     if (nMethodIndex < 0) {
-        MCP_CORE_LOG_DEBUG() << "MCPMetaObjectHelper::getMethod: Object has no method:" << strMethodSignature;
+        MCP_CORE_LOG_DEBUG() << "MCPMetaObjectHelper::getMethod: Object '" << pMetaObject->className() << "(" << pObject->objectName() << ")' has no method:" << strMethodSignature;
         return QMetaMethod();
     }
 

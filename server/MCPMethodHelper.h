@@ -1,6 +1,6 @@
 /**
  * @file MCPMethodHelper.h
- * @brief MCP方法助手类（内部实现）
+ * @brief MCP method helper class (internal implementation)
  * @author zhangheng
  * @date 2025-01-01
  * @copyright Copyright (c) 2025 zhangheng. All rights reserved.
@@ -17,17 +17,17 @@ class QMetaMethod;
 class QObject;
 
 /**
- * @brief MCP方法助手类
+ * @brief MCP method helper class
  *
- * 职责：
- * - 通过反射同步调用对象方法
- * - 支持参数列表和参数字典两种方式
+ * Responsibilities:
+ * - Synchronously call object methods through reflection
+ * - Support both parameter list and parameter dictionary approaches
  *
- * 编码规范：
- * - 类成员添加 m_ 前缀
- * - 指针类型添加 p 前缀
- * - 字符串类型添加 str 前缀
- * - { 和 } 要单独一行
+ * Coding standards:
+ * - Add m_ prefix to class members
+ * - Add p prefix to pointer types
+ * - Add str prefix to string types
+ * - { and } should be on separate lines
  */
 class MCPMethodHelper
 {

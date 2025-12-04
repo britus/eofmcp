@@ -29,8 +29,8 @@ QJsonObject MCPResourceConfig::toJson() const
         json["type"] = strType;
     }
 
-    if (!strContent.isEmpty()) {
-        json["content"] = strContent;
+    if (!jsonContent.isEmpty()) {
+        json["content"] = jsonContent;
     }
 
     if (!strFilePath.isEmpty()) {
@@ -57,7 +57,7 @@ MCPResourceConfig MCPResourceConfig::fromJson(const QJsonObject &json)
     config.strDescription = json["description"].toString();
     config.strMimeType = json["mimeType"].toString("text/plain");
     config.strType = json["type"].toString("content"); // Default to content type
-    config.strContent = json["content"].toString();
+    config.jsonContent = json["content"].toObject();
     config.strFilePath = json["filePath"].toString();
     config.strHandlerName = json["handlerName"].toString();
 

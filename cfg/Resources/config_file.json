@@ -1,8 +1,0 @@
-{
-    "uri": "file://config",
-    "name": "Configuration File",
-    "description": "Server Configuration Information",
-    "mimeType": "text/plain",
-    "type": "file",
-    "filePath": "MCPServerConfig/Resources/config.txt"
-}

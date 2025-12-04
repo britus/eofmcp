@@ -40,7 +40,7 @@ void MCPAutoServer::performStart()
     MCP_CORE_LOG_INFO() << "MCPAutoServer: performStart...";
     m_pServer = IMCPServer::createServer();
 
-    // server tools configuration
+    // server tools configuration: static resource directories
     QString projectsPath;
     projectsPath = QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation);
     projectsPath = projectsPath + QDir::separator() + "Projects";
@@ -176,6 +176,8 @@ void MCPAutoServer::generateResources(const QDir basePath, bool bRecursive)
         return;
     }
 
+    MCP_CORE_LOG_DEBUG().noquote() << "MCPAutoServer: File loaded:" << file.fileName();
+
     uint offset = 0;
     foreach (auto pathName, pathNames.toVariantList()) {
         if (!pathName.isValid() || pathName.toString().isEmpty())
@@ -188,7 +190,7 @@ void MCPAutoServer::generateResources(const QDir basePath, bool bRecursive)
             return;
         }
 
-        MCP_CORE_LOG_DEBUG().noquote() << "MCPAutoServer: Schedule reader:" << file.fileName();
+        MCP_CORE_LOG_DEBUG().noquote() << "MCPAutoServer: Schdule directory:" << pathName.toString();
 
         // propagate MCP resources, 5 sec delay
         offset += 100;

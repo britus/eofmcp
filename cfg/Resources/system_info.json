@@ -4,5 +4,15 @@
     "description": "Provides Server System Information",
     "mimeType": "application/json",
     "type": "content",
-    "content": {"platform":"Windows","version":"10","hostname":"localhost","timestamp":""}
+    "content": {
+        "platform":"MacOS",
+        "version":"15.7.2",
+        "hostname":"localhost",
+        "timestamp":"2025-01-12T15:00:58Z"
+    },
+    "annotations": {
+        "audience": ["user", "assistant"],
+        "priority": 0.9,
+        "lastModified": "2025-01-12T15:00:58Z"
+    }
 }

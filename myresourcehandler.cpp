@@ -19,6 +19,7 @@
 #include <QMimeType>
 #include <QStandardPaths>
 #include <QVariant>
+#include <QtCore/qjsonarray.h>
 
 static QMimeDatabase mimeDB;
 
@@ -66,6 +67,20 @@ QJsonObject MyResourceHandler::getMetadata() const
     metadata["description"] = m_strDescription;
     metadata["mimeType"] = m_strMimeType;
     return metadata;
+}
+
+QJsonObject MyResourceHandler::getAnnotations() const
+{
+    QJsonArray audience;
+    audience.append("user");
+    audience.append("assistant");
+
+    QJsonObject annotation;
+    annotation["audience"] = audience;
+    annotation["priority"] = 0.9f;
+    annotation["lastModified"] = QDateTime::currentDateTime().toString(Qt::ISODate);
+
+    return annotation;
 }
 
 QString MyResourceHandler::getContent() const

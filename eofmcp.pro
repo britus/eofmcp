@@ -364,10 +364,11 @@ TRANSLATIONS += \
 #!isEmpty(target.path): INSTALLS += target
 
 DISTFILES += \
+    README_qtmcp.md \
     cfg/Projects/projects.json \
     cfg/Prompts/code_review.json \
     cfg/Prompts/generate_api_doc.json \
-    cfg/Resources/config_file.json \
+    cfg/Prompts/translage_cn_to_en.json \
     cfg/Resources/system_info.json \
     cfg/Resources/wrapper_dynamic.json \
     cfg/Resources/wrapper_example.json \

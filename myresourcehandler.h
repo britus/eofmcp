@@ -39,25 +39,31 @@ public slots:
      * @brief Get resource metadata
      * @return Resource metadata object
      */
-    QJsonObject getMetadata() const;
+    Q_INVOKABLE QJsonObject getMetadata() const;
 
     /**
      * @brief Get resource content
      * @return Resource content string
      */
-    QString getContent() const;
+    Q_INVOKABLE QString getContent() const;
+
+    /**
+     * @brief Get resource annotation
+     * @return Resource annotation string
+     */
+    Q_INVOKABLE QJsonObject getAnnotations() const;
 
     /**
      * @brief Update resource content (for testing)
      * @param strNewContent New resource content
      */
-    void updateContent(const QString &strNewContent);
+    Q_INVOKABLE void updateContent(const QString &strNewContent);
 
     /**
      * @brief Update resource name (for testing)
      * @param strNewName New resource name
      */
-    void updateName(const QString &strNewName);
+    Q_INVOKABLE void updateName(const QString &strNewName);
 
 signals:
     /**
