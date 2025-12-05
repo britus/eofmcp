@@ -19,14 +19,9 @@
       "content": {
         "type": "string",
         "description": "The new content of the file"
-      },
-      "create_backup": {
-        "type": "boolean",
-        "description": "Create a backup of the original file. Default is true",
-        "default": true
       }
     },
-    "required": ["file_path", "content", "create_backup"]
+    "required": ["file_path", "content"]
   },
   "outputSchema": {
     "type": "object",
