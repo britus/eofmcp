@@ -394,7 +394,10 @@ QString SourceCodeHandler::createBackup(const QString &strOriginalPath)
 {
     QFileInfo fileInfo(strOriginalPath);
     QString strBackupDir = fileInfo.absolutePath();
-    QString strBackupName = "_backup_" + QDateTime::currentDateTime().toString("yyyyMMdd_hhmmss") + "_" + fileInfo.baseName() + "." + fileInfo.suffix() + ".txt";
+    QString strBackupName = "_backup_"                                                 //
+                            + QDateTime::currentDateTime().toString("yyyyMMdd_hhmmss") //
+                            + "_" + fileInfo.baseName() + "."                          //
+                            + fileInfo.suffix() + ".txt";
     QString strBackupPath = strBackupDir + "/" + strBackupName;
 
     if (QFile::copy(strOriginalPath, strBackupPath)) {

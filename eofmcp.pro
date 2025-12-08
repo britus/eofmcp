@@ -379,6 +379,8 @@ DISTFILES += \
     cfg/Tools/source-file-read.json \
     cfg/Tools/source-file-write.json \
     cfg/eofmcp.config \
+    lms/llama-prompt-template.jinja \
+    lms/lms-prompt-template.jinja \
     LICENSE \
     README.md \
     privacy.txt \

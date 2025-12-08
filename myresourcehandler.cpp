@@ -48,7 +48,7 @@ MyResourceHandler::MyResourceHandler(QObject *pParent)
         QJsonDocument doc(contentObj);
         QString strNewContent = doc.toJson(QJsonDocument::Compact);
 
-        //  MCP_RESOURCE_LOG_DEBUG() << "MyResourceHandler: Update content:" << strNewContent;
+        MCP_RESOURCE_LOG_DEBUG() << "MyResourceHandler: Update content:" << strNewContent;
 
         // Update content and emit changed signal
         updateContent(strNewContent);
