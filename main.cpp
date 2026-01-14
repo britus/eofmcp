@@ -37,11 +37,180 @@ void StopAutoMCPServer()
     autoServer.performStop();
 }
 
+static inline bool createDirectory(const QDir &dir)
+{
+    if (!dir.exists()) {
+        QFile::Permissions permissions;
+        permissions.setFlag(QFile::Permission::ReadOwner, true);
+        permissions.setFlag(QFile::Permission::ReadGroup, true);
+        permissions.setFlag(QFile::Permission::WriteOwner, true);
+        permissions.setFlag(QFile::Permission::WriteGroup, true);
+        permissions.setFlag(QFile::Permission::ExeOwner, true);
+        permissions.setFlag(QFile::Permission::ExeGroup, true);
+        if (!dir.mkpath(dir.absolutePath(), permissions)) {
+            qWarning("Unable to create directory: %s", qPrintable(dir.absolutePath()));
+            return false;
+        }
+    }
+    return true;
+}
+
+static inline bool configDirectory(const QString &pathName, QDir &target)
+{
+    // server tools configuration
+    QDir dir(QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation));
+
+    // fallback to internal resource
+    if (!QFileInfo::exists(dir.absoluteFilePath(pathName))) {
+        if (!createDirectory(dir.absoluteFilePath(pathName))) {
+            return false;
+        }
+    }
+
+    target = QDir(dir.absoluteFilePath(pathName));
+    return true;
+}
+
+// Helper function to copy directories recursively
+static inline bool copyDirectoryRecursively(const QString &sourceDirPath, const QString &targetDirPath)
+{
+    QDir sourceDir(sourceDirPath);
+    QDir targetDir(targetDirPath);
+
+    if (!targetDir.exists()) {
+        if (!targetDir.mkpath(".")) {
+            return false;
+        }
+    }
+
+    QFileInfoList fileInfoList = sourceDir.entryInfoList( //
+        QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot);
+
+    foreach (const QFileInfo &fileInfo, fileInfoList) {
+        QString fileName = fileInfo.fileName();
+        QString sourceFilePath = fileInfo.absoluteFilePath();
+        QString targetFilePath = targetDirPath + QDir::separator() + fileName;
+
+        if (fileInfo.isDir()) {
+            // Recursively copy subdirectory
+            if (!copyDirectoryRecursively(sourceFilePath, targetFilePath)) {
+                return false;
+            }
+        } else {
+            // Copy file
+            QFile sourceFile(sourceFilePath);
+            QFile targetFile(targetFilePath);
+
+            if (targetFile.exists()) {
+                if (!targetFile.remove()) {
+                    return false;
+                }
+            }
+
+            if (!sourceFile.copy(targetFilePath)) {
+                return false;
+            }
+        }
+    }
+
+    return true;
+}
+
+static inline bool deployResourceFiles(const QString &resourcePath, const QDir &targetDir)
+{
+    // Ensure target directory exists
+    if (!targetDir.exists()) {
+        if (!createDirectory(targetDir)) {
+            qCritical() << "Failed to create target directory:" << targetDir.absolutePath();
+            return false;
+        }
+    }
+
+    bool success = true;
+
+    // Iterate through each subdirectory
+    QDir sourceDir(resourcePath);
+    QFileInfo sourceInfo(sourceDir.absolutePath());
+
+    // Check if the source subdirectory exists
+    if (!sourceDir.exists()) {
+        qCritical() << "Source subdirectory does not exist:" << sourceDir.absolutePath();
+        return false;
+    }
+
+    // Get all files in the subdirectory
+    QFileInfoList fileInfoList = sourceDir.entryInfoList( //
+        QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot);
+
+    foreach (const QFileInfo &fileInfo, fileInfoList) {
+        QString fileName = fileInfo.fileName();
+        QString sourceFilePath = fileInfo.absoluteFilePath();
+        QString targetFilePath = targetDir.absoluteFilePath(fileName);
+
+        if (fileInfo.isDir()) {
+            // Handle directories recursively
+            QDir targetSubDir(targetFilePath);
+            if (!targetSubDir.exists()) {
+                if (!targetSubDir.mkpath(".")) {
+                    qWarning() << "Failed to create directory:" << targetFilePath;
+                    success = false;
+                    continue;
+                }
+            }
+
+            // Copy directory contents recursively
+            if (!copyDirectoryRecursively(sourceFilePath, targetFilePath)) {
+                qWarning() << "Failed to copy directory:" << sourceFilePath;
+                success = false;
+            }
+        } else {
+            // Handle files
+            QFile sourceFile(sourceFilePath);
+            QFileInfo sfi(sourceFile.fileName());
+            QFile targetFile(targetFilePath);
+            QFileInfo tfi(targetFile.fileName());
+
+            // skip existing newer files
+            if (sfi.lastModified() < tfi.lastModified()) {
+                continue;
+            }
+
+            // Remove existing file if it exists
+            if (targetFile.exists()) {
+                if (!targetFile.remove()) {
+                    qWarning() << "Failed to remove existing file:" << targetFilePath;
+                    success = false;
+                    continue;
+                }
+            }
+
+            // Copy file
+            if (!sourceFile.copy(targetFilePath)) {
+                qWarning() << "Failed to copy file from" << sourceFilePath << "to" << targetFilePath;
+                success = false;
+            } else {
+                qDebug() << "Copied file:" << fileName;
+            }
+        }
+    }
+
+    return success;
+}
+
 int main(int argc, char *argv[])
 {
     // Same as in Info.plist
-    QCoreApplication::setOrganizationDomain("org.eof.tools");
-    QCoreApplication::setApplicationName("EoF MCP Server");
+    QApplication::setOrganizationName(QStringLiteral("EoF Software Labs"));
+    QApplication::setOrganizationDomain(QStringLiteral("org.eof.tools.eofmcp"));
+    QApplication::setApplicationName(QStringLiteral("eofmcp"));
+    QApplication::setApplicationDisplayName(QStringLiteral("EoF MCP Server"));
+
+#ifndef XCODE_BUILD
+    QApplication::setApplicationVersion("4.31");
+#else
+    QApplication::setApplicationVersion( //
+        QStringLiteral("%1.%2").arg(getBundleVersion(), getBuildNumber()));
+#endif
 
     QCoreApplication a(argc, argv);
     a.connect(&a, &QCoreApplication::aboutToQuit, &a, []() { //
@@ -55,6 +224,27 @@ int main(int argc, char *argv[])
         if (translator.load(":/i18n/" + baseName)) {
             a.installTranslator(&translator);
             break;
+        }
+    }
+
+    // deploy configuration files from internal resource
+    QDir target;
+    if (configDirectory(QStringLiteral("Tools"), target)) {
+        if (!deployResourceFiles(QStringLiteral(":/cfg/Tools"), target)) {
+            qCritical("Unable to create configuration directory: Tools");
+            return -1;
+        }
+    }
+    if (configDirectory(QStringLiteral("Prompts"), target)) {
+        if (!deployResourceFiles(QStringLiteral(":/cfg/Prompts"), target)) {
+            qCritical("Unable to create configuration directory: Prompts");
+            return -1;
+        }
+    }
+    if (configDirectory(QStringLiteral("Resources"), target)) {
+        if (!deployResourceFiles(QStringLiteral(":/cfg/Resources"), target)) {
+            qCritical("Unable to create configuration directory: Resources");
+            return -1;
         }
     }
 

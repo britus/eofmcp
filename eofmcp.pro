@@ -11,7 +11,6 @@ QT  += quick
 QT  += quick3d
 QT  += quick3dutils
 QT  += quick3druntimerender
-#QT  += quickshapes
 QT  += qml
 QT  += qmlmeta
 QT  += qmlmodels

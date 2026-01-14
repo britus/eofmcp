@@ -6,7 +6,6 @@
         <file>cfg/Resources/system_info.json</file>
         <file>cfg/Resources/wrapper_dynamic.json</file>
         <file>cfg/Resources/wrapper_example.json</file>
-        <file>cfg/Tools/calculator.json</file>
         <file>cfg/Tools/project-file-list.json</file>
         <file>cfg/Tools/source-file-list.json</file>
         <file>cfg/Tools/source-file-read.json</file>
