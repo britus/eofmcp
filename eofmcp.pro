@@ -152,7 +152,7 @@ mac {
 
     # Added to Xcode project
     generic.files = \
-        $$QTDIR/plugins/generic/libqinsighttracker.dylib \
+        #$$QTDIR/plugins/generic/libqinsighttracker.dylib \
         $$QTDIR/plugins/generic/libqtuiotouchplugin.dylib
     generic.path = Contents/PlugIns/canbus
     QMAKE_BUNDLE_DATA += generic
@@ -191,7 +191,7 @@ mac {
         $$QTDIR/plugins/imageformats/libqjpeg.dylib \
         $$QTDIR/plugins/imageformats/libqmacheif.dylib \
         $$QTDIR/plugins/imageformats/libqmacjp2.dylib \
-        $$QTDIR/plugins/imageformats/libqpdf.dylib \
+        #$$QTDIR/plugins/imageformats/libqpdf.dylib \
         $$QTDIR/plugins/imageformats/libqsvg.dylib \
         $$QTDIR/plugins/imageformats/libqtga.dylib \
         $$QTDIR/plugins/imageformats/libqtiff.dylib \
