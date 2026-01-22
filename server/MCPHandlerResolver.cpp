@@ -6,7 +6,7 @@
  * @copyright Copyright (c) 2025 zhangheng. All rights reserved.
  */
 
-#include "MCPHandlerResolver.h"
+#include <MCPHandlerResolver.h>
 #include <QApplication>
 #include <QCoreApplication>
 #include <QVariant>

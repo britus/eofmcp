@@ -1,5 +1,5 @@
 {
-  "name": "write_source_file",
+  "name": "source_write_file",
   "title": "Save Source Code File",
   "description": "Saves changes to a source code file",
   "execHandler": "SourceCodeHandler",

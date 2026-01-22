@@ -1,0 +1,109 @@
+/**
+ * @file MCPRouter.cpp
+ * @brief MCP方法路由器实现
+ * @author zhangheng
+ * @date 2025-01-09
+ * @copyright Copyright (c) 2025 zhangheng. All rights reserved.
+ */
+
+#include "MCPRouter.h"
+#include "IMCPMiddleware.h"
+#include "MCPContext.h"
+#include "MCPError.h"
+#include "MCPLog.h"
+#include "MCPServerMessage.h"
+
+MCPRouter::MCPRouter(QObject *pParent)
+    : QObject(pParent)
+{}
+
+MCPRouter::~MCPRouter() {}
+
+void MCPRouter::registerRoute(const QString &strMethod, RouteHandler handler)
+{
+    if (m_dictRoutes.contains(strMethod)) {
+        MCP_CORE_LOG_WARNING() << "MCPRouter: Route already exist:" << strMethod;
+    }
+
+    m_dictRoutes[strMethod] = handler;
+}
+
+void MCPRouter::unregisterRoute(const QString &strMethod)
+{
+    if (m_dictRoutes.remove(strMethod) == 0) {
+        MCP_CORE_LOG_WARNING() << "MCPRouter: Route not found for:" << strMethod;
+    }
+}
+
+QSharedPointer<MCPServerMessage> MCPRouter::dispatch(const QString &strMethod, const QSharedPointer<MCPContext> &pContext)
+{
+    MCP_CORE_LOG_DEBUG() << "MCPRouter: -------------------------------------------";
+    MCP_CORE_LOG_DEBUG() << "MCPRouter: Dispatch:" << strMethod;
+    MCP_CORE_LOG_DEBUG() << "MCPRouter: id:" << pContext->getClientMessage()->getMethodId();
+    MCP_CORE_LOG_DEBUG() << "MCPRouter: name:" << pContext->getClientMessage()->getMethodName();
+    MCP_CORE_LOG_DEBUG() << "MCPRouter: sid:" << pContext->getClientMessage()->getSessionId();
+    MCP_CORE_LOG_DEBUG() << "MCPRouter: params:" << pContext->getClientMessage()->getParmams();
+
+    // Find the route processor
+    auto it = m_dictRoutes.find(strMethod);
+    if (it == m_dictRoutes.end()) {
+        MCP_CORE_LOG_WARNING() << "MCPRouter: No route for:" << strMethod;
+        return QSharedPointer<MCPServerErrorResponse>::create(pContext, MCPError::methodNotFound(QString("No route for method: %1").arg(strMethod)));
+    }
+
+    RouteHandler finalHandler = it.value();
+
+    // Build a middleware pipeline (wrapping from back to front)
+    std::function<QSharedPointer<MCPServerMessage>()> pipeline = [finalHandler, pContext]() {
+        return finalHandler(pContext);
+    };
+
+    // Reverse order packaging of middleware (middleware added later is placed in the outer layer).
+    for (int i = m_listMiddlewares.size() - 1; i >= 0; --i) {
+        auto pMiddleware = m_listMiddlewares[i];
+        auto nextPipeline = pipeline; // 捕获当前pipeline
+
+        pipeline = [pMiddleware, pContext, nextPipeline]() {
+            return pMiddleware->process(pContext, nextPipeline);
+        };
+    }
+
+    // Execute middleware pipeline and catch exceptions
+    try {
+        return pipeline();
+    } catch (const MCPError &error) {
+        MCP_CORE_LOG_WARNING() << "MCPRouter: Error:" << strMethod << ":" << error.getMessage();
+        return QSharedPointer<MCPServerErrorResponse>::create(pContext, error);
+    } catch (const std::exception &e) {
+        MCP_CORE_LOG_WARNING() << "MCPRouter: Exception:" << strMethod << ":" << e.what();
+        return QSharedPointer<MCPServerErrorResponse>::create(pContext, MCPError::internalError(QString("Error: %1").arg(e.what())));
+    } catch (...) {
+        MCP_CORE_LOG_WARNING() << "MCPRouter: Exception:" << strMethod;
+        return QSharedPointer<MCPServerErrorResponse>::create(pContext, MCPError::internalError("dispatch failed"));
+    }
+}
+
+bool MCPRouter::hasRoute(const QString &strMethod) const
+{
+    return m_dictRoutes.contains(strMethod);
+}
+
+QStringList MCPRouter::getRegisteredRoutes() const
+{
+    return m_dictRoutes.keys();
+}
+
+void MCPRouter::use(QSharedPointer<IMCPMiddleware> pMiddleware)
+{
+    m_listMiddlewares.append(pMiddleware);
+}
+
+void MCPRouter::clearMiddlewares()
+{
+    m_listMiddlewares.clear();
+}
+
+int MCPRouter::getMiddlewareCount() const
+{
+    return m_listMiddlewares.size();
+}

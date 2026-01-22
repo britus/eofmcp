@@ -126,11 +126,18 @@ QJsonObject SourceCodeHandler::listSourceFiles(const QVariant &project_path, con
     QString strProjectPath = project_path.toString();
     QStringList strExtensions = DEFAULT_EXTENSIONS;
     if (extensions.isValid() && extensions.typeId() == QMetaType::QStringList) {
-        strExtensions = extensions.toStringList();
+        QStringList extList = extensions.toStringList();
+        foreach (QString ext, extList) {
+            if (!strExtensions.contains(ext)) {
+                strExtensions.append(ext);
+            }
+        }
     } else if (extensions.isValid() && extensions.typeId() == QMetaType::QVariantList) {
         foreach (auto ext, extensions.toList()) {
             if (ext.isValid()) {
-                strExtensions.append(ext.toString());
+                if (!strExtensions.contains(ext)) {
+                    strExtensions.append(ext.toString());
+                }
             }
         }
     } else if (extensions.isValid() && extensions.typeId() == QMetaType::QJsonArray) {
@@ -394,7 +401,7 @@ QString SourceCodeHandler::createBackup(const QString &strOriginalPath)
 {
     QFileInfo fileInfo(strOriginalPath);
     QString strBackupDir = fileInfo.absolutePath();
-    QString strBackupName = "_backup_"                                                 //
+    QString strBackupName = ".backup_"                                                 //
                             + QDateTime::currentDateTime().toString("yyyyMMdd_hhmmss") //
                             + "_" + fileInfo.baseName() + "."                          //
                             + fileInfo.suffix() + ".txt";
@@ -426,7 +433,7 @@ QJsonObject SourceCodeHandler::fileInfoToJson(const QFileInfo &fileInfo, const Q
 
 QStringList SourceCodeHandler::getFileExtensions(const QJsonArray &jsonArray)
 {
-    QStringList strExtensions;
+    QStringList strExtensions = DEFAULT_EXTENSIONS;
 
     if (!jsonArray.isEmpty()) {
         for (const QJsonValue &value : jsonArray) {
@@ -435,12 +442,10 @@ QStringList SourceCodeHandler::getFileExtensions(const QJsonArray &jsonArray)
                 if (!strExt.startsWith(".")) {
                     strExt = "." + strExt;
                 }
-                strExtensions.append(strExt);
+                if (!strExtensions.contains(strExt)) {
+                    strExtensions.append(strExt);
+                }
             }
-        }
-    } else {
-        foreach (const auto &ext, DEFAULT_EXTENSIONS) {
-            strExtensions.append(ext);
         }
     }
 

@@ -22,8 +22,7 @@ QT  += qmlworkerscript
 DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000
 
 TARGET = eofmcp
-
-TEMPLATE = app
+VERSION = 1.23.1
 
 # Defaults
 CONFIG += c++20
@@ -46,9 +45,10 @@ CONFIG -= create_prl
 #CONFIG += lrelease
 
 DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000
+DEFINES += LIBMCPServer
 
 # for QT Creator and Visual Studio project.
-QMAKE_PROJECT_NAME = EoFMCP
+QMAKE_PROJECT_NAME = EoFMCPServer
 
 QMAKE_CXXFLAGS += -fno-omit-frame-pointer
 QMAKE_CXXFLAGS += -funwind-tables
@@ -58,6 +58,37 @@ unix:debug {
 }
 
 mac {
+    #TEMPLATE = app
+    TEMPLATE = lib
+    CONFIG -= lib_bundle
+    CONFIG += create_prl
+
+    FRAMEWORK_HEADERS.version = Versions
+    FRAMEWORK_HEADERS.files = \
+        $$PWD/server/core/MCPHelper.h \
+        $$PWD/server/config/IMCPServerConfig.h \
+        $$PWD/server/prompts/IMCPPromptService.h \
+        $$PWD/server/resources/IMCPResourceService.h \
+        $$PWD/server/tools/MCPToolInputSchema.h \
+        $$PWD/server/tools/MCPToolOutputSchema.h \
+        $$PWD/server/tools/IMCPToolService.h \
+        $$PWD/server/MCPServer_global.h \
+        $$PWD/server/IMCPServer.h
+    #FRAMEWORK_HEADERS.path = Headers
+    #QMAKE_BUNDLE_DATA += FRAMEWORK_HEADERS
+
+    #TARGET = EoFMCPServer
+    #QMAKE_FRAMEWORK_BUNDLE_NAME = "EoFMCPServer"
+    #QMAKE_FRAMEWORK_VERSION = 1.0.1
+
+    # Deploy public header files
+    FRAMEWORK_HEADERS.path = /opt/homebrew/eofmcp/include
+    INSTALLS += FRAMEWORK_HEADERS
+
+    # Deploy library files
+    target.path = /opt/homebrew/eofmcp/lib
+    INSTALLS += target
+
     # Define the home directory
     HOME = $$system(echo $HOME)
 
@@ -331,25 +362,60 @@ mac {
     #QMAKE_CODE_SIGN_IDENTITY='Mac Developer'
 
     # Default rules for deployment.
-    target.path = /Applications
-    INSTALLS += target
+    #target.path = /Applications
+    #INSTALLS += target
 }
 
 linux {
-    target.path = /usr/local/bin
+    #TEMPLATE = app
+    TEMPLATE = lib
+
+    #target.path = /usr/local/bin
+    #INSTALLS += target
+
+    # Deploy public header files
+    LIB_INCLUDE_FILES = \
+        $$PWD/server/core/MCPHelper.h \
+        $$PWD/server/config/IMCPServerConfig.h \
+        $$PWD/server/prompts/IMCPPromptService.h \
+        $$PWD/server/resources/IMCPResourceService.h \
+        $$PWD/server/tools/MCPToolInputSchema.h \
+        $$PWD/server/tools/MCPToolOutputSchema.h \
+        $$PWD/server/tools/IMCPToolService.h \
+        $$PWD/server/MCPServer_global.h \
+        $$PWD/server/IMCPServer.h
+    LIB_INCLUDE_FILES.path = /usr/local/include
+    INSTALLS += LIB_INCLUDE_FILES
+
+    # Deploy library files
+    target.path = /usr/local/lib
     INSTALLS += target
 }
 
-include(server/server.pri)
+include($$PWD/server/3rdparty/3rdparty.pri)
+include($$PWD/server/core/core.pri)
+include($$PWD/server/errors/errors.pri)
+include($$PWD/server/config/config.pri)
+include($$PWD/server/messages/messages.pri)
+include($$PWD/server/transport/transport.pri)
+include($$PWD/server/transport/http/transporthttp.pri)
+include($$PWD/server/session/session.pri)
+include($$PWD/server/routing/routing.pri)
+include($$PWD/server/middleware/middleware.pri)
+include($$PWD/server/prompts/prompts.pri)
+include($$PWD/server/resources/resources.pri)
+include($$PWD/server/tools/tools.pri)
+include($$PWD/server/server.pri)
+
+SUBDIRS += \
+    server
 
 SOURCES += \
     main.cpp \
-    mycalculatorHandler.cpp \
     myresourcehandler.cpp \
     mysourcecodehandler.cpp
 
 HEADERS += \
-    mycalculatorHandler.h \
     myresourcehandler.h \
     mysourcecodehandler.h
 
@@ -357,11 +423,6 @@ FORMS +=
 
 TRANSLATIONS += \
     eofmcp_en_US.ts
-
-# Default rules for deployment.
-#qnx: target.path = /tmp/$${TARGET}/bin
-#else: unix:!android: target.path = /opt/$${TARGET}/bin
-#!isEmpty(target.path): INSTALLS += target
 
 DISTFILES += \
     README_qtmcp.md \

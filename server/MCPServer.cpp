@@ -12,6 +12,7 @@
 #include <IMCPTransport.h>
 #include <MCPContext.h>
 #include <MCPHandlerResolver.h>
+#include <MCPHttpReplyMessage.h>
 #include <MCPHttpTransportAdapter.h>
 #include <MCPInvokeHelper.h>
 #include <MCPLog.h>
@@ -30,7 +31,6 @@
 #include <MCPTool.h>
 #include <MCPToolService.h>
 #include <MCPToolsConfig.h>
-#include <impl/MCPHttpReplyMessage.h>
 #include <QDir>
 #include <QEventLoop>
 #include <QJsonDocument>

@@ -3,7 +3,6 @@
 // Copyright © 2025 by EoF Software Labs
 // SPDX-License-Identifier: GPLv3
 // ********************************************************************
-#include "mycalculatorHandler.h"
 #include "myresourcehandler.h"
 #include "mysourcecodehandler.h"
 #include <IMCPMiddleware.h>
@@ -16,6 +15,7 @@
 #include <MCPAutoServer.h>
 #include <MCPLog.h>
 #include <MCPServer.h>
+#include <MCPServer_global.h>
 #include <QApplication>
 #include <QDebug>
 #include <QDir>
@@ -27,12 +27,12 @@
 
 static MCPAutoServer autoServer;
 
-void StartAutoMCPServer()
+static inline void StartAutoMCPServer()
 {
     autoServer.performStart();
 }
 
-void StopAutoMCPServer()
+static inline void StopAutoMCPServer()
 {
     autoServer.performStop();
 }
@@ -55,10 +55,21 @@ static inline bool createDirectory(const QDir &dir)
     return true;
 }
 
-static inline bool configDirectory(const QString &pathName, QDir &target)
+#ifdef LIBMCPServer
+QString preferencePath;
+#endif
+
+static inline bool createConfigDirectory(const QString &pathName, QDir &target)
 {
+#ifdef LIBMCPServer
+    if (preferencePath.isEmpty()) {
+        preferencePath = QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation);
+    }
+    QDir dir(preferencePath);
+#else
     // server tools configuration
     QDir dir(QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation));
+#endif
 
     // fallback to internal resource
     if (!QFileInfo::exists(dir.absoluteFilePath(pathName))) {
@@ -197,16 +208,113 @@ static inline bool deployResourceFiles(const QString &resourcePath, const QDir &
     return success;
 }
 
+#ifdef LIBMCPServer
+extern "C" {
+
+int MCPCORE_EXPORT MCPServerQuit()
+{
+    if (qApp != nullptr) {
+        qApp->quit();
+    }
+
+    return 0;
+}
+
+int MCPCORE_EXPORT MCPSetPreferencePath(const char *path)
+{
+    preferencePath = path;
+    return 0;
+}
+
+int MCPCORE_EXPORT MCPServerStartup( //
+    const char *appName,             //
+    const char *displayName,
+    const char *orgName,
+    const char *orgDomain,
+    const char *version)
+{
+    const char *argv[] = {"lib"};
+    int argc = 0;
+
+    // Same as in Info.plist
+    QApplication::setApplicationName(appName ? appName : QStringLiteral("eofmcp"));
+    QApplication::setApplicationDisplayName(displayName ? displayName : QStringLiteral("EoF MCP Server"));
+    QApplication::setOrganizationName(orgName ? orgName : QStringLiteral("EoF Software Labs"));
+    QApplication::setOrganizationDomain(orgDomain ? orgDomain : QStringLiteral("org.eof.tools.eofmcp"));
+    QApplication::setApplicationVersion(version ? version : QStringLiteral("4.31.6"));
+
+    QCoreApplication a(argc, (char **) argv);
+    a.connect(&a, &QCoreApplication::aboutToQuit, &a, []() { //
+        StopAutoMCPServer();
+    });
+
+    QTranslator translator;
+    const QStringList uiLanguages = QLocale::system().uiLanguages();
+    for (const QString &locale : uiLanguages) {
+        const QString baseName = "eofmcp_" + QLocale(locale).name();
+        if (translator.load(":/i18n/" + baseName)) {
+            a.installTranslator(&translator);
+            break;
+        }
+    }
+
+    // deploy configuration files from internal resource
+    QDir target;
+    if (createConfigDirectory(QStringLiteral("Tools"), target)) {
+        if (!deployResourceFiles(QStringLiteral(":/cfg/Tools"), target)) {
+            qCritical("Unable to create configuration directory: Tools");
+            return -1;
+        }
+    }
+    if (createConfigDirectory(QStringLiteral("Prompts"), target)) {
+        if (!deployResourceFiles(QStringLiteral(":/cfg/Prompts"), target)) {
+            qCritical("Unable to create configuration directory: Prompts");
+            return -1;
+        }
+    }
+    if (createConfigDirectory(QStringLiteral("Resources"), target)) {
+        if (!deployResourceFiles(QStringLiteral(":/cfg/Resources"), target)) {
+            qCritical("Unable to create configuration directory: Resources");
+            return -1;
+        }
+    }
+
+    QObjectList handlers;
+
+    // The source code handler has following invokable tools:
+    // - displayProjectFiles <project_path>  [recursive] [sort_by]
+    // - listSourceFiles <project_path>
+    // - readSourceFile <file_path>
+    // - writeSourceFile <file_path> <content> [create_backup]
+    handlers.append(new SourceCodeHandler(qApp));
+
+    // Create a resource Handler object (used for validating MCPResourceWrapper)
+    // The resource Handler must be created; MCPHandlerResolver will locate it
+    // via objectName or the "MCPResourceHandlerName" property
+    // The "MCPResourceHandlerName" property is already set in the MyResourceHandler constructor
+    handlers.append(new MyResourceHandler(qApp));
+
+    // Use automatic startup to load and start the server from the configuration file
+    // The configuration file is located in the config folder.
+    StartAutoMCPServer();
+
+    return a.exec();
+}
+
+} // extern "C"
+#endif
+
+#ifndef LIBMCPServer
 int main(int argc, char *argv[])
 {
     // Same as in Info.plist
-    QApplication::setOrganizationName(QStringLiteral("EoF Software Labs"));
-    QApplication::setOrganizationDomain(QStringLiteral("org.eof.tools.eofmcp"));
     QApplication::setApplicationName(QStringLiteral("eofmcp"));
     QApplication::setApplicationDisplayName(QStringLiteral("EoF MCP Server"));
+    QApplication::setOrganizationName(QStringLiteral("EoF Software Labs"));
+    QApplication::setOrganizationDomain(QStringLiteral("org.eof.tools.eofmcp"));
 
 #ifndef XCODE_BUILD
-    QApplication::setApplicationVersion("4.31");
+    QApplication::setApplicationVersion("4.31.6");
 #else
     QApplication::setApplicationVersion( //
         QStringLiteral("%1.%2").arg(getBundleVersion(), getBuildNumber()));
@@ -229,19 +337,19 @@ int main(int argc, char *argv[])
 
     // deploy configuration files from internal resource
     QDir target;
-    if (configDirectory(QStringLiteral("Tools"), target)) {
+    if (createConfigDirectory(QStringLiteral("Tools"), target)) {
         if (!deployResourceFiles(QStringLiteral(":/cfg/Tools"), target)) {
             qCritical("Unable to create configuration directory: Tools");
             return -1;
         }
     }
-    if (configDirectory(QStringLiteral("Prompts"), target)) {
+    if (createConfigDirectory(QStringLiteral("Prompts"), target)) {
         if (!deployResourceFiles(QStringLiteral(":/cfg/Prompts"), target)) {
             qCritical("Unable to create configuration directory: Prompts");
             return -1;
         }
     }
-    if (configDirectory(QStringLiteral("Resources"), target)) {
+    if (createConfigDirectory(QStringLiteral("Resources"), target)) {
         if (!deployResourceFiles(QStringLiteral(":/cfg/Resources"), target)) {
             qCritical("Unable to create configuration directory: Resources");
             return -1;
@@ -249,12 +357,6 @@ int main(int argc, char *argv[])
     }
 
     QObjectList handlers;
-
-    // Create a Handler object (used for handling tool calls)
-    // The Handler must be created; MCPHandlerResolver will locate it
-    // via objectName or the "MPCToolHandlerName" property
-    // The "MPCToolHandlerName" property is already set in the MyCalculatorHandler constructor
-    handlers.append(new MyCalculatorHandler(qApp));
 
     // The source code handler has following invokable tools:
     // - displayProjectFiles <project_path>  [recursive] [sort_by]
@@ -270,8 +372,9 @@ int main(int argc, char *argv[])
     handlers.append(new MyResourceHandler(qApp));
 
     // Use automatic startup to load and start the server from the configuration file
-    // The configuration file is located in the MCPServerConfig folder within the application directory
+    // The configuration file is located in the config folder.
     StartAutoMCPServer();
 
     return a.exec();
 }
+#endif

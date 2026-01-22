@@ -15,13 +15,16 @@
 #include <QFile>
 #include <QStandardPaths>
 
+#ifdef LIBMCPServer
+extern QString preferencePath;
+#endif
+
 IMCPServer::IMCPServer(QObject *pParent)
     : QObject(pParent)
 {}
 
 IMCPServer *IMCPServer::createServer()
 {
-
     MCPServer *server = new MCPServer();
 
     auto pConfig = server->getConfig();
@@ -34,7 +37,16 @@ IMCPServer *IMCPServer::createServer()
     permissions.setFlag(QFile::Permission::ExeOwner, true);
     permissions.setFlag(QFile::Permission::ExeGroup, true);
 
+#ifdef LIBMCPServer
+    if (preferencePath.isEmpty()) {
+        preferencePath = QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation);
+    }
+    QString cfgDir = preferencePath;
+#else
+    // server tools configuration
     QString cfgDir = QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation);
+#endif
+
     QDir dir(cfgDir);
     if (!dir.exists()) {
         dir.mkdir(cfgDir, permissions);
@@ -62,7 +74,6 @@ IMCPServer *IMCPServer::createServer()
 
 void IMCPServer::destroyServer(IMCPServer *pServer)
 {
-
     if (pServer != nullptr) {
         pServer->stop();
         pServer->deleteLater();

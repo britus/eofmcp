@@ -132,13 +132,16 @@ private:
 
 private:
     // Standard file extensions for source code
-    QStringList DEFAULT_EXTENSIONS = QStringList() //
-                                     << ".cpp"     //
-                                     << ".h"       //
-                                     << ".hpp"     //
-                                     << ".c"       //
-                                     << ".cc"      //
-                                     << ".cxx"     //
-                                     << ".hxx"     //
-                                     << ".java";
+    QStringList DEFAULT_EXTENSIONS = QStringList()      //
+                                     << ".cpp"          //
+                                     << ".h"            //
+                                     << ".hpp"          //
+                                     << ".c"            //
+                                     << ".cc"           //
+                                     << ".cxx"          //
+                                     << ".hxx"          //
+                                     << ".java"         //
+                                     << ".md"           //
+                                     << ".entitlements" //
+                                     << ".xcdatamodeld";
 };

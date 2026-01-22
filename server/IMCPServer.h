@@ -11,7 +11,7 @@
 #include <IMCPResourceService.h>
 #include <IMCPServerConfig.h>
 #include <IMCPToolService.h>
-#include <MCPCore_global.h.h>
+#include <MCPServer_global.h>
 #include <QObject>
 #include <QString>
 

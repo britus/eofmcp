@@ -1,0 +1,143 @@
+/**
+ * @file MCPToolService.h
+ * @brief MCP tool service class (internal implementation)
+ * @author zhangheng
+ * @date 2025-01-01
+ * @copyright Copyright (c) 2025 zhangheng. All rights reserved.
+ */
+
+#pragma once
+#include <QObject>
+#include <QMap>
+#include <QJsonObject>
+#include <QJsonArray>
+#include <QString>
+#include <functional>
+#include "IMCPToolService.h"
+
+class MCPTool;
+class MCPError;
+struct MCPToolConfig;
+
+/**
+ * @brief MCP tool service implementation class
+ * 
+ * Responsibilities:
+ * - Tool registration and management
+ * - Tool call execution
+ * - Tool list provision
+ * - Tool Schema management
+ * 
+ * Coding conventions:
+ * - Class members add m_ prefix
+ * - Pointer types add p prefix
+ * - { and } should be on separate lines
+ */
+class MCPToolService : public IMCPToolService
+{
+    Q_OBJECT
+
+public:
+    explicit MCPToolService(QObject* pParent = nullptr);
+    virtual ~MCPToolService();
+
+public:
+    // Implement IMCPToolService interface
+    bool add(const QString& strName,
+             const QString& strTitle,
+             const QString& strDescription,
+             const QJsonObject& jsonInputSchema,
+             const QJsonObject& jsonOutputSchema,
+             QObject* pHandler,
+             const QString& strMethodName) override;
+    
+    bool add(const QString& strName,
+             const QString& strTitle,
+             const QString& strDescription,
+             const QJsonObject& jsonInputSchema,
+             const QJsonObject& jsonOutputSchema,
+             std::function<QJsonObject()> execFun) override;
+    
+    bool remove(const QString& strName) override;
+
+public:
+	//
+    QJsonArray list() const override;
+	//
+	bool addFromJson(const QJsonObject& jsonTool, QObject* pSearchRoot = nullptr) override;
+	//
+	QJsonObject call(const QString& strMethodName, const QJsonObject& jsonCallArguments);
+public:
+    // Internal methods (for internal use)
+    bool registerTool(MCPTool* pTool, QObject* pExecHandler, const QString& strMethodName = QString());
+    bool registerTool(MCPTool* pTool, std::function<QJsonObject()> execFun);
+    QJsonObject callTool(const QString& strMethodName, const QJsonObject& jsonCallArguments);
+
+signals:
+    /**
+     * @brief Tool list changed signal
+     * Emit this signal when tools are registered or unregistered
+     */
+    void toolsListChanged();
+    
+private:
+	void onHandlerDestroyed(const QString& strToolName);
+
+private:
+    MCPTool* getTool(const QString& strToolName) const;
+	bool registerTool(MCPTool* pTool); // For tools that have handler already set
+
+	/**
+	 * @brief Internal method: actually perform the add tool operation
+	 * @return Success returns tool object pointer, failure returns nullptr
+	 */
+	MCPTool* doAddImpl(const QString& strName,
+                   const QString& strTitle,
+                   const QString& strDescription,
+                   const QJsonObject& jsonInputSchema,
+                   const QJsonObject& jsonOutputSchema,
+                   QObject* pHandler,
+                   const QString& strMethodName);
+
+	/**
+	 * @brief Internal method: actually perform the add tool operation (using function)
+	 * @return Success returns tool object pointer, failure returns nullptr
+	 */
+	MCPTool* doAddImpl(const QString& strName,
+                   const QString& strTitle,
+                   const QString& strDescription,
+                   const QJsonObject& jsonInputSchema,
+                   const QJsonObject& jsonOutputSchema,
+                   std::function<QJsonObject()> execFun);
+
+	/**
+	 * @brief Internal method: actually perform the remove tool operation
+	 * @param strName Tool name
+	 * @param bEmitSignal Whether to emit signal, default is true
+	 */
+	bool doRemoveImpl(const QString& strName, bool bEmitSignal = true);
+
+	/**
+	 * @brief Internal method: actually perform the get tool list operation
+	 */
+	QJsonArray doListImpl() const;
+
+	/**
+	 * @brief Add tool from configuration object (internal method, for MCPServer use)
+	 * @param toolConfig Tool configuration object
+	 * @param dictHandlers Mapping of handler names to objects, if empty search from qApp
+	 * @return true for successful registration, false for failure
+	 * 
+	 * @warning Deadlock risk: When calling this method to add tools during service operation, if the caller and handler object are in the same thread,
+	 *          and the handler object is waiting for some operation to complete, deadlock may occur. It's recommended to call this method during service initialization,
+	 *          avoiding dynamic addition of tools during runtime.
+	 */
+	bool addFromConfig(const MCPToolConfig& toolConfig, const QMap<QString, QObject*>& dictHandlers = QMap<QString, QObject*>());
+
+private:
+    QMap<QString, MCPTool*> m_dictTools;
+    
+private:
+	friend class MCPAutoServer;
+	friend class MCPServer;
+};

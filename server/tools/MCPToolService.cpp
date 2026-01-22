@@ -1,0 +1,271 @@
+/**
+ * @file MCPToolService.cpp
+ * @brief MCP tool service implementation
+ * @author zhangheng
+ * @date 2025-01-01
+ * @copyright Copyright (c) 2025 zhangheng. All rights reserved.
+ */
+
+
+#include <MCPError.h>
+#include <MCPHandlerResolver.h>
+#include <MCPInvokeHelper.h>
+#include <MCPLog.h>
+#include <MCPMethodHelper.h>
+#include <MCPTool.h>
+#include <MCPToolService.h>
+#include <MCPToolsConfig.h>
+
+MCPToolService::MCPToolService(QObject *pParent)
+    : IMCPToolService(pParent)
+{}
+
+MCPToolService::~MCPToolService() {}
+
+bool MCPToolService::add(const QString &strName,
+                         const QString &strTitle,
+                         const QString &strDescription,
+                         const QJsonObject &jsonInputSchema,
+                         const QJsonObject &jsonOutputSchema,
+                         QObject *pHandler,
+                         const QString &strMethodName)
+{
+    return MCPInvokeHelper::syncInvokeReturn(this, [this, strName, strTitle, strDescription, jsonInputSchema, jsonOutputSchema, pHandler, strMethodName]() {
+        return doAddImpl(strName, strTitle, strDescription, jsonInputSchema, jsonOutputSchema, pHandler, strMethodName) != nullptr;
+    });
+}
+
+bool MCPToolService::add(
+    const QString &strName, const QString &strTitle, const QString &strDescription, const QJsonObject &jsonInputSchema, const QJsonObject &jsonOutputSchema, std::function<QJsonObject()> execFun)
+{
+    return MCPInvokeHelper::syncInvokeReturn(this, [this, strName, strTitle, strDescription, jsonInputSchema, jsonOutputSchema, execFun]() {
+        return doAddImpl(strName, strTitle, strDescription, jsonInputSchema, jsonOutputSchema, execFun) != nullptr;
+    });
+}
+
+bool MCPToolService::remove(const QString &strName)
+{
+    return MCPInvokeHelper::syncInvokeReturn(this, [this, strName]() { return doRemoveImpl(strName); });
+}
+
+QJsonArray MCPToolService::list() const
+{
+    return MCPInvokeHelper::syncInvokeReturnT<QJsonArray>(const_cast<MCPToolService *>(this), [this]() -> QJsonArray { return doListImpl(); });
+}
+
+bool MCPToolService::addFromJson(const QJsonObject &jsonTool, QObject *pSearchRoot)
+{
+    return MCPInvokeHelper::syncInvokeReturn(this, [this, jsonTool, pSearchRoot]() -> bool {
+        // Convert JSON object to MCPToolConfig
+        MCPToolConfig toolConfig = MCPToolConfig::fromJson(jsonTool);
+        return addFromConfig(toolConfig, MCPHandlerResolver::resolveHandlers(pSearchRoot));
+    });
+}
+
+QJsonObject MCPToolService::call(const QString &strMethodName, const QJsonObject &jsonCallArguments)
+{
+    return MCPInvokeHelper::syncInvokeReturnT<QJsonObject>(this, [this, strMethodName, jsonCallArguments]() -> QJsonObject {
+        // Convert JSON object to MCPToolConfig
+        return callTool(strMethodName, jsonCallArguments);
+    });
+}
+
+bool MCPToolService::addFromConfig(const MCPToolConfig &toolConfig, const QMap<QString, QObject *> &dictHandlers)
+{
+    // Find Handler from dictHandlers mapping table, if dictHandlers is empty search from qApp
+    QObject *pHandler = dictHandlers.value(toolConfig.strExecHandler, nullptr);
+    if (pHandler == nullptr) {
+        MCP_TOOLS_LOG_WARNING() << "MCPToolService:addFromConfig: error in tool name:" << toolConfig.strName
+                                << "strExecHandler:" << toolConfig.strExecHandler;
+        return false;
+    }
+
+    // Add tool
+    MCPTool *pTool = doAddImpl(toolConfig.strName,
+                               toolConfig.strTitle,
+                               toolConfig.strDescription,
+                               toolConfig.jsonInputSchema,
+                               toolConfig.jsonOutputSchema,
+                               pHandler,
+                               toolConfig.strExecMethod);
+
+    // If configuration contains annotations, set to tool
+    if (pTool != nullptr && !toolConfig.annotations.isEmpty()) {
+        pTool->withAnnotations(toolConfig.annotations);
+    }
+
+    return pTool != nullptr;
+}
+
+MCPTool *MCPToolService::doAddImpl(const QString &strName,
+                                   const QString &strTitle,
+                                   const QString &strDescription,
+                                   const QJsonObject &jsonInputSchema,
+                                   const QJsonObject &jsonOutputSchema,
+                                   QObject *pHandler,
+                                   const QString &strMethodName)
+{
+    if (pHandler == nullptr) {
+        MCP_TOOLS_LOG_WARNING() << "doAddImpl no handler impl.:" << strName;
+        return nullptr;
+    }
+
+    // Create tool object (set parent to this for lifecycle management)
+    MCPTool *pTool = (new MCPTool(strName, this))
+                         ->withTitle(strTitle) //
+                         ->withDescription(strDescription)
+                         ->withInputSchema(jsonInputSchema)
+                         ->withOutputSchema(jsonOutputSchema)
+                         ->withExecHandler(pHandler, strName);
+    // Register to service (will automatically connect handlerDestroyed signal)
+    // If registration fails, delete Tool object to avoid memory leak
+    if (!registerTool(pTool, pHandler, strMethodName)) {
+        pTool->deleteLater();
+        return nullptr;
+    }
+
+    return pTool;
+}
+
+MCPTool *MCPToolService::doAddImpl(const QString &strName,
+                                   const QString &strTitle,
+                                   const QString &strDescription,
+                                   const QJsonObject &jsonInputSchema,
+                                   const QJsonObject &jsonOutputSchema,
+                                   std::function<QJsonObject()> execFun)
+{
+    if (execFun == nullptr) {
+        MCP_TOOLS_LOG_WARNING() << "doAddImpl no function:" << strName;
+        return nullptr;
+    }
+
+    // Create tool object (set parent to this for lifecycle management)
+    MCPTool *pTool = new MCPTool(strName, this);
+    pTool
+        ->withTitle(strTitle) //
+        ->withDescription(strDescription)
+        ->withInputSchema(jsonInputSchema)
+        ->withOutputSchema(jsonOutputSchema);
+
+    // Register to service (using function method)
+    // If registration fails, delete Tool object to avoid memory leak
+    if (!registerTool(pTool, execFun)) {
+        pTool->deleteLater();
+        return nullptr;
+    }
+
+    return pTool;
+}
+
+bool MCPToolService::doRemoveImpl(const QString &strName, bool bEmitSignal)
+{
+    if (!m_dictTools.contains(strName)) {
+        MCP_TOOLS_LOG_WARNING() << "doRemoveImpl: missing" << strName;
+        return false;
+    }
+
+    MCPTool *pTool = m_dictTools.take(strName);
+    if (pTool) {
+        pTool->deleteLater();
+    }
+
+    //MCP_TOOLS_LOG_INFO() << "doRemoveImpl:" << strName;
+    if (bEmitSignal) {
+        emit toolsListChanged();
+    }
+    return true;
+}
+
+QJsonArray MCPToolService::doListImpl() const
+{
+    QJsonArray toolsArray;
+
+    for (auto pTool : m_dictTools.values()) {
+        toolsArray.append(pTool->getSchema());
+    }
+
+    return toolsArray;
+}
+
+bool MCPToolService::registerTool(MCPTool *pTool, QObject *pExecHandler, const QString &strMethodName)
+{
+    // If already exists, remove old one (overwrite), don't emit signal because new object will emit later
+    if (m_dictTools.contains(pTool->getName())) {
+        //MCP_TOOLS_LOG_INFO() << "registerTool:" << pTool->getName();
+        doRemoveImpl(pTool->getName(), false);
+    }
+
+    // Set execution Handler
+    pTool->withExecHandler(pExecHandler, strMethodName);
+
+    // Listen to Tool's handlerDestroyed signal, automatically unregister tool
+    QObject::connect(pTool, &MCPTool::handlerDestroyed, this, &MCPToolService::onHandlerDestroyed);
+    m_dictTools.insert(pTool->getName(), pTool);
+    //MCP_TOOLS_LOG_INFO() << "registerTool:" << pTool->getName();
+    emit toolsListChanged();
+    return true;
+}
+
+bool MCPToolService::registerTool(MCPTool *pTool, std::function<QJsonObject()> execFun)
+{
+    // If already exists, remove old one (overwrite), don't emit signal because new object will emit later
+    if (m_dictTools.contains(pTool->getName())) {
+        MCP_TOOLS_LOG_INFO() << "registerTool:" << pTool->getName();
+        doRemoveImpl(pTool->getName(), false);
+    }
+    //
+    pTool->withExecFun(execFun);
+    //
+    m_dictTools.insert(pTool->getName(), pTool);
+    MCP_TOOLS_LOG_INFO() << "registerTool:" << pTool->getName();
+    emit toolsListChanged();
+    return true;
+}
+
+bool MCPToolService::registerTool(MCPTool *pTool)
+{
+    // If already exists, remove old one (overwrite), don't emit signal because new object will emit later
+    if (m_dictTools.contains(pTool->getName())) {
+        MCP_TOOLS_LOG_INFO() << "registerTool:" << pTool->getName();
+        doRemoveImpl(pTool->getName(), false);
+    }
+    m_dictTools.insert(pTool->getName(), pTool);
+    MCP_TOOLS_LOG_INFO() << "registerTool:" << pTool->getName();
+    emit toolsListChanged();
+    return true;
+}
+
+void MCPToolService::onHandlerDestroyed(const QString &strToolName)
+{
+    MCP_TOOLS_LOG_INFO() << "onHandlerDestroyed:" << strToolName;
+    remove(strToolName);
+}
+
+MCPTool *MCPToolService::getTool(const QString &strToolName) const
+{
+    return m_dictTools.value(strToolName, nullptr);
+}
+
+QJsonObject MCPToolService::callTool(const QString &strToolName, const QJsonObject &jsonCallArguments)
+{
+    auto pTool = getTool(strToolName);
+    if (pTool == nullptr) {
+        MCP_TOOLS_LOG_CRITICAL() << QString("callTool missing: %1").arg(strToolName);
+        // According to MCP protocol specification, error messages for missing tools should be in English
+        throw MCPError::toolNotFound(strToolName);
+    }
+    try {
+        return pTool->execute(jsonCallArguments);
+    } catch (const MCPError &e) {
+        // Re-throw MCPError exception
+        throw e;
+    } catch (const std::exception &e) {
+        MCP_TOOLS_LOG_CRITICAL() << "MCPToolService: error - " << strToolName << ":" << e.what();
+        // According to MCP protocol specification, internal error messages should be in English
+        throw MCPError::internalError(QString("Tool execution failed: %1").arg(e.what()));
+    } catch (...) {
+        MCP_TOOLS_LOG_CRITICAL() << "MCPToolService: exception - " << strToolName;
+        // According to MCP protocol specification, internal error messages should be in English
+        throw MCPError::internalError("MCPToolService: Tool execution failed: Unknown error");
+    }
+}

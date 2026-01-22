@@ -1,5 +1,5 @@
 {
-  "name": "read_source_file",
+  "name": "source_read_file",
   "title": "Read Source Code File",
   "description": "Reads the content of a source code file",
   "execHandler": "SourceCodeHandler",

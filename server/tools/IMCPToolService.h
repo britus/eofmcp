@@ -1,0 +1,147 @@
+/**
+ * @file IMCPToolService.h
+ * @brief MCP tool service interface
+ * @author zhangheng
+ * @date 2025-01-09
+ * @copyright Copyright (c) 2025 zhangheng. All rights reserved.
+ */
+
+#pragma once
+#include <MCPServer_global.h>
+#include <functional>
+#include <QJsonObject>
+#include <QObject>
+#include <QString>
+
+/**
+ * @brief MCP tool service interface
+ *
+ * Responsibilities:
+ * - Define public interfaces for tool services
+ * - Provide tool registration and management functions
+ * - Hide specific implementation details
+ *
+ * Coding standards:
+ * - Interface methods use pure virtual functions
+ * - { and } should be on separate lines
+ *
+ * @note Deadlock risk explanation: When calling addFromJson and other methods to add tools during service operation,
+ *       if the caller and Handler object are in the same thread, it may cause a deadlock. This issue is currently not addressed,
+ *       and it is recommended to complete tool addition operations during service initialization.
+ */
+class MCPCORE_EXPORT IMCPToolService : public QObject
+{
+    Q_OBJECT
+
+public:
+    explicit IMCPToolService(QObject *pParent = nullptr)
+        : QObject(pParent)
+    {}
+
+protected:
+    /**
+     * @brief Destructor (protected, Service objects are managed by Server, do not delete directly)
+     */
+    virtual ~IMCPToolService() {}
+
+public:
+    /**
+     * @brief Register tool
+     * @param strName Tool name
+     * @param strTitle Tool title
+     * @param strDescription Tool description
+     * @param jsonInputSchema Input Schema (JSON format)
+     * @param jsonOutputSchema Output Schema (JSON format)
+     * @param pHandler Handler object
+     * @param strMethodName Method name for processing
+     * @return true if registration is successful, false if it fails
+     */
+    virtual bool add(const QString &strName,
+                     const QString &strTitle,
+                     const QString &strDescription,
+                     const QJsonObject &jsonInputSchema,
+                     const QJsonObject &jsonOutputSchema,
+                     QObject *pHandler,
+                     const QString &strMethodName)
+        = 0;
+
+    /**
+     * @brief Register tool (using function)
+     * @param strName Tool name
+     * @param strTitle Tool title
+     * @param strDescription Tool description
+     * @param jsonInputSchema Input Schema (JSON format)
+     * @param jsonOutputSchema Output Schema (JSON format)
+     * @param execFun Execution function
+     * @return true if registration is successful, false if it fails
+     *
+     * Usage example:
+     * @code
+     * auto pToolService = pServer->getToolService();
+     * pToolService->add("myTool", "My Tool", "Tool description",
+     *     inputSchema, outputSchema,
+     *     []() -> QJsonObject {
+     *         QJsonObject result;
+     *         result["content"] = QJsonArray();
+     *         result["structuredContent"] = QJsonObject();
+     *         return result;
+     *     });
+     * @endcode
+     */
+    virtual bool add(
+        const QString &strName, const QString &strTitle, const QString &strDescription, const QJsonObject &jsonInputSchema, const QJsonObject &jsonOutputSchema, std::function<QJsonObject()> execFun)
+        = 0;
+
+    /**
+     * @brief Unregister tool
+     * @param strName Tool name
+     * @return true if unregistration is successful, false if it fails
+     */
+    virtual bool remove(const QString &strName) = 0;
+
+    /**
+     * @brief Get tool list
+     * @return Tool list (JSON array format)
+     */
+    virtual QJsonArray list() const = 0;
+
+    /**
+     * @brief Add tool from JSON object
+     * @param jsonTool JSON object containing tool configuration information
+     * @param pSearchRoot Root object for searching Handler, default is nullptr (use qApp)
+     * @return true if registration is successful, false if it fails
+     *
+     * JSON object format:
+     * {
+     *   "name": "Tool name",
+     *   "title": "Tool title",
+     *   "description": "Tool description",
+     *   "inputSchema": { ... },
+     *   "outputSchema": { ... },
+     *   "execHandler": "Handler name",
+     *   "execMethod": "Method name for processing",
+     *   "annotations": { ... } (optional)
+     * }
+     *
+     * Usage example:
+     * @code
+     * QJsonObject json;
+     * json["name"] = "myTool";
+     * json["title"] = "My Tool";
+     * json["execHandler"] = "MyHandler";
+     * json["execMethod"] = "execute";
+     * pToolService->addFromJson(json);
+     * @endcode
+     */
+    virtual bool addFromJson(const QJsonObject &jsonTool, QObject *pSearchRoot = nullptr) = 0;
+
+signals:
+    /**
+     * @brief Tool list change signal
+     * Emitted when tools are registered or unregistered
+     */
+    void toolsListChanged();
+};
+
+//#define IMCPToolService_iid "org.eof.IMCPToolService"
+//Q_DECLARE_INTERFACE(IMCPToolService, IMCPToolService_iid)
