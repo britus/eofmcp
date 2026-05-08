@@ -4,6 +4,10 @@
 
 The project contains a MCP Server based on [QTMCP](https://github.com/britus/eofmcp/blob/master/README_qtmcp.md) 
 
+### Full Application
+[EoF MCP Studio Sandboxed](https://apps.apple.com/us/app/eof-mcp-studio/id6758146445?mt=12)
+[EoF MCP Studio Open](https://mcpstudio.eofsl.com/index.html)
+
 ### Dependencies
 
 - QT-6 framework and its dependencies.
